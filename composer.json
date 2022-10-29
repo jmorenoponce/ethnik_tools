@@ -1,0 +1,15 @@
+{
+    "name": "josemoreno/mybestmetronome",
+    "autoload": {
+        "psr-4": {
+            "Josemoreno\\Mybestmetronome\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Jose Moreno",
+            "email": "jose.moreno@avanzasi.es"
+        }
+    ],
+    "require": {}
+}
