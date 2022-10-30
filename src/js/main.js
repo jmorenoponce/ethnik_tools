@@ -1,6 +1,6 @@
 
-import Core from "/src/js/rhythmHelper/Core";
+import Core from "./rhythmHelper/Core.js";
 
 let myRhythmHelper = new Core();
 
-// myRhythmHelper.init();
+myRhythmHelper.init();

@@ -5,11 +5,9 @@ class Config {
 	static params = {
 
 		maxBpm: 218,
-		minBpm: 40,
+		minBpm: 20,
 		initialBpm: 100,
-
 	}
-
 
 	constructor() {
 
