@@ -1,6 +1,7 @@
 
-import Core from "./rhythmHelper/Core.js";
+import RH_Core from "./RhythmHelper/RH_Core.js";
 
-let myRhythmHelper = new Core();
+let myRhythmHelper = new RH_Core();
 
-myRhythmHelper.init();
+// myRhythmHelper.play();
+

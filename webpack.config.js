@@ -14,9 +14,9 @@ export default {
 			jQuery: 'jquery'
 		})
 	],
-	// resolve: {
-	// 	alias: {
-	// 		handlebars: 'handlebars/dist/handlebars.min.js'
-	// 	}
-	// }
+	resolve: {
+		alias: {
+			handlebars: 'handlebars/dist/handlebars.min.js'
+		}
+	}
 };
