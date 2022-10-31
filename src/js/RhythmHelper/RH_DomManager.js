@@ -1,6 +1,4 @@
 
-import $ from "jquery";
-
 class RH_DomManager {
 
 

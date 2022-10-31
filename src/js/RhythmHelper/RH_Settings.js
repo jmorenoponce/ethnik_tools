@@ -10,14 +10,14 @@ class RH_Settings {
 		bpmMin: 		20,
 		bpmMax: 		218,
 		bpmInitial: 	100,
-		division:			1,
+		division:		1,
 		volume: 		70,
 		soundFile: 		'./defaultAssets/sounds/rhythmHelper_classic_sound.ogg'
 	}
 
 
 	/**
-	 * Declares the min and max limits for each traditional pulse names
+	 * Declares the min and max limits for each traditional tempo names
 	 * @type {{larghissimo: number[], lento: number[], moderato: number[], andante: number[], prestissimo: number[], allegretto: number[], allegro: number[], largo: number[], vivace: number[], adagio: number[], presto: number[]}}
 	 * @private
 	 */
@@ -34,6 +34,12 @@ class RH_Settings {
 		vivace:			[160, 169],
 		presto:			[170, 199],
 		prestissimo:	[200, 218]
+	}
+
+
+	getTempoList() {
+
+
 	}
 
 

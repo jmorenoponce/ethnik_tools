@@ -1,5 +1,6 @@
-import RH_Settings from "./RH_Settings.js"
-import RH_DomManager from "./RH_DomManager.js"
+import RH_Settings from "./RH_Settings.js";
+import RH_DomManager from "./RH_DomManager.js";
+import RH_ConsoleManager from "./RH_ConsoleManager.js";
 
 
 class RH_Core {
@@ -7,10 +8,14 @@ class RH_Core {
 
 	constructor() {
 
-		this._config = new RH_Settings();
+		this._settings = new RH_Settings();
+		this._console = new RH_ConsoleManager();
 		this._dom = new RH_DomManager();
 
+		this._interface = '';
+
 		this._intervalFnc = false;
+
 		this._bpm = 0;
 		this._pulse = 0;
 		this._volume = 0;
@@ -41,7 +46,7 @@ class RH_Core {
 		}
 
 		this._bpm = newBpm;
-		console.log('The Bpm is: ', this._config.getTempoName(this._bpm) + ' [' + this._bpm + 'bpm]');
+		console.log('The Bpm is: ', this._settings.getTempoName(this._bpm) + ' [' + this._bpm + 'bpm]');
 	}
 
 
@@ -57,9 +62,9 @@ class RH_Core {
 	}
 
 
-	pulseList() {
+	tempoList() {
 
-		console.log();
+		return this._settings.getTempoList();
 	}
 
 
@@ -69,7 +74,19 @@ class RH_Core {
 	}
 
 
+	loadPreset() {
+
+
+	}
+
+
 	reload() {
+
+
+	}
+
+
+	defaultPreset() {
 
 
 	}
@@ -131,7 +148,7 @@ class RH_Core {
 
 	_render() {
 
-		this._dom.render(this._bpm, this._config.getTempoName(this._bpm));
+		this._dom.render(this._bpm, this._settings.getTempoName(this._bpm));
 	}
 
 
