@@ -5,21 +5,20 @@ import RH_ConsoleManager from "./RH_ConsoleManager.js";
 
 class RH_Core {
 
-
 	constructor() {
 
 		this._settings = new RH_Settings();
 		this._console = new RH_ConsoleManager();
 		this._dom = new RH_DomManager();
 
-		this._interface = '';
-
 		this._intervalFnc = false;
 
 		this._bpm = 0;
-		this._pulse = 0;
+		this._division = 0;
 		this._volume = 0;
+
 		this._is_valid_settings = false;
+		this._is_playing = false;
 
 		this._initialize();
 	}
@@ -27,38 +26,43 @@ class RH_Core {
 
 	play() {
 
-		console.log("Let's play");
+		if (!this._is_valid_settings) {
+			return false;
+		}
+
+		this._is_playing = true;
 		this._intervalFnc = this._setTimeLapse(this._bpm);
 	}
 
 
 	stop() {
 
-		console.log("I'm stopped");
+		this._is_playing = false;
 		clearInterval(this._intervalFnc);
 	}
 
 
-	setBpm(newBpm) {
+	setTempo(newTempo) {
 
-		if (newBpm < RH_Settings.defaultParams.bpmMin || newBpm > RH_Settings.defaultParams.bpmMax) {
+		if (newTempo < RH_Settings.defaultParams.bpmMin || newTempo > RH_Settings.defaultParams.bpmMax) {
 			return false;
 		}
 
-		this._bpm = newBpm;
+		this._bpm = newTempo;
 		console.log('The Bpm is: ', this._settings.getTempoName(this._bpm) + ' [' + this._bpm + 'bpm]');
 	}
 
 
-	setPulse(pulse) {
+	setDivision(division) {
 
-		if (pulse < 0 || pulse > 16) {
-
+		if (division < 0 || division > 16) {
 			return false;
 		}
 
-		this._pulse = pulse;
-		console.log('The pulse subdivision is: ', this._pulse);
+		this._division = division;
+
+console.log('The pulse subdivision is: ', this._division);
+
 	}
 
 
@@ -102,8 +106,8 @@ class RH_Core {
 
 		console.log('Welcome to Rhythm Helper')
 
-		this.setBpm(RH_Settings.defaultParams.bpmInitial);
-		this.setPulse(RH_Settings.defaultParams.division);
+		this.setTempo(RH_Settings.defaultParams.bpmInitial);
+		this.setDivision(RH_Settings.defaultParams.division);
 		this._is_valid_settings = true;
 
 		console.log('Please, write [play] [stop] [setbpm=value] [pulselist] [save] [reload] [exit]');
@@ -113,12 +117,9 @@ class RH_Core {
 	_setTimeLapse(bpm) {
 
 		const _this = this;
-		const _bpmToMs = (60000 / bpm) * this._pulse;
+		const _bpmToMs = (60000 / bpm) * this._division;
 
-		return setInterval(function () {
-
-			_this._playSound();
-		}, _bpmToMs);
+		return setInterval(function () { _this._playSound(); }, _bpmToMs);
 	}
 
 

@@ -3,4 +3,9 @@ import RH_Core from "./RhythmHelper/RH_Core.js";
 
 let myRhythmHelper = new RH_Core();
 
-// myRhythmHelper.play();
+
+let mySound = document.getElementById("mySound");
+
+mySound.play();
+
+console.log('pepe');
