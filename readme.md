@@ -16,3 +16,8 @@ Allegro 	    Animado y rápido 	112 – 160
 Vivace 	        Vivaz 	            ~ 140
 Presto 	        Rápido 	            140 – 200
 Prestissimo 	Muy rápido 	        > 188
+
+
+https://www.youtube.com/watch?v=FdOBqnsiHQE
+
+https://www.youtube.com/watch?v=x8PBWobv6NY
