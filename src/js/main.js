@@ -1,8 +1,4 @@
-
-import RH_Core from "./RhythmHelper/RH_Core.js";
-
-let myRhythmHelper = new RH_Core();
-
-let mySound = document.getElementById("mySound");
-
-window.test = mySound
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var RH_Core_js_1 = require("./RhythmHelper/RH_Core.js");
+var myRhythmHelper = new RH_Core_js_1.default();
