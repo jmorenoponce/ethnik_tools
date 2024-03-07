@@ -1,16 +1,6 @@
 
 
-class RH_DomManager {
-
-
-	private _$elements: {
-
-		parentCnt: object;
-		stopBtn: object;
-		playBtn: object;
-		volumeSelector: object;
-		bpmSelector: object
-	};
+class DomManager {
 
 
 	constructor() {
@@ -50,4 +40,4 @@ class RH_DomManager {
 	}
 }
 
-export default RH_DomManager;
+export default DomManager;

@@ -5,7 +5,7 @@ export default {
 	mode: 'development',
 	entry: {index: path.resolve("src/js", "main.js")},
 	output: {
-		path: path.resolve('public/js'),
+		path: path.resolve('dist/js'),
 		filename: 'main.bundle.js',
 	},
 	plugins: [

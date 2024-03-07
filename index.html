@@ -1,31 +1,78 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<title>RhythmHelper - My best metronome</title>
-
-	<link rel="stylesheet" href="public/assets/css/styles.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Ethnik Tools - Software de metrónomo profesional</title>
+	<meta name="description" content="Ethnik Tools es el software de gestión de metrónomo más avanzado del mercado. Desarrolla tu precisión rítmica, maximiza tu productividad y disfruta de una experiencia personalizada.">
+	<meta name="keywords" content="Ethnik Tools, metrónomo, música, ritmo, creatividad, productividad, software profesional, plantillas personalizables, múltiples líneas de tiempo, cambios de ritmo, subidas de velocidad, silencios, interfaz gráfica intuitiva, ahorro de tiempo, enfoque en la música, exportación de plantillas, sonidos de metrónomo personalizables, principiantes, profesionales">
+	<link rel="stylesheet" href="./public/assets/css/styles.css">
 </head>
-
 <body>
-<div class="app-cnt">
-
-	<div class="app-inner">
-		<h1>First steps for construct My best metronome</h1>
-		<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias animi dolorum excepturi illum iusto libero nesciunt numquam ratione sunt vel.</p>
-	</div>
-
-	<button onclick="window.playSound()" type="button">Play Audio</button>
-
-	<audio id="mySound">
-		<source src="./public/assets/metronome_sound.mp3" type="audio/mpeg">
-		Your browser does not support the audio element.
-	</audio>
-</div>
-
-<script src="./public/js/main.bundle.js"></script>
+<header class="header">
+	<a href="index.html">
+		<img src="logo.png" alt="Ethnik Tools">
+	</a>
+	<h1>Ethnik Tools</h1>
+	<h2>Software de metrónomo profesional</h2>
+</header>
+<main class="main">
+	<section class="hero">
+		<img src="hero-image.jpg" alt="Imagen de músico usando Ethnik Tools">
+		<div class="hero-content">
+			<h3>Libera tu creatividad musical</h3>
+			<p>Ethnik Tools te ayuda a llevar tu ritmo al siguiente nivel.</p>
+			<a href="descarga.html" class="button">Descargar Ethnik Tools</a>
+		</div>
+	</section>
+	<section class="features">
+		<h2>Funciones principales</h2>
+		<ul class="features-list">
+			<li class="features-list__item">
+				<img src="icon1.png" alt="Plantillas personalizables">
+				<h4>Plantillas personalizables</h4>
+				<p>Crea y personaliza plantillas con múltiples líneas de tiempo, definiendo compases, cambios de ritmo, subidas de velocidad y silencios.</p>
+			</li>
+			<li class="features-list__item">
+				<img src="icon2.png" alt="Interfaz gráfica intuitiva">
+				<h4>Interfaz gráfica intuitiva</h4>
+				<p>Visualiza el ritmo de forma intuitiva con la interfaz gráfica intuitiva de Ethnik Tools.</p>
+			</li>
+			<li class="features-list__item">
+				<img src="icon3.png" alt="Ahorro de tiempo">
+				<h4>Ahorro de tiempo</h4>
+				<p>Ahorra tiempo con las plantillas personalizables y olvídate de configurar el metrónomo manualmente.</p>
+			</li>
+			<li class="features-list__item">
+				<img src="icon4.png" alt="Experiencia personalizada">
+				<h4>Experiencia personalizada</h4>
+				<p>Elige entre una variedad de sonidos de metrónomo y ajusta la configuración para crear una experiencia de práctica personalizada.</p>
+			</li>
+		</ul>
+	</section>
+	<section class="testimonials">
+		<h2>Testimonios</h2>
+		<ul class="testimonials-list">
+			<li class="testimonials-list__item">
+				<p>“Ethnik Tools ha sido una herramienta invaluable para mi desarrollo musical. Me ha permitido mejorar mi precisión rítmica y llevar mi creatividad al siguiente nivel.”</p>
+				<p class="author">- Juan García, Músico profesional</p>
+			</li>
+			<li class="testimonials-list__item">
+				<p>“Ethnik Tools es fácil de usar y muy intuitivo. Me ha ayudado a ahorrar tiempo y a enfocarme en lo que realmente importa: la música.”</p>
+				<p class="author">- María Pérez, Estudiante de música</p>
+			</li>
+		</ul>
+	</section>
+	<section class="call-to-action">
+		<h3>¡Empieza a mejorar tu ritmo hoy mismo!</h3>
+		<a href="descarga.html" class="button">Descargar Ethnik Tools</a>
+	</section>
+</main>
+<footer class="footer">
+	<p>&copy; Ethnik Tools 2023</p>
+</footer>
 </body>
 </html>
 
+<script src="./build/js/main.js"></script>
+<!-- <script src="./public/js/main.bundle.js"></script> -->

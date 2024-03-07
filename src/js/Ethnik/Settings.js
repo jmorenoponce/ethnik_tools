@@ -1,5 +1,5 @@
 
-class RH_Settings {
+class Settings {
 
 	/**
 	 * Predefined preset parameters
@@ -45,9 +45,9 @@ class RH_Settings {
 
 	getTempoName(bpm) {
 
-		for (const _k in RH_Settings.tempoNames) {
+		for (const _k in Settings.tempoNames) {
 
-			if (bpm >= RH_Settings.tempoNames[_k][0] && bpm <= RH_Settings.tempoNames[_k][1]) {
+			if (bpm >= Settings.tempoNames[_k][0] && bpm <= Settings.tempoNames[_k][1]) {
 
 				return _k;
 			}
@@ -55,4 +55,4 @@ class RH_Settings {
 	}
 }
 
-export default RH_Settings;
+export default Settings;

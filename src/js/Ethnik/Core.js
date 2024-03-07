@@ -1,29 +1,16 @@
-import RH_Settings from "./RH_Settings.js";
-import RH_DomManager from "./RH_DomManager.js";
-import RH_ConsoleManager from "./RH_ConsoleManager.js";
+import Settings from "./Settings.js";
+import DomManager from "./DomManager.js";
+import ConsoleManager from "./ConsoleManager.js";
 
 
-class RH_Core {
-
-	private _settings: RH_Settings;
-	private _console: RH_ConsoleManager;
-	private _dom: RH_DomManager;
-
-	private _intervalFnc: number;
-
-	private _is_valid_settings: boolean;
-	private _is_playing: boolean;
-
-	private _bpm: number;
-	private _division: number;
-	private _volume: number;
+class Core {
 
 
 	constructor() {
 
-		this._settings = new RH_Settings();
-		this._console = new RH_ConsoleManager();
-		this._dom = new RH_DomManager();
+		this._settings = new Settings();
+		this._console = new ConsoleManager();
+		this._dom = new DomManager();
 
 		this._is_valid_settings = false;
 		this._is_playing = false;
@@ -59,7 +46,7 @@ class RH_Core {
 
 	setTempo(newTempo) {
 
-		if (newTempo < RH_Settings.defaultParams.bpmMin || newTempo > RH_Settings.defaultParams.bpmMax) {
+		if (newTempo < Settings.defaultParams.bpmMin || newTempo > Settings.defaultParams.bpmMax) {
 			return false;
 		}
 
@@ -121,15 +108,15 @@ console.log('The pulse subdivision is: ', this._division);
 
 		console.log('Welcome to Rhythm Helper')
 
-		this.setTempo(RH_Settings.defaultParams.bpmInitial);
-		this.setDivision(RH_Settings.defaultParams.division);
+		this.setTempo(Settings.defaultParams.bpmInitial);
+		this.setDivision(Settings.defaultParams.division);
 		this._is_valid_settings = true;
 
-		console.log('Please, write [play] [stop] [setbpm=value] [pulselist] [save] [reload] [exit]');
+console.log('Please, write [play] [stop] [setbpm=value] [pulselist] [save] [reload] [exit]');
 	}
 
 
-	_setTimeLapse(bpm: number) {
+	_setTimeLapse(bpm) {
 
 		const _this = this;
 		const _bpmToMs = (60000 / bpm) * this._division;
@@ -174,4 +161,4 @@ console.log('The pulse subdivision is: ', this._division);
 	}
 }
 
-export default RH_Core;
+export default Core;
