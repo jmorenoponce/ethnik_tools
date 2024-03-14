@@ -21,7 +21,6 @@ class Core {
 		this._division = 0;
 		this._volume = 0;
 
-
 		this._initialize();
 	}
 
@@ -51,7 +50,7 @@ class Core {
 		}
 
 		this._bpm = newTempo;
-		console.log('The Bpm is: ', this._settings.getTempoName(this._bpm) + ' [' + this._bpm + 'bpm]');
+console.log('The Bpm is: ', this._settings.getTempoName(this._bpm) + ' [' + this._bpm + 'bpm]');
 	}
 
 
@@ -69,7 +68,7 @@ console.log('The pulse subdivision is: ', this._division);
 
 
 	tempoList() {
-
+		console.log('hola');
 		return this._settings.getTempoList();
 	}
 
@@ -106,13 +105,11 @@ console.log('The pulse subdivision is: ', this._division);
 
 	_initialize() {
 
-		console.log('Welcome to Rhythm Helper')
+console.log('Welcome to Ethnik Tools');
 
 		this.setTempo(Settings.defaultParams.bpmInitial);
 		this.setDivision(Settings.defaultParams.division);
 		this._is_valid_settings = true;
-
-console.log('Please, write [play] [stop] [setbpm=value] [pulselist] [save] [reload] [exit]');
 	}
 
 

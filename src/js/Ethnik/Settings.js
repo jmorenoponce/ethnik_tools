@@ -39,7 +39,7 @@ class Settings {
 
 	getTempoList() {
 
-
+		return Settings.tempoNames;
 	}
 
 
