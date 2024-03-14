@@ -1,5 +1,5 @@
 
-# Rhythm Helper
+# Ethnik Tools
 ## This is the beginning of this project
 
 ### Requirements
