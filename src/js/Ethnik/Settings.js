@@ -1,6 +1,9 @@
 
+
+
 class Settings {
 
+	
 	/**
 	 * Predefined preset parameters
 	 * @type {{volume: number, bpmMax: number, bpmInitial: number, bpmMin: number, soundFile: string}}
@@ -24,26 +27,30 @@ class Settings {
 	static tempoNames = {
 
 		larghissimo: 	[20, 39],
-		largo:			[40, 59],
-		lento:			[60, 67],
-		adagio:			[68, 79],
+		largo:		[40, 59],
+		lento:		[60, 67],
+		adagio:		[68, 79],
 		andante:		[80, 99],
 		moderato:		[100, 111],
 		allegretto:		[112, 127],
 		allegro:		[128, 159],
-		vivace:			[160, 169],
-		presto:			[170, 199],
+		vivace:		[160, 169],
+		presto:		[170, 199],
 		prestissimo:	[200, 218]
 	}
 
 
-	getTempoList() {
+	/**
+	 * 
+	 * @returns 
+	 */
+	static getTempoList() {
 
 		return Settings.tempoNames;
 	}
 
 
-	getTempoName(bpm) {
+	static getTempoName(bpm) {
 
 		for (const _k in Settings.tempoNames) {
 

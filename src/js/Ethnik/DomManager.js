@@ -11,7 +11,7 @@ class DomManager {
 			playBtn: 			null,
 			stopBtn: 			null,
 			bpmSelector: 		null,
-			volumeSelector: 	null
+			volumeSelector: 		null
 		}
 
 		this._init();
