@@ -1,19 +1,21 @@
 
 # Ethnik Tools
-## This is the beginning of this project
+This is the beginning of this project
+
 
 ### Requirements
-Aunque la aplicación tenga el aspecto de un prompt, el diseño de los iconos y la forma en la que te comunicas en tiempo real con las acciones debe ser rápidas desde teclado. El tema de configuración sí podría ir con un menú sencillo y con aspecto tecnológico.
+
+
+
+### Some ideas
+Aunque la aplicación tenga el aspecto de un prompt, el diseño de los iconos y la forma en la que te comunicas en tiempo real con las acciones debe ser rápidas desde teclado.
+El tema de configuración sí podría ir con un menú sencillo y con aspecto tecnológico.
 
 Diferentes saludos, una colección bien nutrida de formas de decir lo mismo, tanto cuando se saluda, como cuando se facilita información, me gustaría evitar la historia de una consola técnica y muy seria, me gustaría que fuera amigable y con comandos muy sencillos.
 
 Es importante que cuando se presenta la información de compases guardados tenga un aspecto desenfadado
 
 El aspecto de las lineas pintadas a modo de trazo real de Excalidraw podría molar
-
-
-### Some ideas
-
 
 
 

@@ -1,4 +1,9 @@
 
-import Core from "./Ethnik/Core.js";
+import {Core} from "./Ethnik/Core.js";
 
-let app = new Core();
+
+// process.stdin.setEncoding('utf8');
+// process.stdin.setRawMode(true);
+
+
+const app = new Core();
