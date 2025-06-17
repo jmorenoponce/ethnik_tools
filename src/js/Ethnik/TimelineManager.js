@@ -1,8 +1,14 @@
-// TimelineManager.js - Sistema de patrones y multipistas
 
 class TimelineManager {
 
+	/**
+	 * Constructor for initializing the class with core functionalities, timeline settings, and predefined patterns.
+	 *
+	 * @param {Object} core - The core instance or object providing essential dependencies and core functionality.
+	 * @return {void}
+	 */
 	constructor(core) {
+
 		this._core = core;
 		this._isTimelineMode = false;
 		this._currentTimeline = null;
@@ -15,8 +21,16 @@ class TimelineManager {
 		this._patternLibrary = this._createPatternLibrary();
 	}
 
-	// Crear biblioteca de patrones predefinidos
+
+	/**
+	 * Creates and returns a library of predefined rhythm patterns. Each pattern contains an array of beats
+	 * and accents, where the beats define the rhythmic structure and the accents define the emphasis on specific beats.
+	 *
+	 * @return {Object} An object containing multiple rhythm patterns. Each pattern is defined with a 'beats' array
+	 * and an 'accents' array. Patterns are organized by categories such as basic, training, and complex.
+	 */
 	_createPatternLibrary() {
+
 		return {
 			// Patrones básicos
 			'straight': { beats: [1, 1, 1, 1], accents: [2, 1, 1, 1] },
@@ -35,8 +49,16 @@ class TimelineManager {
 		};
 	}
 
-	// Crear un timeline de entrenamiento
+
+	/**
+	 * Creates a training timeline with specified sections and configurations for each section.
+	 *
+	 * @param {string} name - The name of the training timeline.
+	 * @param {Array<Object>} sections - An array of objects representing the sections of the timeline. Each section can include properties such as duration, bpm, pattern, division, volume, accent, silent, fadeIn, fadeOut, and tracks.
+	 * @return {Object} An object representing the training timeline, including its name, configured sections, and total duration.
+	 */
 	createTrainingTimeline(name, sections) {
+
 		const timeline = {
 			name,
 			sections: sections.map(section => ({
@@ -57,8 +79,20 @@ class TimelineManager {
 		return timeline;
 	}
 
-	// Cargar timeline predefinido para entrenamiento
+
+	/**
+	 * Loads a preset timeline based on the provided type, creates a corresponding training timeline,
+	 * and sets it as the current timeline. Logs details about the loaded timeline and returns
+	 * a success status.
+	 *
+	 * @param {string} type - The type of preset timeline to load. Acceptable values are:
+	 *                        'basic_training', 'rhythm_challenge', or 'tempo_crescendo'.
+	 *                        If an unknown type is provided, loading will fail.
+	 * @return {boolean} - Returns true if the preset timeline was successfully loaded and set as
+	 *                     the current timeline. Returns false if the preset type was not found.
+	 */
 	loadPresetTimeline(type) {
+
 		let timeline;
 
 		switch(type) {
@@ -104,11 +138,21 @@ class TimelineManager {
 		console.log(`📅 Timeline cargado: ${timeline.name}`);
 		console.log(`   📏 Duración total: ${timeline.totalDuration} compases`);
 		console.log(`   🎵 Secciones: ${timeline.sections.length}`);
+
 		return true;
 	}
 
-	// Iniciar reproducción de timeline
+
+	/**
+	 * Starts the timeline if a timeline is loaded and the application is not currently playing a metronome.
+	 * It initializes the timeline mode, sets the current section index to 0, marks the start time,
+	 * and begins the next section.
+	 *
+	 * @return {Promise<boolean>} A promise that resolves to true if the timeline successfully starts,
+	 *                            or false if no timeline is loaded or if the metronome is already playing.
+	 */
 	async startTimeline() {
+
 		if (!this._currentTimeline) {
 			console.log('❌ No hay timeline cargado');
 			return false;
@@ -127,11 +171,20 @@ class TimelineManager {
 		console.log('=' * 50);
 
 		await this._startNextSection();
+
 		return true;
 	}
 
-	// Iniciar la siguiente sección del timeline
+
+	/**
+	 * Starts the next section of the timeline. Handles configuration for the section,
+	 * including BPM, duration, pattern, and schedule transitions to subsequent sections.
+	 * If the section is silent, it schedules a silent period without playback.
+	 *
+	 * @return {Promise<void>} Resolves when any asynchronous operations, such as pattern playback, are complete.
+	 */
 	async _startNextSection() {
+
 		if (this._currentSectionIndex >= this._currentTimeline.sections.length) {
 			this._finishTimeline();
 			return;
@@ -146,9 +199,12 @@ class TimelineManager {
 		console.log(`   🎯 Patrón: ${section.pattern}`);
 
 		if (section.silent) {
+
 			console.log(`   🔇 SILENCIO - Mantén el tempo solo!`);
 			this._scheduleSilentSection(section);
+
 		} else {
+
 			// Aplicar configuración de la sección
 			this._core._bpm = section.bpm;
 			this._core._division = section.division;
@@ -161,14 +217,26 @@ class TimelineManager {
 
 		// Programar cambio a siguiente sección
 		const sectionDurationMs = (section.duration * 4 * 60000) / section.bpm;
+
 		setTimeout(() => {
 			this._currentSectionIndex++;
 			this._startNextSection();
 		}, sectionDurationMs);
 	}
 
-	// Reproducir patrón específico
+
+	/**
+	 * Initiates the playback of a specific pattern based on the provided section.
+	 * Configures the core system for the chosen pattern and starts the scheduler
+	 * to handle the playback logic.
+	 *
+	 * @param {Object} section - The section object containing pattern information.
+	 * @param {string} section.pattern - The name or identifier of the pattern to be played.
+	 *
+	 * @return {Promise<void>} A promise that resolves when the pattern playback setup is complete.
+	 */
 	async _startPatternPlayback(section) {
+
 		const pattern = this._patternLibrary[section.pattern] || this._patternLibrary['straight'];
 
 		// Configurar el core para este patrón específico
@@ -181,13 +249,24 @@ class TimelineManager {
 		this._startPatternScheduler(section, pattern);
 	}
 
-	// Scheduler específico para patrones
+
+	/**
+	 * Starts a pattern scheduler for the given section and pattern.
+	 * It calculates the interval based on the section's BPM and division,
+	 * and plays audio ticks while providing visual feedback for the pattern's beats and accents.
+	 *
+	 * @param {Object} section - The section object containing BPM and division information to determine timing.
+	 * @param {Object} pattern - The pattern object containing beats and accents to define the rhythm.
+	 * @return {void} No return value.
+	 */
 	_startPatternScheduler(section, pattern) {
+
 		const intervalMs = (60000 / section.bpm) / section.division;
 		let patternIndex = 0;
 		let measureCount = 0;
 
 		const scheduler = setInterval(() => {
+
 			if (!this._isTimelineMode || this._currentSectionIndex >= this._currentTimeline.sections.length) {
 				clearInterval(scheduler);
 				return;
@@ -197,6 +276,7 @@ class TimelineManager {
 			const accent = pattern.accents[patternIndex];
 
 			if (beat > 0) {
+
 				const frequency = accent === 2 ? 1000 : (accent === 1 ? 800 : 600);
 				const duration = accent === 2 ? 120 : (accent === 1 ? 100 : 80);
 
@@ -209,7 +289,9 @@ class TimelineManager {
 				// Visual feedback
 				const symbol = accent === 2 ? '🔴' : (accent === 1 ? '🔵' : '⚪');
 				process.stdout.write(symbol + ' ');
+
 			} else {
+
 				process.stdout.write('⚫ '); // Silencio en el patrón
 			}
 
@@ -217,6 +299,7 @@ class TimelineManager {
 
 			// Contar compases
 			if (patternIndex === 0) {
+
 				measureCount++;
 				process.stdout.write(`[${measureCount}] `);
 
@@ -231,8 +314,18 @@ class TimelineManager {
 		this._currentScheduler = scheduler;
 	}
 
-	// Manejar sección silenciosa
+
+	/**
+	 * Schedules a silent section for a given duration and BPM (beats per minute).
+	 * Displays visual feedback in the console during the silent section.
+	 *
+	 * @param {Object} section - The section configuration object.
+	 * @param {number} section.duration - The duration of the section in measures (1 measure = 4 beats).
+	 * @param {number} section.bpm - The tempo of the section in beats per minute.
+	 * @return {void} This method does not return a value.
+	 */
 	_scheduleSilentSection(section) {
+
 		const totalBeats = section.duration * 4;
 		const beatDuration = 60000 / section.bpm;
 
@@ -255,8 +348,14 @@ class TimelineManager {
 		}, beatDuration);
 	}
 
-	// Finalizar timeline
+
+	/**
+	 * Finalizes the timeline by stopping any ongoing scheduler, resetting relevant flags, and logging a summary of the timeline performance.
+	 *
+	 * @return {void} This method does not return a value.
+	 */
 	_finishTimeline() {
+
 		this._isTimelineMode = false;
 		this._core._is_playing = false;
 
@@ -274,8 +373,17 @@ class TimelineManager {
 		console.log();
 	}
 
-	// Detener timeline
+
+
+	/**
+	 * Stops the timeline if it is currently active.
+	 * Halts any ongoing timeline playback and clears the scheduler.
+	 * Logs the status of the timeline stop operation to the console.
+	 *
+	 * @return {boolean} Returns true if the timeline was successfully stopped, or false if no timeline was in playback.
+	 */
 	stopTimeline() {
+
 		if (!this._isTimelineMode) {
 			console.log('❌ No hay timeline en reproducción');
 			return false;
@@ -290,11 +398,20 @@ class TimelineManager {
 		}
 
 		console.log('⏹️ Timeline detenido');
+
 		return true;
 	}
 
-	// Obtener información del timeline actual
+
+	/**
+	 * Retrieves and logs the current status of the timeline.
+	 * Logs detailed information about the timeline's current state, including
+	 * the timeline name, section index, BPM, pattern, elapsed time, and progress percentage.
+	 *
+	 * @return {undefined} This method does not return a value. Instead, it logs the timeline status to the console.
+	 */
 	getTimelineStatus() {
+
 		if (!this._isTimelineMode) {
 			console.log('ℹ️ Modo timeline inactivo');
 			return;
@@ -314,8 +431,15 @@ class TimelineManager {
 		console.log();
 	}
 
-	// Saltar a siguiente sección
+
+	/**
+	 * Skips to the next section in the timeline if the timeline mode is active.
+	 * If the timeline mode is not active, logs a warning message and does not perform the action.
+	 *
+	 * @return {boolean} Returns true if the timeline mode is active and the operation is successful, otherwise returns false.
+	 */
 	skipToNextSection() {
+
 		if (!this._isTimelineMode) {
 			console.log('❌ Timeline no activo');
 			return false;
@@ -324,11 +448,18 @@ class TimelineManager {
 		this._currentSectionIndex++;
 		console.log('⏭️ Saltando a siguiente sección...');
 		this._startNextSection();
+
 		return true;
 	}
 
-	// Getter para saber si está en modo timeline
+
+	/**
+	 * Determines whether the application is currently in timeline mode.
+	 *
+	 * @return {boolean} True if the application is in timeline mode, otherwise false.
+	 */
 	get isTimelineMode() {
+
 		return this._isTimelineMode;
 	}
 }

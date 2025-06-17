@@ -6,6 +6,15 @@ import fs from 'fs';
 
 class AudioEngine {
 
+	/**
+	 * Constructs an instance of the class and initializes audio system settings.
+	 *
+	 * This constructor sets default values for audio methods, sound file paths,
+	 * volume levels, and latency compensation. It also invokes a method to
+	 * initialize the audio system to ensure proper functionality.
+	 *
+	 * @return {void} No return value.
+	 */
 	constructor() {
 
 		this._audioMethod = 'system'; // 'system', 'file', 'tone'
@@ -21,6 +30,12 @@ class AudioEngine {
 	}
 
 
+	/**
+	 * Initializes the audio system by detecting the best audio method
+	 * and calibrating latency if required based on the method selected.
+	 *
+	 * @return {Promise<void>} A promise that resolves when the audio system has been successfully initialized.
+	 */
 	async _initAudioSystem() {
 
 		// Detect the best available audio method
@@ -34,6 +49,17 @@ class AudioEngine {
 	}
 
 
+	/**
+	 * Determines the best method to generate audio based on the availability of sound files
+	 * and system capabilities. It will prioritize the use of audio files if available,
+	 * attempt to utilize system capabilities as a secondary option, and fallback to a
+	 * tone generator if necessary.
+	 *
+	 * @return {Promise<string>} A promise that resolves to a string indicating the best audio method:
+	 * - 'file': Indicates that audio files are available and can be used.
+	 * - 'system': Indicates that the system's native audio methods can be used.
+	 * - 'tone': Indicates that a fallback tone generator should be used.
+	 */
 	async _detectBestAudioMethod() {
 
 		// Check if sound files exist
@@ -73,6 +99,13 @@ class AudioEngine {
 	}
 
 
+	/**
+	 * Executes a command in a child process and resolves or rejects the promise based on the outcome.
+	 *
+	 * @param {string} command The command to execute.
+	 * @param {Array<string>} args An array of string arguments to pass to the command.
+	 * @return {Promise<void>} A promise that resolves if the command executes successfully or rejects if it fails.
+	 */
 	_testCommand(command, args) {
 
 		return new Promise((resolve, reject) => {
@@ -89,6 +122,12 @@ class AudioEngine {
 	}
 
 
+	/**
+	 * Calibrates the system's latency by playing a system beep and measuring the time it takes.
+	 * This method estimates the latency and stores it in the `_latencyCompensation` property.
+	 *
+	 * @return {void} No value is returned as the latency calibration result is stored internally.
+	 */
 	_calibrateLatency() {
 
 		// Simple latency calibration - can be improved with real audio
@@ -99,6 +138,14 @@ class AudioEngine {
 	}
 
 
+	/**
+	 * Plays a tick sound with the given type, frequency, and duration, compensating for latency if applicable.
+	 *
+	 * @param {string} type - The type of tick sound to play. Default is 'beat'.
+	 * @param {number} frequency - The frequency of the tick sound in Hz. Default is 800.
+	 * @param {number} duration - The duration of the tick sound in milliseconds. Default is 100.
+	 * @return {Promise<void>} A promise that resolves when the tick has been played.
+	 */
 	async playTick(type = 'beat', frequency = 800, duration = 100) {
 
 		const compensatedDelay = Math.max(0, -this._latencyCompensation);
@@ -111,6 +158,14 @@ class AudioEngine {
 	}
 
 
+	/**
+	 * Executes the play operation based on the specified audio type and method.
+	 *
+	 * @param {string} type - The type of audio to play (e.g., 'beep', 'tone', etc.).
+	 * @param {number} frequency - The frequency of the audio signal in hertz, applicable for methods that generate tones.
+	 * @param {number} duration - The duration of the audio signal in milliseconds.
+	 * @return {void} No return value.
+	 */
 	_executePlay(type, frequency, duration) {
 
 		switch (this._audioMethod) {
@@ -130,6 +185,12 @@ class AudioEngine {
 	}
 
 
+	/**
+	 * Plays an audio file based on the provided type and system platform.
+	 *
+	 * @param {string} type - The type of sound file to play, which determines the file to be used. Defaults to a beat file if the type is not found.
+	 * @return {void} This method does not return a value.
+	 */
 	_playAudioFile(type) {
 
 		const file = this._soundFiles[type] || this._soundFiles.beat;
@@ -165,6 +226,14 @@ class AudioEngine {
 	}
 
 
+	/**
+	 * Plays a system beep sound with a specified frequency and duration for Windows,
+	 * or uses platform-specific commands for macOS and other operating systems.
+	 *
+	 * @param {number} frequency - The frequency of the beep sound in hertz (only applicable to Windows and other systems that support custom frequencies).
+	 * @param {number} duration - The duration of the beep sound in milliseconds (only applicable to Windows).
+	 * @return {void} This method does not return a value.
+	 */
 	_playSystemBeep(frequency, duration) {
 
 		try {
@@ -190,6 +259,13 @@ class AudioEngine {
 	}
 
 
+	/**
+	 * Plays a tone generated using ANSI characters and visual feedback based on the specified parameters.
+	 *
+	 * @param {number} frequency The frequency of the tone in Hertz, which determines the intensity.
+	 * @param {number} duration The duration of the tone in milliseconds.
+	 * @return {void} Does not return any value.
+	 */
 	_playGeneratedTone(frequency, duration) {
 
 		// Generate tone using ANSI characters and visual feedback
@@ -199,12 +275,27 @@ class AudioEngine {
 	}
 
 
+	/**
+	 * Sets the volume level to a specified value. The value is clamped between 0 and 100.
+	 *
+	 * @param {number} volume - The desired volume level. Values below 0 are set to 0, and values above 100 are set to 100.
+	 * @return {void}
+	 */
 	setVolume(volume) {
 
 		this._volume = Math.max(0, Math.min(100, volume));
 	}
 
 
+	/**
+	 * Retrieves information about the current audio settings and status.
+	 *
+	 * @return {Object} An object containing the following properties:
+	 * - method: The audio method being used.
+	 * - latency: The latency compensation value.
+	 * - volume: The current volume level.
+	 * - hasAudioFiles: A boolean indicating whether valid audio files are available.
+	 */
 	getAudioInfo() {
 
 		return {

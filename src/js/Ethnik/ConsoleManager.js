@@ -242,6 +242,13 @@ class ConsoleManager {
 	}
 
 
+	/**
+	 * Handles operations related to timeline commands.
+	 *
+	 * @param {string} subcommand The specific timeline subcommand to execute. Valid values are 'start', 'stop', 'status', 'skip', and 'list'.
+	 * @param {Array} args An array of arguments passed alongside the subcommand. For 'start', the first argument specifies the timeline type.
+	 * @return {void} This method does not return a value.
+	 */
 	_handleTimelineCommand(subcommand, args) {
 
 		switch(subcommand) {

@@ -579,6 +579,13 @@ class Core {
 		return names[division] || `División ${division}`;
 	}
 
+
+	/**
+	 * Starts a timeline of the specified type. Ensures the timeline is not started if already playing.
+	 *
+	 * @param {string} timelineType - The type of timeline to be started, which determines the preset configuration to load.
+	 * @return {boolean} Returns false if the timeline is already playing, otherwise returns the result of the timeline start operation.
+	 */
 	startTimeline(timelineType) {
 
 		if (this._is_playing) {
@@ -592,18 +599,33 @@ class Core {
 	}
 
 
+	/**
+	 * Stops the currently active timeline managed by the timeline manager.
+	 *
+	 * @return {boolean} Returns true if the timeline was successfully stopped, otherwise false.
+	 */
 	stopTimeline() {
 
 		return this._timelineManager.stopTimeline();
 	}
 
 
+	/**
+	 * Retrieves the current status of the timeline.
+	 *
+	 * @return {Object} The status of the timeline as provided by the timeline manager.
+	 */
 	getTimelineStatus() {
 
 		this._timelineManager.getTimelineStatus();
 	}
 
 
+	/**
+	 * Skips the current timeline section and moves to the next section.
+	 *
+	 * @return {boolean} Returns true if the operation to skip to the next timeline section was successful, otherwise false.
+	 */
 	skipTimelineSection() {
 
 		return this._timelineManager.skipToNextSection();
