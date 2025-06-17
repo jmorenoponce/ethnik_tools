@@ -88,6 +88,7 @@ class ConsoleManager {
 		console.log("   ▶️  Reproducción:");
 		console.log("      play, start           - Iniciar metrónomo");
 		console.log("      stop                  - Detener metrónomo");
+
 		console.log("   🎼 Configuración:");
 		console.log("      bpm [valor]           - Cambiar tempo (20-218)");
 		console.log("      div [valor]           - Cambiar división (1-16)");
@@ -102,6 +103,14 @@ class ConsoleManager {
 		console.log("      help, ?               - Mostrar esta ayuda");
 		console.log("      clear                 - Limpiar pantalla");
 		console.log("      exit, quit            - Salir");
+
+		console.log("   🎬 Timeline (Entrenamiento):");
+		console.log("      timeline start [tipo]  - Iniciar timeline de entrenamiento");
+		console.log("      timeline stop          - Detener timeline");
+		console.log("      timeline status        - Estado del timeline actual");
+		console.log("      timeline skip          - Saltar a siguiente sección");
+		console.log("      timeline list          - Ver tipos disponibles");
+
 		console.log();
 	}
 
@@ -130,7 +139,8 @@ class ConsoleManager {
 
 		const parts = input.toLowerCase().split(' ');
 		const command = parts[0];
-		const args = parts.slice(1);
+		const subcommand = parts[1];
+		const args = parts.slice(2);
 
 		console.log();
 
@@ -214,6 +224,10 @@ class ConsoleManager {
 				this._core._initialize();
 				break;
 
+				case 'timeline':
+				this._handleTimelineCommand(subcommand, args);
+				break;
+
 			case 'exit':
 			case 'quit':
 				this._handleExit();
@@ -225,6 +239,42 @@ class ConsoleManager {
 		}
 
 		console.log();
+	}
+
+
+	_handleTimelineCommand(subcommand, args) {
+
+		switch(subcommand) {
+
+			case 'start':
+				const timelineType = args[0] || 'basic_training';
+				this._core.startTimeline(timelineType);
+				break;
+
+			case 'stop':
+				this._core.stopTimeline();
+				break;
+
+			case 'status':
+				this._core.getTimelineStatus();
+				break;
+
+			case 'skip':
+				this._core.skipTimelineSection();
+				break;
+
+			case 'list':
+				console.log("🎬 Timelines de Entrenamiento Disponibles:");
+				console.log("   basic_training     - Entrenamiento básico progresivo");
+				console.log("   rhythm_challenge   - Desafío rítmico avanzado");
+				console.log("   tempo_crescendo    - Crescendo de tempo gradual");
+				console.log("💡 Uso: timeline start [tipo]");
+				break;
+
+			default:
+				console.log("❌ Subcomando de timeline inválido");
+				console.log("💡 Comandos: start, stop, status, skip, list");
+		}
 	}
 
 

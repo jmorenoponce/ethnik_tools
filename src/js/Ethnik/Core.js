@@ -3,6 +3,7 @@ import Settings from "./Settings.js";
 import ConsoleManager from "./ConsoleManager.js";
 import {AudioEngine} from "./AudioEngine.js";
 import {performance} from 'perf_hooks';
+import TimelineManager from "./TimelineManager.js";
 
 
 /**
@@ -25,6 +26,7 @@ class Core {
 
 		this._console = new ConsoleManager(this);
 		this._audioEngine = new AudioEngine();
+		this._timelineManager = new TimelineManager(this);
 
 		this._is_playing = false;
 		this._bpm = Settings.defaultParams.bpmInitial;
@@ -94,6 +96,11 @@ class Core {
 	 * playback starts successfully, or `false` if the metronome is already running.
 	 */
 	async play() {
+
+		if (this._timelineManager.isTimelineMode) {
+			console.log("⚠️ Timeline activo. Usa 'timeline stop' primero");
+			return false;
+		}
 
 		if (this._is_playing) {
 			console.log("⚠️  El metrónomo ya está funcionando");
@@ -181,14 +188,17 @@ class Core {
 		}
 
 		const wasPlaying = this._is_playing;
+
 		if (wasPlaying) this.stop();
 
 		this._bpm = tempo;
+
 		console.log(`🎼 Tempo: ${this._bpm} BPM (${Settings.getTempoName(this._bpm)})`);
 
 		if (wasPlaying) {
 			setTimeout(() => this.play(), 150);
 		}
+
 		return true;
 	}
 
@@ -212,6 +222,7 @@ class Core {
 		}
 
 		const wasPlaying = this._is_playing;
+
 		if (wasPlaying) this.stop();
 
 		this._division = div;
@@ -220,6 +231,7 @@ class Core {
 		if (wasPlaying) {
 			setTimeout(() => this.play(), 150);
 		}
+
 		return true;
 	}
 
@@ -234,6 +246,7 @@ class Core {
 
 		this._accent = enabled;
 		console.log(`🎯 Acentos: ${this._accent ? 'Activados' : 'Desactivados'}`);
+
 		return true;
 	}
 
@@ -565,6 +578,37 @@ class Core {
 		};
 		return names[division] || `División ${division}`;
 	}
+
+	startTimeline(timelineType) {
+
+		if (this._is_playing) {
+			console.log("⚠️ Detén el metrónomo antes de iniciar timeline");
+			return false;
+		}
+
+		this._timelineManager.loadPresetTimeline(timelineType);
+
+		return this._timelineManager.startTimeline();
+	}
+
+
+	stopTimeline() {
+
+		return this._timelineManager.stopTimeline();
+	}
+
+
+	getTimelineStatus() {
+
+		this._timelineManager.getTimelineStatus();
+	}
+
+
+	skipTimelineSection() {
+
+		return this._timelineManager.skipToNextSection();
+	}
+
 }
 
 export { Core };
