@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector de Sonidos Preciso</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .meter-container {
+            margin: 20px 0;
+        }
+
+        .meter {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .meter-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            width: 0%;
+            transition: width 0.1s ease;
+            border-radius: 10px;
+        }
+
+        .threshold-line {
+            position: absolute;
+            height: 20px;
+            width: 2px;
+            background: #ff6b6b;
+            box-shadow: 0 0 10px #ff6b6b;
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4ecdc4;
+            text-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+        }
+
+        .detection-log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+
+        .detection-entry {
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .slider-group {
+            margin: 15px 0;
+        }
+
+        .slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4ecdc4;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎵 Detector de Sonidos Preciso</h1>
+    <p>Sistema de detección de audio en tiempo real para juegos de ritmo y precisión</p>
+
+    <div class="controls">
+        <button id="startBtn">🎤 Iniciar Detección</button>
+        <button id="stopBtn" disabled>⏹️ Detener</button>
+        <button id="clearLog">🗑️ Limpiar Log</button>
+    </div>
+
+    <div class="slider-group">
+        <label>Umbral de Detección: <span id="thresholdValue">0.1</span></label>
+        <input type="range" id="thresholdSlider" min="0.01" max="0.5" step="0.01" value="0.1" class="slider">
+    </div>
+
+    <div class="slider-group">
+        <label>Sensibilidad: <span id="sensitivityValue">1.0</span></label>
+        <input type="range" id="sensitivitySlider" min="0.1" max="3.0" step="0.1" value="1.0" class="slider">
+    </div>
+
+    <div class="meter-container">
+        <label>Nivel de Audio:</label>
+        <div class="meter" style="position: relative;">
+            <div class="meter-fill" id="audioMeter"></div>
+            <div class="threshold-line" id="thresholdLine" style="left: 10%;"></div>
+        </div>
+    </div>
+
+    <div class="info-panel">
+        <div class="info-item">
+            <div class="info-value" id="peakLevel">0.00</div>
+            <div>Pico Actual</div>
+        </div>
+        <div class="info-item">
+            <div class="info-value" id="detectionCount">0</div>
+            <div>Detecciones</div>
+        </div>
+        <div class="info-item">
+            <div class="info-value" id="avgInterval">0ms</div>
+            <div>Intervalo Promedio</div>
+        </div>
+        <div class="info-item">
+            <div class="info-value" id="bpmEstimate">0</div>
+            <div>BPM Estimado</div>
+        </div>
+    </div>
+
+    <div class="detection-log">
+        <h3>📊 Log de Detecciones</h3>
+        <div id="logContainer">
+            <div style="color: #888; font-style: italic;">Presiona "Iniciar Detección" para comenzar...</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

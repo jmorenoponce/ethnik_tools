@@ -1,4 +1,10 @@
+import { performance } from 'perf_hooks';
 
+
+/**
+ * Manages timeline-based training sessions with multiple sections and patterns.
+ * Implements Command pattern for timeline operations and Factory pattern for preset creation.
+ */
 class TimelineManager {
 
 	/**
@@ -15,10 +21,14 @@ class TimelineManager {
 		this._timelineStartTime = 0;
 		this._currentSectionIndex = 0;
 		this._sectionStartTime = 0;
-		this._tracks = new Map(); // Múltiples pistas de audio
+		this._currentScheduler = null;
+		this._tracks = new Map();
 
-		// Predefined patterns para diferentes tipos de práctica
+		// Pattern library for different practice types
 		this._patternLibrary = this._createPatternLibrary();
+
+		// Timeline factories
+		this._timelineFactories = this._createTimelineFactories();
 	}
 
 
@@ -32,18 +42,18 @@ class TimelineManager {
 	_createPatternLibrary() {
 
 		return {
-			// Patrones básicos
+			// Basic patterns
 			'straight': { beats: [1, 1, 1, 1], accents: [2, 1, 1, 1] },
 			'backbeat': { beats: [0, 1, 0, 1], accents: [0, 2, 0, 2] },
 			'syncopated': { beats: [1, 0, 1, 0, 1], accents: [2, 0, 1, 0, 2] },
 			'triplets': { beats: [1, 1, 1], accents: [2, 1, 1] },
 
-			// Patrones de entrenamiento
+			// Training patterns
 			'offbeat_only': { beats: [0, 1, 0, 1], accents: [0, 1, 0, 1] },
 			'strong_beats': { beats: [1, 0, 1, 0], accents: [2, 0, 2, 0] },
 			'subdivision_16': { beats: [1, 1, 1, 1, 1, 1, 1, 1], accents: [2, 1, 1, 1, 2, 1, 1, 1] },
 
-			// Patrones complejos
+			// Complex patterns
 			'latin_clave': { beats: [1, 0, 1, 0, 1, 0, 0, 1], accents: [2, 0, 2, 0, 2, 0, 0, 2] },
 			'jazz_swing': { beats: [1, 0, 1, 1, 0, 1], accents: [2, 0, 1, 2, 0, 1] }
 		};
@@ -51,28 +61,86 @@ class TimelineManager {
 
 
 	/**
+	 * Creates timeline factory methods for different preset types.
+	 *
+	 * @return {Object} An object containing factory methods for each timeline type.
+	 */
+	_createTimelineFactories() {
+
+		return {
+			'basic_training': () => this._createBasicTrainingTimeline(),
+			'rhythm_challenge': () => this._createRhythmChallengeTimeline(),
+			'tempo_crescendo': () => this._createTempoCrescendoTimeline()
+		};
+	}
+
+
+	/**
+	 * Creates a basic training timeline with progressive difficulty.
+	 *
+	 * @return {Object} Timeline object for basic training.
+	 */
+	_createBasicTrainingTimeline() {
+
+		return this._createTrainingTimeline('Basic Training', [
+			{ duration: 8, bpm: 80, pattern: 'straight', accent: true },
+			{ duration: 4, bpm: 100, pattern: 'straight', accent: true },
+			{ duration: 4, bpm: 120, pattern: 'backbeat', accent: true },
+			{ duration: 8, bpm: 100, pattern: 'offbeat_only', accent: false },
+			{ duration: 4, bpm: 80, pattern: 'straight', silent: true }
+		]);
+	}
+
+
+	/**
+	 * Creates a rhythm challenge timeline with complex patterns.
+	 *
+	 * @return {Object} Timeline object for rhythm challenge.
+	 */
+	_createRhythmChallengeTimeline() {
+
+		return this._createTrainingTimeline('Rhythm Challenge', [
+			{ duration: 4, bpm: 90, pattern: 'straight' },
+			{ duration: 4, bpm: 90, pattern: 'syncopated' },
+			{ duration: 4, bpm: 110, pattern: 'triplets', division: 3 },
+			{ duration: 8, bpm: 130, pattern: 'subdivision_16', division: 4 },
+			{ duration: 4, bpm: 100, pattern: 'latin_clave' },
+			{ duration: 4, bpm: 90, pattern: 'straight', silent: true }
+		]);
+	}
+
+
+	/**
+	 * Creates a tempo crescendo timeline with gradual speed increases.
+	 *
+	 * @return {Object} Timeline object for tempo crescendo.
+	 */
+	_createTempoCrescendoTimeline() {
+
+		return this._createTrainingTimeline('Tempo Crescendo', [
+			{ duration: 8, bpm: 60, pattern: 'straight' },
+			{ duration: 8, bpm: 80, pattern: 'straight' },
+			{ duration: 8, bpm: 100, pattern: 'straight' },
+			{ duration: 8, bpm: 120, pattern: 'straight' },
+			{ duration: 8, bpm: 140, pattern: 'straight' }, // Fixed typo: was "bmp"
+			{ duration: 8, bpm: 120, pattern: 'straight' },
+			{ duration: 8, bpm: 100, pattern: 'straight' }
+		]);
+	}
+
+
+	/**
 	 * Creates a training timeline with specified sections and configurations for each section.
 	 *
 	 * @param {string} name - The name of the training timeline.
-	 * @param {Array<Object>} sections - An array of objects representing the sections of the timeline. Each section can include properties such as duration, bpm, pattern, division, volume, accent, silent, fadeIn, fadeOut, and tracks.
+	 * @param {Array<Object>} sections - An array of objects representing the sections of the timeline.
 	 * @return {Object} An object representing the training timeline, including its name, configured sections, and total duration.
 	 */
-	createTrainingTimeline(name, sections) {
+	_createTrainingTimeline(name, sections) {
 
 		const timeline = {
 			name,
-			sections: sections.map(section => ({
-				duration: section.duration || 8, // compases
-				bpm: section.bpm || this._core._bpm,
-				pattern: section.pattern || 'straight',
-				division: section.division || 1,
-				volume: section.volume || 100,
-				accent: section.accent !== undefined ? section.accent : true,
-				silent: section.silent || false,
-				fadeIn: section.fadeIn || 0,
-				fadeOut: section.fadeOut || 0,
-				tracks: section.tracks || ['main'] // Múltiples pistas
-			})),
+			sections: sections.map(section => this._createTimelineSection(section)),
 			totalDuration: sections.reduce((sum, s) => sum + (s.duration || 8), 0)
 		};
 
@@ -81,63 +149,48 @@ class TimelineManager {
 
 
 	/**
-	 * Loads a preset timeline based on the provided type, creates a corresponding training timeline,
-	 * and sets it as the current timeline. Logs details about the loaded timeline and returns
-	 * a success status.
+	 * Creates a standardized timeline section with default values.
 	 *
-	 * @param {string} type - The type of preset timeline to load. Acceptable values are:
-	 *                        'basic_training', 'rhythm_challenge', or 'tempo_crescendo'.
-	 *                        If an unknown type is provided, loading will fail.
-	 * @return {boolean} - Returns true if the preset timeline was successfully loaded and set as
-	 *                     the current timeline. Returns false if the preset type was not found.
+	 * @param {Object} sectionConfig - Configuration object for the section.
+	 * @return {Object} Normalized section object.
+	 */
+	_createTimelineSection(sectionConfig) {
+
+		return {
+			duration: sectionConfig.duration || 8,
+			bpm: sectionConfig.bpm || this._core._bpm,
+			pattern: sectionConfig.pattern || 'straight',
+			division: sectionConfig.division || 1,
+			volume: sectionConfig.volume || 100,
+			accent: sectionConfig.accent !== undefined ? sectionConfig.accent : true,
+			silent: sectionConfig.silent || false,
+			fadeIn: sectionConfig.fadeIn || 0,
+			fadeOut: sectionConfig.fadeOut || 0,
+			tracks: sectionConfig.tracks || ['main']
+		};
+	}
+
+
+	/**
+	 * Loads a preset timeline based on the provided type using the factory pattern.
+	 *
+	 * @param {string} type - The type of preset timeline to load.
+	 * @return {boolean} Returns true if the preset timeline was successfully loaded.
 	 */
 	loadPresetTimeline(type) {
 
-		let timeline;
+		const factory = this._timelineFactories[type];
 
-		switch(type) {
-			case 'basic_training':
-				timeline = this.createTrainingTimeline('Entrenamiento Básico', [
-					{ duration: 8, bpm: 80, pattern: 'straight', accent: true },
-					{ duration: 4, bpm: 100, pattern: 'straight', accent: true },
-					{ duration: 4, bpm: 120, pattern: 'backbeat', accent: true },
-					{ duration: 8, bpm: 100, pattern: 'offbeat_only', accent: false },
-					{ duration: 4, bpm: 80, pattern: 'straight', silent: true }
-				]);
-				break;
-
-			case 'rhythm_challenge':
-				timeline = this.createTrainingTimeline('Desafío Rítmico', [
-					{ duration: 4, bpm: 90, pattern: 'straight' },
-					{ duration: 4, bpm: 90, pattern: 'syncopated' },
-					{ duration: 4, bpm: 110, pattern: 'triplets', division: 3 },
-					{ duration: 8, bpm: 130, pattern: 'subdivision_16', division: 4 },
-					{ duration: 4, bpm: 100, pattern: 'latin_clave' },
-					{ duration: 4, bpm: 90, pattern: 'straight', silent: true }
-				]);
-				break;
-
-			case 'tempo_crescendo':
-				timeline = this.createTrainingTimeline('Crescendo de Tempo', [
-					{ duration: 8, bpm: 60, pattern: 'straight' },
-					{ duration: 8, bpm: 80, pattern: 'straight' },
-					{ duration: 8, bpm: 100, pattern: 'straight' },
-					{ duration: 8, bpm: 120, pattern: 'straight' },
-					{ duration: 8, bmp: 140, pattern: 'straight' },
-					{ duration: 8, bpm: 120, pattern: 'straight' },
-					{ duration: 8, bpm: 100, pattern: 'straight' }
-				]);
-				break;
-
-			default:
-				console.log(`❌ Timeline preset '${type}' no encontrado`);
-				return false;
+		if (!factory) {
+			console.log(`❌ Timeline preset '${type}' not found`);
+			console.log(`💡 Available presets: ${Object.keys(this._timelineFactories).join(', ')}`);
+			return false;
 		}
 
-		this._currentTimeline = timeline;
-		console.log(`📅 Timeline cargado: ${timeline.name}`);
-		console.log(`   📏 Duración total: ${timeline.totalDuration} compases`);
-		console.log(`   🎵 Secciones: ${timeline.sections.length}`);
+		this._currentTimeline = factory();
+		console.log(`📅 Timeline loaded: ${this._currentTimeline.name}`);
+		console.log(`   📏 Total duration: ${this._currentTimeline.totalDuration} measures`);
+		console.log(`   🎵 Sections: ${this._currentTimeline.sections.length}`);
 
 		return true;
 	}
@@ -145,21 +198,18 @@ class TimelineManager {
 
 	/**
 	 * Starts the timeline if a timeline is loaded and the application is not currently playing a metronome.
-	 * It initializes the timeline mode, sets the current section index to 0, marks the start time,
-	 * and begins the next section.
 	 *
-	 * @return {Promise<boolean>} A promise that resolves to true if the timeline successfully starts,
-	 *                            or false if no timeline is loaded or if the metronome is already playing.
+	 * @return {Promise<boolean>} A promise that resolves to true if the timeline successfully starts.
 	 */
 	async startTimeline() {
 
 		if (!this._currentTimeline) {
-			console.log('❌ No hay timeline cargado');
+			console.log('❌ No timeline loaded');
 			return false;
 		}
 
-		if (this._core._is_playing) {
-			console.log('⚠️ Detén el metrónomo normal antes de usar timeline');
+		if (this._core._isPlaying) {
+			console.log('⚠️ Stop the metronome before using timeline');
 			return false;
 		}
 
@@ -167,23 +217,23 @@ class TimelineManager {
 		this._currentSectionIndex = 0;
 		this._timelineStartTime = performance.now();
 
-		console.log(`\n🎬 Iniciando Timeline: ${this._currentTimeline.name}`);
-		console.log('=' * 50);
+		console.log(`\n🎬 Starting Timeline: ${this._currentTimeline.name}`);
+		console.log('='.repeat(50));
 
 		await this._startNextSection();
-
 		return true;
 	}
 
 
 	/**
-	 * Starts the next section of the timeline. Handles configuration for the section,
-	 * including BPM, duration, pattern, and schedule transitions to subsequent sections.
-	 * If the section is silent, it schedules a silent period without playback.
+	 * Starts the next section of the timeline with proper cleanup and configuration.
 	 *
-	 * @return {Promise<void>} Resolves when any asynchronous operations, such as pattern playback, are complete.
+	 * @return {Promise<void>} Resolves when the section setup is complete.
 	 */
 	async _startNextSection() {
+
+		// Clean up previous section
+		this._cleanupCurrentSection();
 
 		if (this._currentSectionIndex >= this._currentTimeline.sections.length) {
 			this._finishTimeline();
@@ -193,32 +243,48 @@ class TimelineManager {
 		const section = this._currentTimeline.sections[this._currentSectionIndex];
 		this._sectionStartTime = performance.now();
 
-		console.log(`\n🎵 Sección ${this._currentSectionIndex + 1}/${this._currentTimeline.sections.length}:`);
-		console.log(`   ⏱️ Duración: ${section.duration} compases`);
+		console.log(`\n🎵 Section ${this._currentSectionIndex + 1}/${this._currentTimeline.sections.length}:`);
+		console.log(`   ⏱️ Duration: ${section.duration} measures`);
 		console.log(`   🎼 BPM: ${section.bpm}`);
-		console.log(`   🎯 Patrón: ${section.pattern}`);
+		console.log(`   🎯 Pattern: ${section.pattern}`);
 
 		if (section.silent) {
-
-			console.log(`   🔇 SILENCIO - Mantén el tempo solo!`);
+			console.log(`   🔇 SILENCE - Keep the tempo yourself!`);
 			this._scheduleSilentSection(section);
-
 		} else {
-
-			// Aplicar configuración de la sección
-			this._core._bpm = section.bpm;
-			this._core._division = section.division;
-			this._core._accent = section.accent;
-			this._core._currentPattern = section.pattern;
-
-			// Iniciar reproducción con patrón específico
 			await this._startPatternPlayback(section);
 		}
 
-		// Programar cambio a siguiente sección
+		// Schedule transition to next section
+		this._scheduleNextSection(section);
+	}
+
+
+	/**
+	 * Cleans up resources from the current section.
+	 *
+	 * @return {void} No return value.
+	 */
+	_cleanupCurrentSection() {
+
+		if (this._currentScheduler) {
+			clearInterval(this._currentScheduler);
+			this._currentScheduler = null;
+		}
+	}
+
+
+	/**
+	 * Schedules the transition to the next section.
+	 *
+	 * @param {Object} section - Current section configuration.
+	 * @return {void} No return value.
+	 */
+	_scheduleNextSection(section) {
+
 		const sectionDurationMs = (section.duration * 4 * 60000) / section.bpm;
 
-		setTimeout(() => {
+		this._sectionTimer = setTimeout(() => {
 			this._currentSectionIndex++;
 			this._startNextSection();
 		}, sectionDurationMs);
@@ -227,36 +293,40 @@ class TimelineManager {
 
 	/**
 	 * Initiates the playback of a specific pattern based on the provided section.
-	 * Configures the core system for the chosen pattern and starts the scheduler
-	 * to handle the playback logic.
 	 *
 	 * @param {Object} section - The section object containing pattern information.
-	 * @param {string} section.pattern - The name or identifier of the pattern to be played.
-	 *
 	 * @return {Promise<void>} A promise that resolves when the pattern playback setup is complete.
 	 */
 	async _startPatternPlayback(section) {
 
 		const pattern = this._patternLibrary[section.pattern] || this._patternLibrary['straight'];
 
-		// Configurar el core para este patrón específico
-		this._core._customPattern = pattern;
-		this._core._is_playing = true;
-		this._core._tickCount = 0;
-		this._core._nextTickTime = performance.now();
-
-		// Usar el scheduler del core pero con lógica de patrón
+		// Configure core for this specific pattern
+		this._applySectionToCore(section);
 		this._startPatternScheduler(section, pattern);
 	}
 
 
 	/**
-	 * Starts a pattern scheduler for the given section and pattern.
-	 * It calculates the interval based on the section's BPM and division,
-	 * and plays audio ticks while providing visual feedback for the pattern's beats and accents.
+	 * Applies section configuration to the core metronome.
 	 *
-	 * @param {Object} section - The section object containing BPM and division information to determine timing.
-	 * @param {Object} pattern - The pattern object containing beats and accents to define the rhythm.
+	 * @param {Object} section - Section configuration to apply.
+	 * @return {void} No return value.
+	 */
+	_applySectionToCore(section) {
+
+		this._core._bpm = section.bpm;
+		this._core._division = section.division;
+		this._core._accent = section.accent;
+		this._core._currentPattern = section.pattern;
+	}
+
+
+	/**
+	 * Starts a pattern scheduler for the given section and pattern.
+	 *
+	 * @param {Object} section - The section object containing BPM and division information.
+	 * @param {Object} pattern - The pattern object containing beats and accents.
 	 * @return {void} No return value.
 	 */
 	_startPatternScheduler(section, pattern) {
@@ -265,41 +335,18 @@ class TimelineManager {
 		let patternIndex = 0;
 		let measureCount = 0;
 
-		const scheduler = setInterval(() => {
+		this._currentScheduler = setInterval(() => {
 
 			if (!this._isTimelineMode || this._currentSectionIndex >= this._currentTimeline.sections.length) {
-				clearInterval(scheduler);
 				return;
 			}
 
-			const beat = pattern.beats[patternIndex];
-			const accent = pattern.accents[patternIndex];
-
-			if (beat > 0) {
-
-				const frequency = accent === 2 ? 1000 : (accent === 1 ? 800 : 600);
-				const duration = accent === 2 ? 120 : (accent === 1 ? 100 : 80);
-
-				this._core._audioEngine.playTick(
-					accent === 2 ? 'downbeat' : (accent === 1 ? 'beat' : 'subdivision'),
-					frequency,
-					duration
-				);
-
-				// Visual feedback
-				const symbol = accent === 2 ? '🔴' : (accent === 1 ? '🔵' : '⚪');
-				process.stdout.write(symbol + ' ');
-
-			} else {
-
-				process.stdout.write('⚫ '); // Silencio en el patrón
-			}
+			this._playPatternBeat(pattern, patternIndex);
 
 			patternIndex = (patternIndex + 1) % pattern.beats.length;
 
-			// Contar compases
+			// Count measures and provide visual feedback
 			if (patternIndex === 0) {
-
 				measureCount++;
 				process.stdout.write(`[${measureCount}] `);
 
@@ -309,31 +356,117 @@ class TimelineManager {
 			}
 
 		}, intervalMs);
-
-		// Guardar referencia para poder limpiarlo
-		this._currentScheduler = scheduler;
 	}
 
 
 	/**
-	 * Schedules a silent section for a given duration and BPM (beats per minute).
-	 * Displays visual feedback in the console during the silent section.
+	 * Plays a single beat in the pattern.
+	 *
+	 * @param {Object} pattern - The pattern object containing beats and accents.
+	 * @param {number} patternIndex - Current index in the pattern.
+	 * @return {void} No return value.
+	 */
+	_playPatternBeat(pattern, patternIndex) {
+
+		const beat = pattern.beats[patternIndex];
+		const accent = pattern.accents[patternIndex];
+
+		if (beat > 0) {
+			const frequency = this._getFrequencyForAccent(accent);
+			const duration = this._getDurationForAccent(accent);
+			const tickType = this._getTickTypeForAccent(accent);
+
+			this._core._audioEngine.playTick(tickType, frequency, duration);
+
+			// Visual feedback
+			const symbol = this._getSymbolForAccent(accent);
+			process.stdout.write(symbol + ' ');
+		} else {
+			process.stdout.write('⚫ '); // Silence in pattern
+		}
+	}
+
+
+	/**
+	 * Gets the appropriate frequency for an accent level.
+	 *
+	 * @param {number} accent - Accent level (0-2).
+	 * @return {number} Frequency in Hz.
+	 */
+	_getFrequencyForAccent(accent) {
+
+		switch (accent) {
+			case 2: return 1000; // Downbeat
+			case 1: return 800;  // Beat
+			default: return 600; // Subdivision
+		}
+	}
+
+
+	/**
+	 * Gets the appropriate duration for an accent level.
+	 *
+	 * @param {number} accent - Accent level (0-2).
+	 * @return {number} Duration in milliseconds.
+	 */
+	_getDurationForAccent(accent) {
+
+		switch (accent) {
+			case 2: return 120; // Downbeat
+			case 1: return 100; // Beat
+			default: return 80; // Subdivision
+		}
+	}
+
+
+	/**
+	 * Gets the appropriate tick type for an accent level.
+	 *
+	 * @param {number} accent - Accent level (0-2).
+	 * @return {string} Tick type identifier.
+	 */
+	_getTickTypeForAccent(accent) {
+
+		switch (accent) {
+			case 2: return 'downbeat';
+			case 1: return 'beat';
+			default: return 'subdivision';
+		}
+	}
+
+
+	/**
+	 * Gets the appropriate visual symbol for an accent level.
+	 *
+	 * @param {number} accent - Accent level (0-2).
+	 * @return {string} Visual symbol.
+	 */
+	_getSymbolForAccent(accent) {
+
+		switch (accent) {
+			case 2: return '🔴'; // Downbeat
+			case 1: return '🔵'; // Beat
+			default: return '⚪'; // Subdivision
+		}
+	}
+
+
+	/**
+	 * Schedules a silent section for a given duration and BPM.
 	 *
 	 * @param {Object} section - The section configuration object.
-	 * @param {number} section.duration - The duration of the section in measures (1 measure = 4 beats).
-	 * @param {number} section.bpm - The tempo of the section in beats per minute.
-	 * @return {void} This method does not return a value.
+	 * @return {void} No return value.
 	 */
 	_scheduleSilentSection(section) {
 
 		const totalBeats = section.duration * 4;
 		const beatDuration = 60000 / section.bpm;
-
 		let currentBeat = 0;
-		const silentScheduler = setInterval(() => {
+
+		this._currentScheduler = setInterval(() => {
 			currentBeat++;
 
-			// Feedback visual durante silencio
+			// Visual feedback during silence
 			const isDownbeat = (currentBeat - 1) % 4 === 0;
 			process.stdout.write(isDownbeat ? '🟡 ' : '⚫ ');
 
@@ -342,7 +475,8 @@ class TimelineManager {
 			}
 
 			if (currentBeat >= totalBeats) {
-				clearInterval(silentScheduler);
+				clearInterval(this._currentScheduler);
+				this._currentScheduler = null;
 			}
 
 		}, beatDuration);
@@ -350,70 +484,68 @@ class TimelineManager {
 
 
 	/**
-	 * Finalizes the timeline by stopping any ongoing scheduler, resetting relevant flags, and logging a summary of the timeline performance.
+	 * Finalizes the timeline by stopping any ongoing processes and logging summary.
 	 *
-	 * @return {void} This method does not return a value.
+	 * @return {void} No return value.
 	 */
 	_finishTimeline() {
 
-		this._isTimelineMode = false;
-		this._core._is_playing = false;
-
-		if (this._currentScheduler) {
-			clearInterval(this._currentScheduler);
-			this._currentScheduler = null;
-		}
+		this._stopTimeline();
 
 		const totalTime = (performance.now() - this._timelineStartTime) / 1000;
 
-		console.log('\n🏁 Timeline completado!');
-		console.log(`   ⏱️ Tiempo total: ${totalTime.toFixed(1)}s`);
+		console.log('\n🏁 Timeline completed!');
+		console.log(`   ⏱️ Total time: ${totalTime.toFixed(1)}s`);
 		console.log(`   🎵 Timeline: ${this._currentTimeline.name}`);
-		console.log('   🎯 ¡Excelente práctica!');
+		console.log('   🎯 Excellent practice!');
 		console.log();
 	}
 
 
-
 	/**
 	 * Stops the timeline if it is currently active.
-	 * Halts any ongoing timeline playback and clears the scheduler.
-	 * Logs the status of the timeline stop operation to the console.
 	 *
-	 * @return {boolean} Returns true if the timeline was successfully stopped, or false if no timeline was in playback.
+	 * @return {boolean} Returns true if the timeline was successfully stopped.
 	 */
 	stopTimeline() {
 
 		if (!this._isTimelineMode) {
-			console.log('❌ No hay timeline en reproducción');
+			console.log('❌ No timeline in playback');
 			return false;
 		}
 
-		this._isTimelineMode = false;
-		this._core._is_playing = false;
-
-		if (this._currentScheduler) {
-			clearInterval(this._currentScheduler);
-			this._currentScheduler = null;
-		}
-
-		console.log('⏹️ Timeline detenido');
-
+		this._stopTimeline();
+		console.log('⏹️ Timeline stopped');
 		return true;
 	}
 
 
 	/**
-	 * Retrieves and logs the current status of the timeline.
-	 * Logs detailed information about the timeline's current state, including
-	 * the timeline name, section index, BPM, pattern, elapsed time, and progress percentage.
+	 * Internal method to stop timeline and clean up resources.
 	 *
-	 * @return {undefined} This method does not return a value. Instead, it logs the timeline status to the console.
+	 * @return {void} No return value.
+	 */
+	_stopTimeline() {
+
+		this._isTimelineMode = false;
+		this._cleanupCurrentSection();
+
+		if (this._sectionTimer) {
+			clearTimeout(this._sectionTimer);
+			this._sectionTimer = null;
+		}
+	}
+
+
+	/**
+	 * Retrieves and logs the current status of the timeline.
+	 *
+	 * @return {void} No return value.
 	 */
 	getTimelineStatus() {
 
 		if (!this._isTimelineMode) {
-			console.log('ℹ️ Modo timeline inactivo');
+			console.log('ℹ️ Timeline mode inactive');
 			return;
 		}
 
@@ -421,35 +553,51 @@ class TimelineManager {
 		const elapsed = (performance.now() - this._timelineStartTime) / 1000;
 		const progress = (this._currentSectionIndex / this._currentTimeline.sections.length) * 100;
 
-		console.log('\n📊 Estado del Timeline:');
+		console.log('\n📊 Timeline Status:');
 		console.log(`   🎬 Timeline: ${this._currentTimeline.name}`);
-		console.log(`   📍 Sección: ${this._currentSectionIndex + 1}/${this._currentTimeline.sections.length}`);
-		console.log(`   🎼 BPM actual: ${currentSection.bpm}`);
-		console.log(`   🎯 Patrón actual: ${currentSection.pattern}`);
-		console.log(`   ⏱️ Tiempo transcurrido: ${elapsed.toFixed(1)}s`);
-		console.log(`   📊 Progreso: ${progress.toFixed(1)}%`);
+		console.log(`   📍 Section: ${this._currentSectionIndex + 1}/${this._currentTimeline.sections.length}`);
+		console.log(`   🎼 Current BPM: ${currentSection.bpm}`);
+		console.log(`   🎯 Current pattern: ${currentSection.pattern}`);
+		console.log(`   ⏱️ Elapsed time: ${elapsed.toFixed(1)}s`);
+		console.log(`   📊 Progress: ${progress.toFixed(1)}%`);
 		console.log();
 	}
 
 
 	/**
 	 * Skips to the next section in the timeline if the timeline mode is active.
-	 * If the timeline mode is not active, logs a warning message and does not perform the action.
 	 *
-	 * @return {boolean} Returns true if the timeline mode is active and the operation is successful, otherwise returns false.
+	 * @return {boolean} Returns true if the operation is successful.
 	 */
 	skipToNextSection() {
 
 		if (!this._isTimelineMode) {
-			console.log('❌ Timeline no activo');
+			console.log('❌ Timeline not active');
 			return false;
 		}
 
+		// Cancel current section timer
+		if (this._sectionTimer) {
+			clearTimeout(this._sectionTimer);
+			this._sectionTimer = null;
+		}
+
 		this._currentSectionIndex++;
-		console.log('⏭️ Saltando a siguiente sección...');
+		console.log('⏭️ Skipping to next section...');
 		this._startNextSection();
 
 		return true;
+	}
+
+
+	/**
+	 * Gets available timeline types.
+	 *
+	 * @return {Array<string>} Array of available timeline type names.
+	 */
+	getAvailableTimelineTypes() {
+
+		return Object.keys(this._timelineFactories);
 	}
 
 
@@ -461,6 +609,19 @@ class TimelineManager {
 	get isTimelineMode() {
 
 		return this._isTimelineMode;
+	}
+
+
+	/**
+	 * Cleanup method to be called when the manager is no longer needed.
+	 *
+	 * @return {void} No return value.
+	 */
+	destroy() {
+
+		this._stopTimeline();
+		this._currentTimeline = null;
+		this._tracks.clear();
 	}
 }
 
