@@ -1,10 +1,9 @@
 import { performance } from 'perf_hooks';
 import PatternLibrary from './patterns/PatternLibrary.js';
-import {
-	BasicTrainingFactory,
-	RhythmChallengeFactory,
-	TempoCrescendoFactory
-} from './factories/FactoriesIndex.js';
+import BasicTrainingFactory from "./factories/BasicTrainingFactory.js";
+import RhythmChallengeFactory from "./factories/RhythmChallengeFactory.js";
+import TempoCrescendoFactory from "./factories/TempoCrescendoFactory.js";
+
 
 /**
  * Manages timeline-based training sessions with multiple sections and patterns.
@@ -19,6 +18,7 @@ class TimelineManager {
 	 * @return {void}
 	 */
 	constructor(core) {
+
 		this._core = core;
 		this._isTimelineMode = false;
 		this._currentTimeline = null;
@@ -35,12 +35,14 @@ class TimelineManager {
 		this._timelineFactories = this._createTimelineFactories();
 	}
 
+
 	/**
 	 * Creates and configures timeline factory instances.
 	 *
 	 * @return {Map} Map of factory names to factory instances.
 	 */
 	_createTimelineFactories() {
+
 		const factories = new Map();
 
 		// Create factory instances
@@ -68,6 +70,7 @@ class TimelineManager {
 	 * @return {boolean} Returns true if the preset timeline was successfully loaded.
 	 */
 	loadPresetTimeline(type) {
+
 		const factory = this._timelineFactories.get(type);
 
 		if (!factory) {
@@ -89,12 +92,14 @@ class TimelineManager {
 		}
 	}
 
+
 	/**
 	 * Starts the timeline if a timeline is loaded.
 	 *
 	 * @return {Promise<boolean>} A promise that resolves to true if the timeline successfully starts.
 	 */
 	async startTimeline() {
+
 		if (!this._currentTimeline) {
 			console.log('❌ No timeline loaded');
 			return false;
@@ -116,12 +121,14 @@ class TimelineManager {
 		return true;
 	}
 
+
 	/**
 	 * Starts the next section of the timeline.
 	 *
 	 * @return {Promise<void>} Resolves when the section setup is complete.
 	 */
 	async _startNextSection() {
+
 		// Clean up previous section
 		this._cleanupCurrentSection();
 
@@ -153,6 +160,7 @@ class TimelineManager {
 		this._scheduleNextSection(section);
 	}
 
+
 	/**
 	 * Initiates the playback of a specific pattern based on the provided section.
 	 *
@@ -160,6 +168,7 @@ class TimelineManager {
 	 * @return {Promise<void>} A promise that resolves when the pattern playback setup is complete.
 	 */
 	async _startPatternPlayback(section) {
+
 		// Get pattern from library
 		const pattern = this._patternLibrary.getPattern(section.pattern);
 
@@ -174,6 +183,7 @@ class TimelineManager {
 		}
 	}
 
+
 	/**
 	 * Applies section configuration to the core metronome.
 	 *
@@ -181,11 +191,13 @@ class TimelineManager {
 	 * @return {void} No return value.
 	 */
 	_applySectionToCore(section) {
+
 		this._core._bpm = section.bpm;
 		this._core._division = section.division;
 		this._core._accent = section.accent;
 		this._core._currentPattern = section.pattern;
 	}
+
 
 	/**
 	 * Starts a pattern scheduler for the given section and pattern.
@@ -195,6 +207,7 @@ class TimelineManager {
 	 * @return {void} No return value.
 	 */
 	_startPatternScheduler(section, pattern) {
+
 		const intervalMs = (60000 / section.bpm) / section.division;
 		let patternIndex = 0;
 		let measureCount = 0;
@@ -220,6 +233,7 @@ class TimelineManager {
 		}, intervalMs);
 	}
 
+
 	/**
 	 * Plays a single beat in the pattern.
 	 *
@@ -228,6 +242,7 @@ class TimelineManager {
 	 * @return {void} No return value.
 	 */
 	_playPatternBeat(pattern, patternIndex) {
+
 		const beat = pattern.beats[patternIndex];
 		const accent = pattern.accents[patternIndex];
 
@@ -246,10 +261,12 @@ class TimelineManager {
 		}
 	}
 
+
 	/**
 	 * Gets the appropriate frequency for an accent level.
 	 */
 	_getFrequencyForAccent(accent) {
+
 		switch (accent) {
 			case 2: return 1000; // Downbeat
 			case 1: return 800;  // Beat
@@ -257,10 +274,12 @@ class TimelineManager {
 		}
 	}
 
+
 	/**
 	 * Gets the appropriate duration for an accent level.
 	 */
 	_getDurationForAccent(accent) {
+
 		switch (accent) {
 			case 2: return 120; // Downbeat
 			case 1: return 100; // Beat
@@ -268,10 +287,12 @@ class TimelineManager {
 		}
 	}
 
+
 	/**
 	 * Gets the appropriate tick type for an accent level.
 	 */
 	_getTickTypeForAccent(accent) {
+
 		switch (accent) {
 			case 2: return 'downbeat';
 			case 1: return 'beat';
@@ -279,16 +300,19 @@ class TimelineManager {
 		}
 	}
 
+
 	/**
 	 * Gets the appropriate visual symbol for an accent level.
 	 */
 	_getSymbolForAccent(accent) {
+
 		switch (accent) {
 			case 2: return '🔴'; // Downbeat
 			case 1: return '🔵'; // Beat
 			default: return '⚪'; // Subdivision
 		}
 	}
+
 
 	/**
 	 * Schedules a silent section.
@@ -297,6 +321,7 @@ class TimelineManager {
 	 * @return {void} No return value.
 	 */
 	_scheduleSilentSection(section) {
+
 		const totalBeats = section.duration * 4;
 		const beatDuration = 60000 / section.bpm;
 		let currentBeat = 0;
@@ -319,20 +344,24 @@ class TimelineManager {
 		}, beatDuration);
 	}
 
+
 	/**
 	 * Cleans up resources from the current section.
 	 */
 	_cleanupCurrentSection() {
+
 		if (this._currentScheduler) {
 			clearInterval(this._currentScheduler);
 			this._currentScheduler = null;
 		}
 	}
 
+
 	/**
 	 * Schedules the transition to the next section.
 	 */
 	_scheduleNextSection(section) {
+
 		const sectionDurationMs = (section.duration * 4 * 60000) / section.bpm;
 
 		this._sectionTimer = setTimeout(() => {
@@ -341,10 +370,12 @@ class TimelineManager {
 		}, sectionDurationMs);
 	}
 
+
 	/**
 	 * Finalizes the timeline.
 	 */
 	_finishTimeline() {
+
 		this._stopTimeline();
 
 		const totalTime = (performance.now() - this._timelineStartTime) / 1000;
@@ -356,10 +387,12 @@ class TimelineManager {
 		console.log();
 	}
 
+
 	/**
 	 * Stops the timeline if it is currently active.
 	 */
 	stopTimeline() {
+
 		if (!this._isTimelineMode) {
 			console.log('❌ No timeline in playback');
 			return false;
@@ -370,10 +403,12 @@ class TimelineManager {
 		return true;
 	}
 
+
 	/**
 	 * Internal method to stop timeline and clean up resources.
 	 */
 	_stopTimeline() {
+
 		this._isTimelineMode = false;
 		this._cleanupCurrentSection();
 
@@ -383,10 +418,12 @@ class TimelineManager {
 		}
 	}
 
+
 	/**
 	 * Retrieves and logs the current status of the timeline.
 	 */
 	getTimelineStatus() {
+
 		if (!this._isTimelineMode) {
 			console.log('ℹ️ Timeline mode inactive');
 			return;
@@ -410,10 +447,12 @@ class TimelineManager {
 		console.log();
 	}
 
+
 	/**
 	 * Skips to the next section in the timeline.
 	 */
 	skipToNextSection() {
+
 		if (!this._isTimelineMode) {
 			console.log('❌ Timeline not active');
 			return false;
@@ -432,12 +471,15 @@ class TimelineManager {
 		return true;
 	}
 
+
 	/**
 	 * Gets available timeline types.
 	 */
 	getAvailableTimelineTypes() {
+
 		return Array.from(this._timelineFactories.keys());
 	}
+
 
 	/**
 	 * Gets the pattern library instance.
@@ -445,8 +487,10 @@ class TimelineManager {
 	 * @return {PatternLibrary} The pattern library.
 	 */
 	getPatternLibrary() {
+
 		return this._patternLibrary;
 	}
+
 
 	/**
 	 * Adds a new timeline factory.
@@ -456,6 +500,7 @@ class TimelineManager {
 	 * @return {boolean} True if added successfully.
 	 */
 	addTimelineFactory(name, factory) {
+
 		if (factory.setPatternLibrary) {
 			factory.setPatternLibrary(this._patternLibrary);
 		}
@@ -463,12 +508,14 @@ class TimelineManager {
 		return true;
 	}
 
+
 	/**
 	 * Gets timeline information.
 	 *
 	 * @return {Object|null} Current timeline info or null.
 	 */
 	getCurrentTimelineInfo() {
+
 		if (!this._currentTimeline) return null;
 
 		return {
@@ -482,14 +529,17 @@ class TimelineManager {
 		};
 	}
 
+
 	/**
 	 * Determines whether the application is currently in timeline mode.
 	 *
 	 * @return {boolean} True if the application is in timeline mode.
 	 */
 	get isTimelineMode() {
+
 		return this._isTimelineMode;
 	}
+
 
 	/**
 	 * Cleanup method to be called when the manager is no longer needed.
@@ -497,6 +547,7 @@ class TimelineManager {
 	 * @return {void} No return value.
 	 */
 	destroy() {
+
 		this._stopTimeline();
 		this._currentTimeline = null;
 		this._tracks.clear();

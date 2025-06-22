@@ -1,11 +1,11 @@
+import {performance} from 'perf_hooks';
 import Settings from "./Settings.js";
 import ConsoleManager from "../interface/ConsoleManager.js";
-import { AudioEngine } from "../audio/AudioEngine.js";
-import { performance } from 'perf_hooks';
 import TimelineManager from "../timeline/TimelineManager.js";
 import PerformanceMonitor from "../managers/PerformanceMonitor.js";
 import TapTempoManager from "../managers/TapTempoManager.js";
 import PresetFactory from "../factories/PresetFactory.js";
+import {AudioEngine} from "../audio/AudioEngine.js";
 
 /**
  * The Core class represents the main functionality of an advanced metronome.
@@ -23,11 +23,13 @@ class Core {
 	 * @return {Core} The Core singleton instance.
 	 */
 	static getInstance() {
+
 		if (!Core._instance) {
 			Core._instance = new Core();
 		}
 		return Core._instance;
 	}
+
 
 	/**
 	 * Constructs a new instance of the Core class and initializes its properties and systems.
@@ -78,14 +80,48 @@ class Core {
 		this._initialize();
 	}
 
+
 	// Public getters for encapsulation
-	get isPlaying() { return this._isPlaying; }
-	get bpm() { return this._bpm; }
-	get division() { return this._division; }
-	get volume() { return this._volume; }
-	get accent() { return this._accent; }
-	get currentPattern() { return this._currentPattern; }
-	get audioEngine() { return this._audioEngine; }
+	get isPlaying() {
+
+		return this._isPlaying;
+	}
+
+
+	get bpm() {
+
+		return this._bpm;
+	}
+
+
+	get division() {
+
+		return this._division;
+	}
+
+	get volume() {
+
+		return this._volume;
+	}
+
+
+	get accent() {
+
+		return this._accent;
+	}
+
+
+	get currentPattern() {
+
+		return this._currentPattern;
+	}
+
+
+	get audioEngine() {
+
+		return this._audioEngine;
+	}
+
 
 	/**
 	 * Sets up observer patterns for subsystem communication.
@@ -99,6 +135,7 @@ class Core {
 			this.setTempo(bpm);
 		});
 	}
+
 
 	/**
 	 * Initializes the system by clearing the console, displaying application details, and logging relevant information.
@@ -124,14 +161,17 @@ class Core {
 		}
 	}
 
+
 	/**
 	 * Public method for re-initialization (used by ClearCommand)
 	 *
 	 * @return {Promise<void>} Resolves when initialization is complete.
 	 */
 	async initialize() {
+
 		return this._initialize();
 	}
+
 
 	/**
 	 * Logs current system information to the console.
@@ -148,6 +188,7 @@ class Core {
 		console.log(`🔊 Volume: ${this._volume}%`);
 	}
 
+
 	/**
 	 * Helper method to pause playback, execute callback, and resume if needed.
 	 *
@@ -155,6 +196,7 @@ class Core {
 	 * @return {*} Returns the result of the callback.
 	 */
 	_withPlaybackPause(callback) {
+
 		const wasPlaying = this._isPlaying;
 
 		if (wasPlaying) {
@@ -169,6 +211,7 @@ class Core {
 
 		return result;
 	}
+
 
 	/**
 	 * Starts the metronome playback if it's not already running.
@@ -206,6 +249,7 @@ class Core {
 		}
 	}
 
+
 	/**
 	 * Stops the metronome if it is currently running.
 	 *
@@ -234,6 +278,7 @@ class Core {
 		return true;
 	}
 
+
 	/**
 	 * Displays performance statistics of the metronome.
 	 *
@@ -254,6 +299,7 @@ class Core {
 		console.log(`   🔊 Audio method: ${audioInfo.method}`);
 		console.log();
 	}
+
 
 	/**
 	 * Sets the tempo for the current playback with validation.
@@ -277,6 +323,7 @@ class Core {
 		});
 	}
 
+
 	/**
 	 * Sets the division value with validation.
 	 *
@@ -299,6 +346,7 @@ class Core {
 		});
 	}
 
+
 	/**
 	 * Sets the accent state.
 	 *
@@ -311,6 +359,7 @@ class Core {
 		console.log(`🎯 Accents: ${this._accent ? 'Enabled' : 'Disabled'}`);
 		return true;
 	}
+
 
 	/**
 	 * Sets the rhythmic pattern.
@@ -332,6 +381,7 @@ class Core {
 		return true;
 	}
 
+
 	/**
 	 * Sets the volume level with validation.
 	 *
@@ -350,6 +400,7 @@ class Core {
 		console.log(`🔊 Volume: ${this._volume}%`);
 		return true;
 	}
+
 
 	/**
 	 * Loads a preset by its name using the factory pattern.
@@ -379,6 +430,7 @@ class Core {
 		});
 	}
 
+
 	/**
 	 * Applies a preset configuration to the metronome.
 	 *
@@ -397,6 +449,7 @@ class Core {
 		this._division = preset.division;
 		this._accent = preset.accent;
 	}
+
 
 	/**
 	 * Handles tap tempo functionality using the dedicated manager.
@@ -417,6 +470,7 @@ class Core {
 			}
 		}
 	}
+
 
 	/**
 	 * Logs the current status of the system.
@@ -445,12 +499,14 @@ class Core {
 		console.log();
 	}
 
+
 	/**
 	 * Gets current performance stats with caching.
 	 *
 	 * @return {Object|null} Cached or fresh performance stats.
 	 */
 	_getCachedStats() {
+
 		const now = performance.now();
 
 		if (!this._cachedStats || (now - this._lastStatsUpdate) > this._statsUpdateInterval) {
@@ -460,6 +516,7 @@ class Core {
 
 		return this._cachedStats;
 	}
+
 
 	/**
 	 * Starts the scheduler which runs at regular intervals.
@@ -479,6 +536,7 @@ class Core {
 		}, this._lookahead);
 	}
 
+
 	/**
 	 * Manages and schedules future ticks based on lookahead timing.
 	 *
@@ -493,6 +551,7 @@ class Core {
 			this._nextTickTime += this._calculateInterval();
 		}
 	}
+
 
 	/**
 	 * Schedules a single tick at the specified time.
@@ -510,6 +569,7 @@ class Core {
 			}
 		}, delay);
 	}
+
 
 	/**
 	 * Plays a single tick with appropriate sound and visual feedback.
@@ -539,6 +599,7 @@ class Core {
 			Settings.log("Error playing tick:", error);
 		}
 	}
+
 
 	/**
 	 * Calculates tick information for the current beat.
@@ -577,6 +638,7 @@ class Core {
 		};
 	}
 
+
 	/**
 	 * Renders visual feedback for the current tick.
 	 *
@@ -608,6 +670,7 @@ class Core {
 		}
 	}
 
+
 	/**
 	 * Calculates the time interval for the current tick based on BPM, division, and pattern.
 	 *
@@ -629,9 +692,6 @@ class Core {
 		return interval;
 	}
 
-	/**
-	 * Timeline management methods - delegation to TimelineManager
-	 */
 
 	/**
 	 * Starts a timeline of the specified type.
@@ -650,6 +710,7 @@ class Core {
 		return this._timelineManager.startTimeline();
 	}
 
+
 	/**
 	 * Stops the currently active timeline.
 	 *
@@ -659,6 +720,7 @@ class Core {
 
 		return this._timelineManager.stopTimeline();
 	}
+
 
 	/**
 	 * Gets the current timeline status.
@@ -670,6 +732,7 @@ class Core {
 		this._timelineManager.getTimelineStatus();
 	}
 
+
 	/**
 	 * Skips to the next timeline section.
 	 *
@@ -680,6 +743,7 @@ class Core {
 		return this._timelineManager.skipToNextSection();
 	}
 
+
 	/**
 	 * Gets available timeline types.
 	 *
@@ -689,6 +753,7 @@ class Core {
 
 		return this._timelineManager.getAvailableTimelineTypes();
 	}
+
 
 	/**
 	 * Cleanup method to be called when shutting down.
@@ -715,6 +780,4 @@ class Core {
 	}
 }
 
-
-
-export { Core };
+export {Core};

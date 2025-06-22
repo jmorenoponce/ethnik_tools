@@ -1,1 +1,0 @@
-export { default as PatternLibrary } from './PatternLibrary.js';

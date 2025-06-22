@@ -1,20 +1,19 @@
-import {
-	PlayCommand,
-	StopCommand,
-	BpmCommand,
-	DivisionCommand,
-	AccentCommand,
-	PatternCommand,
-	VolumeCommand,
-	PresetCommand,
-	TapCommand,
-	StatusCommand,
-	TimelineCommand,
-	HelpCommand,
-	ClearCommand,
-	ExitCommand
-} from '../commands/CommandsIndex.js';
+
 import Settings from '../core/Settings.js';
+import PlayCommand from "../commands/playback/PlayCommand.js";
+import StopCommand from "../commands/playback/StopCommand.js";
+import PatternCommand from "../commands/configuration/PatternCommand.js";
+import VolumeCommand from "../commands/configuration/VolumeCommand.js";
+import PresetCommand from "../commands/utility/PresetCommand.js";
+import TapCommand from "../commands/utility/TapCommand.js";
+import StatusCommand from "../commands/utility/StatusCommand.js";
+import TimelineCommand from "../commands/timeline/TimelineCommand.js";
+import HelpCommand from "../commands/system/HelpCommand.js";
+import ClearCommand from "../commands/system/ClearCommand.js";
+import ExitCommand from "../commands/system/ExitCommand.js";
+import BpmCommand from "../commands/configuration/BpmCommand.js";
+import DivisionCommand from "../commands/configuration/DivisionCommand.js";
+import AccentCommand from "../commands/configuration/AccentCommand.js";
 
 
 /**
