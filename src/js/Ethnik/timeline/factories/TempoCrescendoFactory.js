@@ -22,7 +22,6 @@ class TempoCrescendoFactory extends TimelineFactory {
 	 */
 	createTimeline() {
 
-		// ✅ REFACTORED: Usar configuración centralizada
 		const config = Settings.timelineConstants.tempoCrescendo;
 
 		// Aplicar defaults y crear secciones

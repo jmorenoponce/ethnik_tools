@@ -7,24 +7,19 @@ import ToneGeneratorStrategy from './strategies/ToneGeneratorStrategy.js';
 
 
 /**
- * A class responsible for managing audio playback and configuration.
- *
- * The AudioEngine class handles the initialization, strategy selection, latency calibration,
- * and playback of audio ticks. It provides methods to configure audio properties such as volume
- * and to retrieve audio-related information.
+ * AudioEngine is responsible for managing audio playback using different strategies,
+ * handling latency compensation, and providing access to audio configuration settings.
  */
 class AudioEngine {
 
 	/**
-	 * Creates an instance of the class and initializes the audio system along with the default settings.
-	 *
-	 * The constructor sets up sound files, volume, latency compensation, and selects the default strategy.
-	 * Additionally, it initializes and registers available audio strategies such as File Audio, System Audio, and Tone Generator strategies.
+	 * Constructs a new instance of the class, initializing sound file paths, volume, latency compensation, and audio strategies.
 	 *
 	 * @return {void} This constructor does not return a value.
 	 */
 	constructor() {
 
+		// TODO: Hardcoded file sounds
 		this._soundFiles = {
 			downbeat: './assets/sounds/downbeat.wav',
 			beat: './assets/sounds/beat.wav',
@@ -47,11 +42,11 @@ class AudioEngine {
 
 
 	/**
-	 * Initializes the audio system by detecting the best audio strategy for the current environment.
-	 * It sets the detected strategy as the current strategy and logs the selected audio method.
-	 * If the selected strategy is a system audio strategy, it performs latency calibration.
+	 * Initializes the audio system by detecting the best audio strategy
+	 * and setting it up. If the system strategy is selected, latency
+	 * calibration is executed.
 	 *
-	 * @return {Promise<void>} A promise that resolves once the audio system is initialized and configured.
+	 * @return {Promise<void>} A promise that resolves once the audio system is initialized.
 	 */
 	async _initAudioSystem() {
 
@@ -66,16 +61,16 @@ class AudioEngine {
 
 
 	/**
-	 * Determines and selects the best available audio strategy based on a predefined priority order.
-	 * The priority order is: file -> system -> tone. If no strategy in the priority order is available,
-	 * it defaults to the 'tone' strategy.
+	 * Detects and determines the best available audio strategy based on predefined priorities.
+	 * It iterates through the prioritized list of audio strategies, checks their availability,
+	 * and returns the first available strategy. If no strategies from the prioritized list
+	 * are available, it defaults to the "tone" strategy.
 	 *
-	 * @return {Object} The detected audio strategy that is available and prioritized.
+	 * @return {Object} The best available audio strategy or the default "tone" strategy if none are available.
 	 */
 	async _detectBestAudioStrategy() {
 
-		// Priority order: file -> system -> tone
-		const priorities = ['file', 'system', 'tone'];
+		const priorities = Settings.commandConstants.audioStrategyPriorities;
 
 		for (const strategyName of priorities) {
 			const strategy = this._strategies.get(strategyName);
@@ -90,10 +85,10 @@ class AudioEngine {
 
 
 	/**
-	 * Retrieves the name of the given strategy.
+	 * Determines the name of the strategy based on the provided strategy instance.
 	 *
-	 * @param {object} strategy - The strategy object to evaluate.
-	 * @return {string} The name of the strategy. Possible values are 'file', 'system', 'tone', or 'unknown'.
+	 * @param {Object} strategy - The strategy object to evaluate.
+	 * @return {string} The name of the strategy ('file', 'system', 'tone', or 'unknown').
 	 */
 	_getStrategyName(strategy) {
 
@@ -105,30 +100,35 @@ class AudioEngine {
 
 
 	/**
-	 * Calibrates the audio playback latency by measuring the time difference
-	 * between initiating a playback tick and the recorded performance time.
+	 * Calibrates the latency for audio playback by measuring the time taken
+	 * to initiate a tick sound and adjusting the compensation value accordingly.
+	 * Uses the system and audio constants for frequency, duration, and timing values.
 	 *
-	 * @return {void} This method does not return a value. It sets the `_latencyCompensation`
-	 * property with the estimated latency in milliseconds.
+	 * @return {void} Does not return any value; updates the latency compensation property.
 	 */
 	_calibrateLatency() {
 
 		const calibrationStart = performance.now();
+
 		const calibrationFreq = Settings.audioConstants.frequencies.beat;
 		const calibrationDuration = Settings.audioConstants.durations.subdivision;
+
 		this._currentStrategy.playTick('calibration', calibrationFreq, calibrationDuration);
 		this._latencyCompensation = performance.now() - calibrationStart;
-		console.log(`🎛️  Estimated latency: ${this._latencyCompensation.toFixed(2)}ms`);
+
+		const { audioCalibrationDelayMs } = Settings.systemConstants.timing;
+		console.log(`🎛️  Estimated latency: ${this._latencyCompensation.toFixed(2)}ms (calibration delay: ${audioCalibrationDelayMs}ms)`);
 	}
 
 
 	/**
-	 * Plays a tick sound using the current playback strategy, applying a latency compensation if necessary.
+	 * Plays a single tick sound with specific type, frequency, and duration, taking latency compensation into account.
+	 * The tick is played immediately if latency compensation is not required or after a delay if compensation is necessary.
 	 *
-	 * @param {string} type - The type of sound to play (default is 'beat').
-	 * @param {number} frequency - The frequency of the sound in Hz (default is 800).
-	 * @param {number} duration - The duration of the sound in milliseconds (default is 100).
-	 * @return {Promise<void>} A promise that resolves when the tick sound has been played.
+	 * @param {string} [type='beat'] - The type of tick sound to play (e.g., 'beat'). Defaults to 'beat'.
+	 * @param {number} [frequency=800] - The frequency of the tick sound in hertz. Defaults to 800 Hz.
+	 * @param {number} [duration=100] - The duration of the tick sound in milliseconds. Defaults to 100 ms.
+	 * @return {Promise<void>} A promise that resolves when the tick sound finishes playing.
 	 */
 	async playTick(type = 'beat', frequency = 800, duration = 100) {
 
@@ -143,30 +143,29 @@ class AudioEngine {
 
 
 	/**
-	 * Sets the volume level for the current instance.
+	 * Sets the volume level for the instance.
 	 *
-	 * The volume level determines the sound intensity and must be within
-	 * the valid range specified by the application settings.
-	 *
-	 * @param {number} volume The desired volume level to be set. It should be validated using the application's constraints.
-	 * @return {void} Does not return any value.
+	 * @param {number} volume - The new volume level to set. Must be a number between 0 and 100 (inclusive).
+	 * @return {void} This method does not return a value.
 	 */
 	setVolume(volume) {
 
-		if (Settings.isValidVolume(volume)) {
+		if (!isNaN(volume) && volume >= 0 && volume <= 100) {
 			this._volume = volume;
 		}
 	}
 
 
 	/**
-	 * Retrieves information related to the current audio playback strategy.
+	 * Retrieves information about the current audio system's configuration and status.
 	 *
-	 * @return {Object} An object containing the following properties:
-	 * - method {string}: The name of the current audio strategy being used.
-	 * - latency {number}: The latency compensation value for audio playback.
-	 * - volume {number}: The current volume level.
-	 * - hasAudioFiles {boolean}: Indicates whether any audio files exist in the configured sound files directory.
+	 * @return {Object} An object containing the following attributes:
+	 * - method: The name of the current audio strategy.
+	 * - latency: The latency compensation value for audio playback.
+	 * - volume: The current volume level.
+	 * - hasAudioFiles: A boolean indicating whether any audio files exist in the specified paths.
+	 * - availableStrategies: A list of available audio strategies, defined by system settings.
+	 * - currentStrategy: The name of the currently selected audio strategy.
 	 */
 	getAudioInfo() {
 
@@ -174,8 +173,45 @@ class AudioEngine {
 			method: this._getStrategyName(this._currentStrategy),
 			latency: this._latencyCompensation,
 			volume: this._volume,
-			hasAudioFiles: Object.values(this._soundFiles).some(f => fs.existsSync(f))
+			hasAudioFiles: Object.values(this._soundFiles).some(f => fs.existsSync(f)),
+			availableStrategies: Settings.commandConstants.audioStrategyPriorities,
+			currentStrategy: this._getStrategyName(this._currentStrategy)
 		};
+	}
+
+
+	/**
+	 * Retrieves the list of available audio strategy priorities from the configuration settings.
+	 *
+	 * @return {Array} An array containing the audio strategy priorities defined in the settings.
+	 */
+	getAvailableStrategies() {
+
+		return Settings.commandConstants.audioStrategyPriorities;
+	}
+
+
+	/**
+	 * Switches the current audio strategy to the specified strategy if it is available.
+	 *
+	 * @param {string} strategyName - The name of the strategy to switch to. Must be a valid strategy listed in Settings.commandConstants.audioStrategyPriorities.
+	 * @return {Promise<boolean>} - Resolves to true if the strategy was successfully switched, or false if the specified strategy is not available.
+	 * @throws {Error} - Throws an error if the provided strategyName is invalid.
+	 */
+	async switchStrategy(strategyName) {
+
+		if (!Settings.commandConstants.audioStrategyPriorities.includes(strategyName)) {
+			throw new Error(`Invalid strategy: ${strategyName}`);
+		}
+
+		const strategy = this._strategies.get(strategyName);
+		if (await strategy.isAvailable()) {
+			this._currentStrategy = strategy;
+			console.log(`🔄 Switched to audio strategy: ${strategyName}`);
+			return true;
+		}
+
+		return false;
 	}
 }
 

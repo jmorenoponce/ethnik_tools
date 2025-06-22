@@ -1,4 +1,5 @@
 import Settings from './Settings.js';
+import SettingsValidator from "./SettingsValidator.js";
 
 /**
  * Manages configuration settings, validation, and history for a system.
@@ -234,12 +235,17 @@ class ConfigurationManager {
 	 * @return {Object} Returns an object indicating the success or failure of the operation. If successful, includes
 	 *                  details of the change (type, oldValue, newValue). In case of failure, contains an error message.
 	 */
+	/**
+	 * Updates the current pattern configuration using centralized validation.
+	 *
+	 * @param {string} pattern - The new pattern to set.
+	 * @return {Object} Returns an object indicating the success or failure of the operation.
+	 */
 	setPattern(pattern) {
 
-		const validPatterns = ['straight', 'swing', 'custom'];
-
-		if (!validPatterns.includes(pattern)) {
-			const error = `Invalid pattern: ${pattern}. Valid: ${validPatterns.join(', ')}`;
+		if (!SettingsValidator.isValidPattern(pattern)) {
+			const validPatterns = Settings.commandConstants.validPatterns.join(', ');
+			const error = `Invalid pattern: ${pattern}. Valid: ${validPatterns}`;
 			this._emit('configurationError', {type: 'pattern', error, value: pattern});
 			return {success: false, error};
 		}
@@ -533,13 +539,19 @@ class ConfigurationManager {
 	 *                  'valid' indicates if the pattern is valid,
 	 *                  'error' provides an error message if invalid.
 	 */
+	/**
+	 * Validates the provided pattern using centralized validation.
+	 *
+	 * @param {string} pattern - The pattern to be validated.
+	 * @return {Object} An object containing the validation result.
+	 */
 	_validatePattern(pattern) {
 
-		const validPatterns = ['straight', 'swing', 'custom'];
-		if (!validPatterns.includes(pattern)) {
+		if (!SettingsValidator.isValidPattern(pattern)) {
+			const validPatterns = Settings.commandConstants.validPatterns.join(', ');
 			return {
 				valid: false,
-				error: `Invalid pattern: ${pattern}. Valid: ${validPatterns.join(', ')}`
+				error: `Invalid pattern: ${pattern}. Valid: ${validPatterns}`
 			};
 		}
 		return {valid: true};
@@ -571,11 +583,15 @@ class ConfigurationManager {
 	 *
 	 * @return {boolean} Returns true if the current configuration is valid, false otherwise.
 	 */
+	/**
+	 * Validates the current configuration using centralized validation methods.
+	 *
+	 * @return {boolean} Returns true if the current configuration is valid, false otherwise.
+	 */
 	_validateCurrentConfiguration() {
 
 		const now = Date.now();
 
-		// ✅ REFACTORED: Usar tiempo de cache centralizado
 		const cacheTime = Settings.rhythmConstants.performance.validationCacheTimeMs;
 
 		// Use cached validation if recent
@@ -583,10 +599,10 @@ class ConfigurationManager {
 			return this._lastValidation;
 		}
 
-		const isValid = Settings.isValidBpm(this._bpm) &&
-			Settings.isValidDivision(this._division) &&
-			Settings.isValidVolume(this._volume) &&
-			['straight', 'swing', 'custom'].includes(this._currentPattern);
+		const isValid = SettingsValidator.isValidBpm(this._bpm) &&
+			SettingsValidator.isValidDivision(this._division) &&
+			SettingsValidator.isValidVolume(this._volume) &&
+			SettingsValidator.isValidPattern(this._currentPattern);
 
 		this._lastValidation = isValid;
 		this._validationCacheTime = now;

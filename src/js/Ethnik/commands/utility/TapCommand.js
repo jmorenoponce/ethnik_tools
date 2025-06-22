@@ -1,4 +1,6 @@
+
 import Command from "../base/Command.js";
+
 
 /**
  * Represents a tap tempo command that allows the user to detect and set the tempo

@@ -1,17 +1,17 @@
+
 import Command from '../base/Command.js';
+import Settings from '../../core/Settings.js';
 
 
 /**
  * Class representing a BPM (Beats Per Minute) command.
  * This command is used to set the tempo of a metronome.
+ * Now uses centralized configuration for BPM ranges.
  */
 class BpmCommand extends Command {
 
 	/**
 	 * Constructor for initializing a new instance of the class.
-	 *
-	 * @param {Object} core - The core object to be associated with this instance.
-	 * @return {void}
 	 */
 	constructor(core) {
 
@@ -22,9 +22,6 @@ class BpmCommand extends Command {
 
 	/**
 	 * Executes the method logic by validating the provided arguments and setting the tempo if valid.
-	 *
-	 * @param {Array} args - The input arguments where the first element is used to set the tempo.
-	 * @return {void} - Does not return a value. Logs usage information if the arguments are invalid.
 	 */
 	execute(args) {
 
@@ -38,9 +35,6 @@ class BpmCommand extends Command {
 
 	/**
 	 * Validates the provided arguments to ensure they meet specific criteria.
-	 *
-	 * @param {Array} args - An array of arguments to validate.
-	 * @return {boolean} Returns true if the arguments array contains at least one element, otherwise returns false.
 	 */
 	validateArgs(args) {
 
@@ -49,20 +43,17 @@ class BpmCommand extends Command {
 
 
 	/**
-	 * Retrieves the usage information for the application.
-	 *
-	 * @return {string} A string containing the usage information, typically describing permissible input values or format.
+	 * Retrieves the usage information using centralized BPM range configuration.
 	 */
 	getUsage() {
 
-		return 'Usage: bpm [20-218]';
+		const { bpmMin, bpmMax } = Settings.defaultParams;
+		return `Usage: bpm [${bpmMin}-${bpmMax}]`;
 	}
 
 
 	/**
 	 * Retrieves the description for the functionality of the method.
-	 *
-	 * @return {string} The description of the method's purpose or behavior.
 	 */
 	getDescription() {
 
@@ -71,6 +62,3 @@ class BpmCommand extends Command {
 }
 
 export default BpmCommand;
-
-
-

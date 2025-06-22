@@ -34,6 +34,7 @@ class PatternLibrary {
 	 */
 	_initializePatterns() {
 
+		// TODO: Hardcoded patterns
 		// Load patterns from collection classes
 		this._loadPatternCollection('basic', BasicPatterns.getPatterns());
 		this._loadPatternCollection('training', TrainingPatterns.getPatterns());

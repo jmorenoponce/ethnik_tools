@@ -1,6 +1,8 @@
 import {performance} from 'perf_hooks';
 import Settings from './Settings.js';
 import TickConfiguration from '../audio/TickConfiguration.js';
+import SettingsValidator from "./SettingsValidator.js";
+
 
 /**
  * MetronomeEngine is responsible for handling the logic of a metronome, including playback control, configuration settings, and timing functionality.
@@ -235,10 +237,10 @@ class MetronomeEngine {
 	 */
 	setPattern(pattern) {
 
-		const validPatterns = ['straight', 'swing', 'custom'];
-
-		if (!validPatterns.includes(pattern)) {
-			this._emit('error', `Invalid pattern: ${pattern}. Valid: ${validPatterns.join(', ')}`);
+		// ✅ FIXED: Use centralized validation instead of hardcoded list
+		if (!SettingsValidator.isValidPattern(pattern)) {
+			const validPatterns = Settings.commandConstants.validPatterns.join(', ');
+			this._emit('error', `Invalid pattern: ${pattern}. Valid: ${validPatterns}`);
 			return false;
 		}
 
@@ -246,12 +248,13 @@ class MetronomeEngine {
 		this._currentPattern = pattern;
 		this._invalidateCache();
 
-		this._emit('configurationChanged', {
+		const change = {
 			type: 'pattern',
 			oldValue: oldPattern,
 			newValue: pattern
-		});
+		};
 
+		this._emit('configurationChanged', change);
 		return true;
 	}
 

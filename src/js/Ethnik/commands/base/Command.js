@@ -1,3 +1,4 @@
+
 /**
  * Represents an abstract command that can be executed with arguments.
  * Concrete implementations should extend this class to define specific behaviors.

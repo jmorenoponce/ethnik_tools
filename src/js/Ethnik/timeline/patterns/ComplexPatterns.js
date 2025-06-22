@@ -14,6 +14,7 @@ class ComplexPatterns {
 	 */
 	static getPatterns() {
 
+		// Hardcoded!!!
 		return new Map([
 			['syncopated', {
 				beats: [1, 0, 1, 0, 1],

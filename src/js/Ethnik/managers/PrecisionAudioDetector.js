@@ -23,7 +23,6 @@ class PrecisionAudioDetector {
 		this.dataArray = null;
 		this.isRecording = false;
 
-		// ✅ REFACTORED: Usar valores centralizados de Settings
 		this.threshold = Settings.audioDetectionConstants.defaultThreshold;
 		this.sensitivity = Settings.audioDetectionConstants.defaultSensitivity;
 
@@ -102,7 +101,7 @@ class PrecisionAudioDetector {
 	async startDetection() {
 
 		try {
-			// ✅ REFACTORED: Usar configuración de audio centralizada
+
 			const audioConfig = Settings.audioDetectionConstants.audioCapture;
 
 			// Solicitar acceso al micrófono con configuración centralizada
@@ -118,12 +117,10 @@ class PrecisionAudioDetector {
 			// Crear contexto de audio
 			this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-			// ✅ REFACTORED: Usar configuración FFT centralizada
 			this.analyser = this.audioContext.createAnalyser();
 			this.analyser.fftSize = Settings.audioDetectionConstants.fft.size;
 			this.analyser.smoothingTimeConstant = Settings.audioDetectionConstants.fft.smoothingTimeConstant;
 
-			// ✅ REFACTORED: Calcular bins de frecuencia usando valores centralizados
 			const nyquist = this.audioContext.sampleRate / 2;
 			const freqs = Settings.audioDetectionConstants.analysisFrequencies;
 
@@ -196,11 +193,9 @@ class PrecisionAudioDetector {
 		const midLevel = this.getAverageLevel(this.lowFreqBin, this.midFreqBin);
 		const highLevel = this.getAverageLevel(this.midFreqBin, this.highFreqBin);
 
-		// ✅ REFACTORED: Usar pesos centralizados para análisis de nivel
 		const weights = Settings.audioDetectionConstants.levelWeights;
 		const overallLevel = (lowLevel * weights.low + midLevel * weights.mid + highLevel * weights.high) / weights.normalize;
 
-		// ✅ REFACTORED: Usar exponente centralizado para ajuste de sensibilidad
 		const adjustedLevel = Math.pow(overallLevel * this.sensitivity, Settings.audioDetectionConstants.sensitivityExponent);
 
 		// Actualizar medidor visual
@@ -256,7 +251,6 @@ class PrecisionAudioDetector {
 			}
 		}
 
-		// ✅ REFACTORED: Usar ratio centralizado para detectar fin de ataque
 		const releaseThreshold = this.threshold * Settings.audioDetectionConstants.attackReleaseRatio;
 		if (level < releaseThreshold && this.isInAttack) {
 			this.isInAttack = false;
@@ -278,7 +272,6 @@ class PrecisionAudioDetector {
 		this.detectionCount++;
 		this.detectionTimes.push(timestamp);
 
-		// ✅ REFACTORED: Usar límite centralizado para historial de detecciones
 		const maxHistory = Settings.audioDetectionConstants.maxDetectionHistory;
 		if (this.detectionTimes.length > maxHistory) {
 			this.detectionTimes.shift();
@@ -313,7 +306,6 @@ class PrecisionAudioDetector {
 			const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
 			this.avgInterval.textContent = `${Math.round(avgInterval)}ms`;
 
-			// ✅ REFACTORED: Usar rango de validación centralizado para BPM
 			const bpm = Math.round(60000 / avgInterval);
 			const bpmRange = Settings.audioDetectionConstants.bpmValidRange;
 
@@ -351,7 +343,6 @@ class PrecisionAudioDetector {
 
 		this.logContainer.insertBefore(logEntry, this.logContainer.firstChild);
 
-		// ✅ REFACTORED: Usar límite centralizado para entradas de log
 		const maxEntries = Settings.audioDetectionConstants.maxLogEntries;
 		while (this.logContainer.children.length > maxEntries) {
 			this.logContainer.removeChild(this.logContainer.lastChild);

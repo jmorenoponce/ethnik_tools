@@ -2,6 +2,7 @@ import { spawn } from 'child_process';
 import AudioPlaybackStrategy from './AudioPlaybackStrategy.js';
 import Settings from "../../core/Settings.js";
 
+
 /**
  * Represents a strategy for playing system-level audio feedback like beeps.
  * This class uses system commands to produce audio and verifies the availability of such capabilities on the host platform.
@@ -48,6 +49,7 @@ class SystemAudioStrategy extends AudioPlaybackStrategy {
 	 * @return {Promise<boolean>} A promise that resolves to `true` if the platform command is successfully executed, indicating audio output is available; otherwise `false`.
 	 */
 	async isAvailable() {
+
 		try {
 			if (process.platform === 'win32') {
 				const testFreq = Settings.audioConstants.frequencies.beat;

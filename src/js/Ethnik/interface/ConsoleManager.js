@@ -52,7 +52,7 @@ class ConsoleManager {
 
 	/**
 	 * Initializes and returns a map of command names to their corresponding command objects.
-	 * This method sets up various commands, categorized into playback, configuration, preset, timeline, and system commands.
+	 * Now uses centralized configuration for command aliases.
 	 *
 	 * @return {Map<string, Object>} A map containing command names as keys and their respective command objects as values.
 	 */
@@ -60,37 +60,52 @@ class ConsoleManager {
 
 		const commands = new Map();
 
-		// Playback commands
+		// TODO: Hardcoded!!!!
+		// Primary commands
 		commands.set('play', new PlayCommand(this._core));
-		commands.set('start', new PlayCommand(this._core));
 		commands.set('stop', new StopCommand(this._core));
-
-		// Configuration commands
 		commands.set('bpm', new BpmCommand(this._core));
-		commands.set('tempo', new BpmCommand(this._core));
-		commands.set('div', new DivisionCommand(this._core));
 		commands.set('division', new DivisionCommand(this._core));
 		commands.set('accent', new AccentCommand(this._core));
 		commands.set('pattern', new PatternCommand(this._core));
-		commands.set('vol', new VolumeCommand(this._core));
 		commands.set('volume', new VolumeCommand(this._core));
-
-		// Preset and utility commands
 		commands.set('preset', new PresetCommand(this._core));
 		commands.set('tap', new TapCommand(this._core));
 		commands.set('status', new StatusCommand(this._core));
-
-		// Timeline commands
 		commands.set('timeline', new TimelineCommand(this._core));
-
-		// System commands
 		commands.set('help', new HelpCommand(this));
-		commands.set('?', new HelpCommand(this));
 		commands.set('clear', new ClearCommand(this._core));
 		commands.set('exit', new ExitCommand(this._core));
-		commands.set('quit', new ExitCommand(this._core));
+
+		const aliases = Settings.commandConstants.aliases;
+
+		// Add aliases dynamically from centralized configuration
+		for (const [alias, primaryCommand] of Object.entries(aliases)) {
+			const commandInstance = commands.get(primaryCommand);
+			if (commandInstance) {
+				commands.set(alias, commandInstance);
+			}
+		}
 
 		return commands;
+	}
+
+	/**
+	 * Alternative approach: Helper method to register aliases
+	 */
+	_registerCommandAliases(commands) {
+
+		const aliases = Settings.commandConstants.aliases;
+
+		for (const [alias, primaryCommand] of Object.entries(aliases)) {
+			const commandInstance = commands.get(primaryCommand);
+			if (commandInstance) {
+				commands.set(alias, commandInstance);
+				console.log(`📎 Registered alias: '${alias}' -> '${primaryCommand}'`);
+			} else {
+				console.warn(`⚠️ Cannot create alias '${alias}': primary command '${primaryCommand}' not found`);
+			}
+		}
 	}
 
 

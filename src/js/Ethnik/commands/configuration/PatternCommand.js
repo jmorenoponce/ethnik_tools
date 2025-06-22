@@ -1,16 +1,18 @@
+
 import Command from "../base/Command.js";
+import SettingsValidator from "../../core/SettingsValidator.js";
+import Settings from "../../core/Settings.js";
+
 
 /**
  * Defines a command to set a rhythmic pattern using a metronome's core functionality.
  * This class extends the Command base class and provides validation, execution, and descriptive information.
+ * Now uses centralized configuration instead of hardcoded values.
  */
 class PatternCommand extends Command {
 
 	/**
 	 * Constructs an instance of the class.
-	 *
-	 * @param {Object} core - The core object to initialize the class with.
-	 * @return {Object} A new instance of the class.
 	 */
 	constructor(core) {
 
@@ -21,9 +23,7 @@ class PatternCommand extends Command {
 
 	/**
 	 * Executes the method logic by validating the provided arguments and setting the pattern in the core component.
-	 *
-	 * @param {Array} args - The arguments to be validated and processed. The first element of the array is expected to be used as a pattern if validation is successful.
-	 * @return {void} This method does not return a value.
+	 * Uses centralized validation instead of hardcoded pattern list.
 	 */
 	execute(args) {
 
@@ -36,32 +36,26 @@ class PatternCommand extends Command {
 
 
 	/**
-	 * Validates the provided arguments to ensure they meet specific criteria.
-	 *
-	 * @param {Array} args - An array of arguments to be validated. The first element should be a string matching 'straight', 'swing', or 'custom'.
-	 * @return {boolean} Returns true if the arguments array is non-empty and the first argument matches one of the allowed values, otherwise false.
+	 * Validates the provided arguments using centralized configuration.
 	 */
 	validateArgs(args) {
 
-		return args.length > 0 && ['straight', 'swing', 'custom'].includes(args[0]);
+		return args.length > 0 && SettingsValidator.isValidPattern(args[0]);
 	}
 
 
 	/**
-	 * Provides usage information for the pattern command.
-	 *
-	 * @return {string} A string detailing the usage format and options for the pattern command.
+	 * Provides usage information using centralized pattern definitions.
 	 */
 	getUsage() {
 
-		return 'Usage: pattern [straight/swing/custom]';
+		const validPatterns = Settings.commandConstants.validPatterns.join('/');
+		return `Usage: pattern [${validPatterns}]`;
 	}
 
 
 	/**
 	 * Retrieves the description of the rhythmic pattern.
-	 *
-	 * @return {string} A string describing the rhythmic pattern (e.g., straight, swing, or custom).
 	 */
 	getDescription() {
 

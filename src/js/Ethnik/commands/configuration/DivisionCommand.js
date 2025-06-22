@@ -1,17 +1,17 @@
+
 import Command from "../base/Command.js";
+import SettingsValidator from "../../core/SettingsValidator.js";
+
 
 /**
  * Represents a command to set the beat division for the core metronome instance.
  * Inherits from the base Command class.
+ * Now uses centralized validation instead of hardcoded ranges.
  */
 class DivisionCommand extends Command {
 
 	/**
 	 * Constructs an instance of the class with the provided core parameter.
-	 * Initializes the core property of the class.
-	 *
-	 * @param {Object} core - The core object used for initializing the instance.
-	 * @return {void}
 	 */
 	constructor(core) {
 
@@ -22,9 +22,7 @@ class DivisionCommand extends Command {
 
 	/**
 	 * Executes a defined operation based on the provided arguments.
-	 *
-	 * @param {Array} args An array of arguments required for the operation. The first element of this array should be the division to set.
-	 * @return {void} This method does not return any values, but logs usage guidelines if the arguments are invalid.
+	 * Uses centralized validation for division values.
 	 */
 	execute(args) {
 
@@ -37,21 +35,18 @@ class DivisionCommand extends Command {
 
 
 	/**
-	 * Validates the provided arguments to ensure they meet specific criteria.
-	 *
-	 * @param {Array} args - The list of arguments to validate.
-	 * @return {boolean} Returns true if the arguments are valid, otherwise false.
+	 * Validates the provided arguments using centralized validation.
 	 */
 	validateArgs(args) {
 
-		return args.length > 0;
+		if (args.length === 0) return false;
+		const division = parseInt(args[0]);
+		return SettingsValidator.isValidDivision(division);
 	}
 
 
 	/**
 	 * Retrieves the usage instructions for a specific command or function.
-	 *
-	 * @return {string} A string describing the usage format and allowed range.
 	 */
 	getUsage() {
 
@@ -61,8 +56,6 @@ class DivisionCommand extends Command {
 
 	/**
 	 * Returns the description of the beat division setting.
-	 *
-	 * @return {string} A string describing the beat division, indicating the relationship between note types and values (e.g., 1 for quarter notes, 2 for eighth notes, etc.).
 	 */
 	getDescription() {
 

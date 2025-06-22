@@ -2,7 +2,6 @@ import TimelineFactory from './TimelineFactory.js';
 import Settings from "../../core/Settings.js";
 
 
-
 /**
  * A factory class that extends TimelineFactory to create a basic training timeline.
  * The basic training timeline is designed to progressively increase difficulty,
@@ -19,7 +18,6 @@ class BasicTrainingFactory extends TimelineFactory {
 	 */
 	createTimeline() {
 
-		// ✅ REFACTORED: Usar configuración centralizada
 		const config = Settings.timelineConstants.basicTraining;
 
 		// Aplicar defaults y crear secciones
@@ -32,10 +30,21 @@ class BasicTrainingFactory extends TimelineFactory {
 
 
 	/**
-	 * Crea una sección aplicando valores por defecto de Settings.
+	 * Creates a section object with default values if certain properties are not provided in the configuration.
 	 *
-	 * @param {Object} sectionConfig - Configuración de la sección
-	 * @return {Object} Sección completa con defaults aplicados
+	 * @param {Object} sectionConfig - The configuration object for the section.
+	 * @param {number} [sectionConfig.duration] - The duration of the section in seconds.
+	 * @param {number} [sectionConfig.bpm=120] - The beats per minute (BPM) for the section.
+	 * @param {string} [sectionConfig.pattern='straight'] - The rhythmic pattern of the section.
+	 * @param {number} [sectionConfig.division] - The division of the beat, default is from timeline constants.
+	 * @param {number} [sectionConfig.volume] - The volume level, default is from timeline constants.
+	 * @param {boolean} [sectionConfig.accent] - Whether the section has an accent, default is from timeline constants.
+	 * @param {boolean} [sectionConfig.silent=false] - Whether the section is silent.
+	 * @param {string} [sectionConfig.description=''] - The description of the section.
+	 * @param {number} [sectionConfig.fadeIn=0] - The fade-in time for the section in seconds.
+	 * @param {number} [sectionConfig.fadeOut=0] - The fade-out time for the section in seconds.
+	 * @param {Array<string>} [sectionConfig.tracks=['main']] - The list of tracks in the section.
+	 * @return {Object} The section object populated with default values where necessary.
 	 */
 	_createSectionWithDefaults(sectionConfig) {
 

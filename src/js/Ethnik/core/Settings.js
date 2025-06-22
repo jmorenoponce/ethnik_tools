@@ -1,15 +1,53 @@
 /**
- * The `Settings` class manages and provides default parameters, tempo names,
- * division names, and validation methods for a rhythm helper application.
- * It also includes debugging capabilities and utility functions for
- * handling presets and configurations.
+ * Central configuration hub for Ethnik Tools
+ * This class manages all system constants, default parameters, and configuration definitions
+ * in a structured and organized manner.
  */
 class Settings {
 
+	// ============================================================================
+	// SYSTEM CONTROL
+	// ============================================================================
+
 	static debug = false;
 
-	static audioConstants = {
 
+	// ============================================================================
+	// CORE SYSTEM PARAMETERS
+	// ============================================================================
+
+	/**
+	 * Default parameters for core system functionality
+	 */
+	static defaultParams = {
+		// BPM Configuration
+		bpmMin: 20,
+		bpmMax: 218,
+		bpmInitial: 100,
+
+		// Division and Volume
+		division: 1,
+		volume: 70,
+
+		// Audio Settings
+		soundFile: './defaultAssets/sounds/rhythmHelper_classic_sound.ogg',
+		lookahead: 15.0,
+
+		// System Limits
+		maxHistorySize: 100,
+		debounceTime: 50,
+		tapTimeoutMs: 3000
+	};
+
+
+	// ============================================================================
+	// AUDIO SYSTEM CONSTANTS
+	// ============================================================================
+
+	/**
+	 * Audio frequencies and durations for different beat types
+	 */
+	static audioConstants = {
 		frequencies: {
 			downbeat: 1000,
 			beat: 800,
@@ -22,19 +60,15 @@ class Settings {
 		}
 	};
 
-	static performanceConstants = {
-
-		driftWarningThreshold: 10,
-		highSeverityThreshold: 20,
-		debounceTime: 50
-	};
-
+	/**
+	 * Audio detection and analysis configuration
+	 */
 	static audioDetectionConstants = {
-		// Valores por defecto para umbrales
+		// Detection Thresholds
 		defaultThreshold: 0.1,
 		defaultSensitivity: 1.0,
 
-		// Configuración de captura de audio
+		// Audio Capture Settings
 		audioCapture: {
 			echoCancellation: false,
 			noiseSuppression: false,
@@ -42,44 +76,257 @@ class Settings {
 			sampleRate: 44100
 		},
 
-		// Configuración FFT (Fast Fourier Transform)
+		// FFT Configuration
 		fft: {
 			size: 2048,
 			smoothingTimeConstant: 0.3
 		},
 
-		// Frecuencias de análisis en Hz
+		// Frequency Analysis Bands (Hz)
 		analysisFrequencies: {
-			lowCutoff: 80,      // Frecuencia de corte para graves
-			midCutoff: 1000,    // Frecuencia de corte para medios
-			highCutoff: 8000    // Frecuencia de corte para agudos
+			lowCutoff: 80,
+			midCutoff: 1000,
+			highCutoff: 8000
 		},
 
-		// Pesos para análisis de nivel (deben sumar 1.0)
+		// Level Weights (must sum to 1.0)
 		levelWeights: {
-			low: 0.3,           // Peso de frecuencias graves
-			mid: 0.5,           // Peso de frecuencias medias
-			high: 0.2,          // Peso de frecuencias agudas
-			normalize: 255      // Factor de normalización FFT
+			low: 0.3,
+			mid: 0.5,
+			high: 0.2,
+			normalize: 255
 		},
 
-		// Parámetros de procesamiento
-		sensitivityExponent: 1.5,     // Exponente para ajuste de sensibilidad
-		attackReleaseRatio: 0.7,      // Ratio para detectar fin de ataque (70% del threshold)
+		// Processing Parameters
+		sensitivityExponent: 1.5,
+		attackReleaseRatio: 0.7,
 
-		// Límites de memoria y performance
-		maxDetectionHistory: 10,      // Máximo número de detecciones en historial
-		maxLogEntries: 20,           // Máximo número de entradas en el log
+		// Memory Management
+		maxDetectionHistory: 10,
+		maxLogEntries: 20,
 
-		// Validación de BPM estimado
+		// BPM Validation Range
 		bpmValidRange: {
-			min: 1,              // BPM mínimo válido
-			max: 300            // BPM máximo válido
+			min: 1,
+			max: 300
 		}
 	};
 
+
+	// ============================================================================
+	// PERFORMANCE AND MONITORING
+	// ============================================================================
+
+	/**
+	 * A collection of constants used for performance monitoring and evaluation.
+	 * This object defines thresholds and delays for various performance-related operations.
+	 *
+	 * @property {number} driftWarningThreshold - The threshold value in milliseconds for measuring drift and triggering warnings.
+	 * @property {number} highSeverityThreshold - The threshold value in milliseconds indicating high severity performance issues.
+	 * @property {number} debounceTime - The debounce time in milliseconds used to limit the frequency of operations or notifications.
+	 */
+	static performanceConstants = {
+		driftWarningThreshold: 10,
+		highSeverityThreshold: 20,
+		debounceTime: 50
+	};
+
+	/**
+	 * Rhythm and timing constants
+	 */
+	static rhythmConstants = {
+		// Swing Timing Ratios
+		swingRatio: {
+			long: 1.33,
+			short: 0.67,
+			description: "2:1 swing ratio - long notes are 1.33x, short notes are 0.67x"
+		},
+
+		// Display Configuration
+		display: {
+			tickCounterInterval: 16,
+			measuresPerDisplayLine: 4,
+			beatsPerMeasure: 4
+		},
+
+		// Performance Optimization
+		performance: {
+			validationCacheTimeMs: 1000,
+			configChangeThresholdMs: 1000
+		}
+	};
+
+
+	// ============================================================================
+	// TAP TEMPO CONFIGURATION
+	// ============================================================================
+
+	/**
+	 * Tap tempo detection and calculation settings
+	 */
+	static tapTempoConstants = {
+		// Basic Configuration
+		maxTapHistory: 8,
+		minTapsForCalculation: 2,
+
+		// Precision Settings
+		accuracyWindow: 0.5,
+		outlierDetection: true,
+
+		// Validation Range
+		minValidBpm: 30,
+		maxValidBpm: 300,
+
+		// Statistical Processing
+		useMedian: true,
+		smoothingFactor: 0.1,
+
+		// Confidence Calculation
+		confidenceFactors: {
+			tapWeight: 15,
+			maxTapConfidence: 100,
+			consistencyWeight: 1
+		}
+	};
+
+
+	// ============================================================================
+	// VISUAL AND DISPLAY CONFIGURATION
+	// ============================================================================
+
+	/**
+	 * Visual display constants and layout configuration
+	 */
+	static visualDisplayConstants = {
+		layout: {
+			newlineOnDownbeat: true,
+			showMeasureMarkers: true,
+			showTickCounters: true,
+			measureMarkerTemplate: "--- Measure {count} ---"
+		}
+	};
+
+	/**
+	 * Visual audio representation for tone generation
+	 */
+	static visualAudioConstants = {
+		// Tone Generation Configuration
+		toneGeneration: {
+			intensityLevels: 10,
+			maxSymbolIndex: 2,
+
+			// Musical Symbols
+			musicSymbols: {
+				chars: '♪♫♬',
+				descriptions: [
+					'Eighth note (low intensity)',
+					'Beamed notes (medium intensity)',
+					'Multiple notes (high intensity)'
+				]
+			},
+
+			// Mapping Algorithm
+			mapping: {
+				algorithm: 'linear',
+				minIntensity: 0,
+				maxIntensity: 10,
+				clampToRange: true
+			}
+		},
+
+		// Alternative Symbol Sets
+		alternativeSymbols: {
+			geometric: '●◐◯',
+			volume: '🔈🔉🔊',
+			classical: '𝄽𝄾𝄿',
+			ascii: '.oO'
+		},
+
+		// Output Configuration
+		output: {
+			useColors: false,
+			addSpacing: false,
+			newlineOnSilence: false
+		}
+	};
+
+	/**
+	 * System-level display and UI constants
+	 */
+	static systemConstants = {
+		// Timing Configuration
+		timing: {
+			initializationDelayMs: 100,
+			playbackResumeDelayMs: 150,
+			shutdownDelayMs: 50,
+			audioCalibrationDelayMs: 25
+		},
+
+		// Console Display
+		display: {
+			bannerWidth: 55,
+			separatorWidth: 50,
+			bannerChar: "=",
+			separatorChar: "-",
+
+			// Message Templates
+			templates: {
+				banner: "🎵 Ethnik Tools - Professional Metronome v2.0",
+				shutdown: "👋 Closing Ethnik Tools...",
+				initialization: "🔊 System initialized successfully"
+			}
+		},
+
+		// Logging Configuration
+		logging: {
+			showTimestamps: true,
+			debugMode: false,
+			logLevel: 'INFO'
+		}
+	};
+
+
+	// ============================================================================
+	// COMMAND SYSTEM CONFIGURATION
+	// ============================================================================
+
+	/**
+	 * Command system constants and valid values
+	 */
+	static commandConstants = {
+		// Command aliases mapping
+		aliases: {
+			'start': 'play',
+			'tempo': 'bpm',
+			'div': 'division',
+			'vol': 'volume',
+			'?': 'help',
+			'quit': 'exit'
+		},
+
+		// Valid pattern types
+		validPatterns: ['straight', 'swing', 'custom'],
+
+		// Valid accent command values
+		validAccentValues: ['on', 'off', 'true', 'false', '1', '0'],
+
+		// Timeline subcommands
+		timelineSubcommands: ['start', 'stop', 'status', 'skip', 'list'],
+
+		// Audio strategy priority order
+		audioStrategyPriorities: ['file', 'system', 'tone']
+	};
+
+
+	// ============================================================================
+	// TIMELINE SYSTEM CONFIGURATION
+	// ============================================================================
+
+	/**
+	 * Timeline and training configuration
+	 */
 	static timelineConstants = {
-		// Configuraciones por defecto para todas las timelines
+		// Default Values
 		defaults: {
 			sectionDuration: 8,
 			transitionDuration: 1,
@@ -88,12 +335,11 @@ class Settings {
 			defaultAccent: true
 		},
 
-		// Configuración específica para Basic Training
+		// Basic Training Timeline
 		basicTraining: {
 			name: "Basic Training",
 			type: "basic_training",
 			description: "Progressive basic training for rhythm development",
-
 			sections: [
 				{
 					id: "warmup",
@@ -138,12 +384,11 @@ class Settings {
 			]
 		},
 
-		// Configuración específica para Rhythm Challenge
+		// Rhythm Challenge Timeline
 		rhythmChallenge: {
 			name: "Rhythm Challenge",
 			type: "rhythm_challenge",
 			description: "Advanced rhythmic challenge with complex patterns",
-
 			sections: [
 				{
 					id: "baseline",
@@ -193,12 +438,11 @@ class Settings {
 			]
 		},
 
-		// Configuración específica para Tempo Crescendo
+		// Tempo Crescendo Timeline
 		tempoCrescendo: {
 			name: "Tempo Crescendo",
 			type: "tempo_crescendo",
 			description: "Gradual tempo increase and decrease exercise",
-
 			sections: [
 				{
 					id: "very_slow",
@@ -253,8 +497,10 @@ class Settings {
 		}
 	};
 
+	/**
+	 * Custom timeline templates for extension
+	 */
 	static customTimelineTemplates = {
-		// Template para práctica técnica
 		technicalPractice: {
 			warmupDuration: 4,
 			practiceDuration: 8,
@@ -264,7 +510,6 @@ class Settings {
 			bpmIncrement: 10
 		},
 
-		// Template para trabajo de tempo
 		tempoWork: {
 			baseBpm: 80,
 			targetBpm: 140,
@@ -275,8 +520,15 @@ class Settings {
 		}
 	};
 
+
+	// ============================================================================
+	// PRESET SYSTEM CONFIGURATION
+	// ============================================================================
+
+	/**
+	 * Predefined metronome presets
+	 */
 	static presetDefinitions = {
-		// Presets musicales clásicos
 		classical: {
 			name: "Classical",
 			bpm: 120,
@@ -325,7 +577,6 @@ class Settings {
 			recommendedFor: ["latin_practice", "rhythm_training", "cultural_music"]
 		},
 
-		// Presets adicionales que podemos agregar fácilmente
 		ballad: {
 			name: "Ballad",
 			bpm: 80,
@@ -366,7 +617,7 @@ class Settings {
 			name: "Reggae",
 			bpm: 90,
 			division: 2,
-			accent: false,  // Reggae emphasizes off-beats
+			accent: false,
 			description: "Relaxed reggae tempo with off-beat emphasis",
 			genre: "reggae",
 			difficulty: "intermediate",
@@ -375,6 +626,9 @@ class Settings {
 		}
 	};
 
+	/**
+	 * Preset categorization system
+	 */
 	static presetCategories = {
 		byGenre: {
 			classical: ["classical", "ballad"],
@@ -390,242 +644,52 @@ class Settings {
 		},
 
 		byTempo: {
-			slow: ["ballad"],           // < 90 BPM
-			moderate: ["reggae", "latin", "rock", "funk", "classical"],  // 90-140 BPM
-			fast: ["jazz", "metal"]     // > 140 BPM
+			slow: ["ballad"],
+			moderate: ["reggae", "latin", "rock", "funk", "classical"],
+			fast: ["jazz", "metal"]
 		}
 	};
 
 
-	static systemConstants = {
-		// Delays de timing del sistema
-		timing: {
-			initializationDelayMs: 100,    // Delay para inicialización de audio
-			playbackResumeDelayMs: 150,    // Delay para reanudar después de pausa
-			shutdownDelayMs: 50,           // Delay para operaciones de shutdown
-			audioCalibrationDelayMs: 25    // Delay para calibración de audio
-		},
+	// ============================================================================
+	// FACTORY CONFIGURATION
+	// ============================================================================
 
-		// Configuración de display de consola
-		display: {
-			bannerWidth: 55,               // Ancho del banner principal
-			separatorWidth: 50,            // Ancho de separadores secundarios
-			bannerChar: "=",               // Carácter para banners
-			separatorChar: "-",            // Carácter para separadores
-
-			// Templates de mensajes
-			templates: {
-				banner: "🎵 Ethnik Tools - Professional Metronome v2.0",
-				shutdown: "👋 Closing Ethnik Tools...",
-				initialization: "🔊 System initialized successfully"
-			}
-		},
-
-		// Configuración de logging y debug
-		logging: {
-			showTimestamps: true,          // Mostrar timestamps en logs
-			debugMode: false,              // Modo debug por defecto
-			logLevel: 'INFO'               // Nivel de log por defecto
-		}
-	};
-
-	static visualAudioConstants = {
-
-		// Configuración de generación visual de tonos
-		toneGeneration: {
-			intensityLevels: 10,              // Niveles de intensidad para mapeo
-			maxSymbolIndex: 2,                // Índice máximo en array de símbolos
-
-			// Símbolos musicales por intensidad (de menor a mayor)
-			musicSymbols: {
-				chars: '♪♫♬',                 // String de símbolos disponibles
-				descriptions: [
-					'Eighth note (low intensity)',     // ♪
-					'Beamed notes (medium intensity)', // ♫
-					'Multiple notes (high intensity)'  // ♬
-				]
-			},
-
-			// Algoritmo de mapeo frecuencia → intensidad
-			mapping: {
-				algorithm: 'linear',          // 'linear', 'logarithmic', 'exponential'
-				minIntensity: 0,             // Intensidad mínima
-				maxIntensity: 10,            // Intensidad máxima
-				clampToRange: true           // Limitar intensidad al rango válido
-			}
-		},
-
-		// Configuración alternativa de símbolos (para futuras extensiones)
-		alternativeSymbols: {
-			// Símbolos geométricos
-			geometric: '●◐◯',
-			// Símbolos de volumen
-			volume: '🔈🔉🔊',
-			// Símbolos de notas clásicas
-			classical: '𝄽𝄾𝄿',
-			// Símbolos simples ASCII
-			ascii: '.oO'
-		},
-
-		// Configuración de output visual
-		output: {
-			useColors: false,             // Para futuro soporte de colores ANSI
-			addSpacing: false,            // Agregar espacios entre símbolos
-			newlineOnSilence: false       // Nueva línea en silencios largos
-		}
-	};
-
+	/**
+	 * Factory system constants
+	 */
 	static factoryConstants = {
-		// Para Timeline Factories
-		defaultSectionDuration: 8,        // Duración por defecto de secciones
-		defaultBpmStep: 20,               // Incremento de BPM por defecto
-
-		// Para Preset Factory
+		defaultSectionDuration: 8,
+		defaultBpmStep: 20,
 		presetCategories: ['classical', 'jazz', 'rock', 'latin', 'custom']
 	};
 
-	static rhythmConstants = {
-		// Configuración de swing
-		swingRatio: {
-			long: 1.33,         // Nota larga en swing (4/3)
-			short: 0.67,        // Nota corta en swing (2/3)
-			description: "2:1 swing ratio - long notes are 1.33x, short notes are 0.67x"
-		},
 
-		// Configuración de display y contadores
-		display: {
-			tickCounterInterval: 16,        // Mostrar contador cada N ticks
-			measuresPerDisplayLine: 4,      // Nueva línea cada N compases
-			beatsPerMeasure: 4             // Beats por compás (para cálculos)
-		},
-
-		// Configuración de cache y performance
-		performance: {
-			validationCacheTimeMs: 1000,   // Tiempo de cache para validaciones (1 segundo)
-			configChangeThresholdMs: 1000  // Umbral para detectar cambios de configuración
-		}
-	};
-
-	static visualDisplayConstants = {
-		// Símbolos para diferentes tipos de beat (ya existían en TickConfiguration)
-		// Pero agregar configuración de layout
-		layout: {
-			newlineOnDownbeat: true,        // Nueva línea en downbeats
-			showMeasureMarkers: true,       // Mostrar marcadores de compás
-			showTickCounters: true,         // Mostrar contadores de tick
-			measureMarkerTemplate: "--- Measure {count} ---"
-		}
-	};
+	// ============================================================================
+	// MUSICAL KNOWLEDGE BASE
+	// ============================================================================
 
 	/**
-	 * An object containing the default configuration parameters for the application.
-	 *
-	 * Properties:
-	 * - bpmMin: Minimum beats per minute (BPM) value.
-	 * - bpmMax: Maximum beats per minute (BPM) value.
-	 * - bpmInitial: Initial beats per minute (BPM) value on load.
-	 * - division: The subdivision or multiplier used for setting tempo granularity.
-	 * - volume: Default volume level expressed as a percentage (0-100).
-	 * - soundFile: Path to the default sound file used for feedback or metronome sound.
-	 * - lookahead: Time in milliseconds to look ahead when scheduling audio events.
-	 * - maxHistorySize: Maximum number of entries to maintain in the history log.
-	 * - debounceTime: Debouncing time in milliseconds to handle rapid user interactions.
-	 * - tapTimeoutMs: Time in milliseconds to reset the tap tempo timeout.
-	 *
-	 * This object acts as a configuration preset for initializing application state
-	 * or default behaviors.
-	 */
-	static defaultParams = {
-
-		bpmMin: 		20,
-		bpmMax: 		218,
-		bpmInitial: 	100,
-		division:		1,
-		volume: 		70,
-		soundFile: 		'./defaultAssets/sounds/rhythmHelper_classic_sound.ogg',
-		lookahead:		15.0,
-		maxHistorySize:	100,
-		debounceTime:	50,
-		tapTimeoutMs:	3000
-	}
-
-
-	static tapTempoConstants = {
-		// Configuración básica
-		maxTapHistory: 8,           // Máximo número de taps almacenados
-		minTapsForCalculation: 2,   // Mínimo taps necesarios para BPM
-
-		// Configuración de precisión
-		accuracyWindow: 0.5,        // Ventana de precisión para filtrar outliers (50%)
-		outlierDetection: true,     // Activar detección de outliers
-
-		// Configuración de validación
-		minValidBpm: 30,           // BPM mínimo considerado válido para tap tempo
-		maxValidBpm: 300,          // BPM máximo considerado válido para tap tempo
-
-		// Configuración de estadísticas
-		useMedian: true,           // Usar mediana en lugar de promedio para mejor precisión
-		smoothingFactor: 0.1,      // Factor de suavizado para cambios de BPM
-
-		// Configuración de confianza
-		confidenceFactors: {
-			tapWeight: 15,         // Peso por tap en cálculo de confianza
-			maxTapConfidence: 100, // Máxima confianza por número de taps
-			consistencyWeight: 1   // Peso de la consistencia en confianza
-		}
-	};
-
-
-	/**
-	 * Represents a mapping of tempo names to their corresponding BPM (Beats Per Minute) ranges.
-	 * Each property of the object corresponds to a tempo name, with the value being an array
-	 * representing the minimum and maximum BPM for that tempo.
-	 *
-	 * Properties:
-	 * - larghissimo: [20, 39] - Extremely slow tempo.
-	 * - largo: [40, 59] - Very slow, broad tempo.
-	 * - lento: [60, 67] - Slowly, sustained tempo.
-	 * - adagio: [68, 79] - Slow and stately tempo.
-	 * - andante: [80, 99] - Walking pace, moderate tempo.
-	 * - moderato: [100, 111] - Moderately paced tempo.
-	 * - allegretto: [112, 127] - Moderately fast tempo.
-	 * - allegro: [128, 159] - Fast, lively tempo.
-	 * - vivace: [160, 169] - Lively and brisk tempo.
-	 * - presto: [170, 199] - Very fast tempo.
-	 * - prestissimo: [200, 218] - Extremely fast tempo.
+	 * Tempo name mappings (Italian musical terms)
 	 */
 	static tempoNames = {
-
-		larghissimo: 	[20, 39],
-		largo:			[40, 59],
-		lento:			[60, 67],
-		adagio:			[68, 79],
-		andante:		[80, 99],
-		moderato:		[100, 111],
-		allegretto:		[112, 127],
-		allegro:		[128, 159],
-		vivace:			[160, 169],
-		presto:			[170, 199],
-		prestissimo:	[200, 218]
-	}
-
+		larghissimo: [20, 39],
+		largo: [40, 59],
+		lento: [60, 67],
+		adagio: [68, 79],
+		andante: [80, 99],
+		moderato: [100, 111],
+		allegretto: [112, 127],
+		allegro: [128, 159],
+		vivace: [160, 169],
+		presto: [170, 199],
+		prestissimo: [200, 218]
+	};
 
 	/**
-	 * An object that maps numerical division keys to their corresponding musical note division names.
-	 * The keys represent division factors, and the values are the names of the respective musical note divisions.
-	 *
-	 * Properties:
-	 * - 1: Represents "Negras (1/4)"
-	 * - 2: Represents "Corcheas (1/8)"
-	 * - 3: Represents "Tresillos"
-	 * - 4: Represents "Semicorcheas (1/16)"
-	 * - 6: Represents "Seisillos"
-	 * - 8: Represents "Fusas (1/32)"
-	 * - 12: Represents "Docesillos"
-	 * - 16: Represents "Semicorcheas cuádruples"
+	 * Musical division names (Spanish)
 	 */
 	static divisionNames = {
-
 		1: "Negras (1/4)",
 		2: "Corcheas (1/8)",
 		3: "Tresillos",
@@ -634,88 +698,28 @@ class Settings {
 		8: "Fusas (1/32)",
 		12: "Docesillos",
 		16: "Semicorcheas cuádruples"
-	}
+	};
 
 
-	/**
-	 * Logs a debug message to the console if debugging is enabled.
-	 *
-	 * @param {...any} args - The arguments to be logged. These can be any type and are passed to `console.log`.
-	 * @return {void} This method does not return a value.
-	 */
-	static log(...args) {
-
-		if (this.debug) {
-			console.log('[DEBUG]', new Date().toISOString(), ...args);
-		}
-	}
-
+	// ============================================================================
+	// VALIDATION METHODS (KEPT FOR BACKWARD COMPATIBILITY)
+	// ============================================================================
 
 	/**
-	 * Retrieves the list of tempo names from the application settings.
-	 *
-	 * @return {Array} An array containing the names of tempos available in the settings.
-	 */
-	static getTempoList() {
-
-		return Settings.tempoNames;
-	}
-
-
-	/**
-	 * Retrieves the tempo name corresponding to a given beats per minute (BPM) value.
-	 *
-	 * @param {number} bpm - The beats per minute value to evaluate.
-	 * @return {string} The tempo name corresponding to the BPM value, or 'unknown' if no match is found.
-	 */
-	static getTempoName(bpm) {
-
-		for (const tempoName in Settings.tempoNames) {
-
-			const [min, max] = Settings.tempoNames[tempoName];
-			if (bpm >= min && bpm <= max) {
-				return tempoName;
-			}
-		}
-
-		return 'unknown';
-	}
-
-
-	/**
-	 * Retrieves the name of the division based on the given division identifier.
-	 *
-	 * @param {string|number} division - The identifier for the division.
-	 * @return {string} The name of the division associated with the given identifier, or a default formatted name if not found.
-	 */
-	static getDivisionName(division) {
-
-		return Settings.divisionNames[division] || `División ${division}`;
-	}
-
-
-	/**
-	 * Checks if the provided BPM (beats per minute) value is valid.
-	 *
-	 * A BPM value is considered valid if it is a number and falls within
-	 * the predefined minimum and maximum BPM range defined in the Settings.
-	 *
-	 * @param {number} bpm - The BPM value to be validated.
-	 * @return {boolean} True if the bpm is valid, otherwise false.
+	 * Validates BPM value against system limits
+	 * @deprecated Use SettingsValidator.isValidBpm() instead
 	 */
 	static isValidBpm(bpm) {
 
-		return !isNaN(bpm) && bpm >= Settings.defaultParams.bpmMin && bpm <= Settings.defaultParams.bpmMax;
+		return !isNaN(bpm) &&
+			bpm >= Settings.defaultParams.bpmMin &&
+			bpm <= Settings.defaultParams.bpmMax;
 	}
 
 
 	/**
-	 * Checks if the provided division value is valid.
-	 *
-	 * A valid division is a number between 1 and 16 (inclusive).
-	 *
-	 * @param {number} division - The division value to validate.
-	 * @return {boolean} Returns true if the division is valid, otherwise false.
+	 * Validates division value
+	 * @deprecated Use SettingsValidator.isValidDivision() instead
 	 */
 	static isValidDivision(division) {
 
@@ -724,10 +728,8 @@ class Settings {
 
 
 	/**
-	 * Validates if the given volume is within the acceptable range.
-	 *
-	 * @param {number} volume - The volume value to be validated.
-	 * @return {boolean} Returns true if the volume is a number between 0 and 100 (inclusive), otherwise false.
+	 * Validates volume value
+	 * @deprecated Use SettingsValidator.isValidVolume() instead
 	 */
 	static isValidVolume(volume) {
 
@@ -736,18 +738,13 @@ class Settings {
 
 
 	/**
-	 * Validates a given preset object to ensure it meets specific configuration requirements.
-	 *
-	 * @param {Object} preset - The preset object to be validated.
-	 * @param {number} preset.bpm - The beats per minute (bpm) value of the preset.
-	 * @param {string} preset.division - The division value of the preset.
-	 * @param {boolean} preset.accent - The accent flag indicating specific configuration.
-	 * @return {boolean} Returns true if the preset is valid; otherwise, returns false.
+	 * Validates basic preset structure
+	 * @deprecated Use SettingsValidator.validatePreset() instead
 	 */
 	static validatePreset(preset) {
 
 		if (!preset || typeof preset !== 'object') {
-			this.log('Invalid preset: not an object');
+			Settings.log('Invalid preset: not an object');
 			return false;
 		}
 
@@ -756,7 +753,7 @@ class Settings {
 			typeof preset.accent === 'boolean';
 
 		if (!isValid) {
-			this.log('Invalid preset configuration:', preset);
+			Settings.log('Invalid preset configuration:', preset);
 		}
 
 		return isValid;
@@ -764,133 +761,15 @@ class Settings {
 
 
 	/**
-	 * Enables debug mode for the application, allowing more detailed logging information.
-	 * This method sets the internal 'debug' state to true and logs a confirmation message.
-	 *
-	 * @return {void} Does not return a value.
+	 * Validates extended preset with additional metadata
+	 * @deprecated Use SettingsValidator.validateExtendedPreset() instead
 	 */
-	static enableDebug() {
-
-		this.debug = true;
-		this.log('Debug mode enabled');
-	}
-
-
-	/**
-	 * Disables the debug mode for the application. Once called, debug logs and related functionality will be turned off.
-	 *
-	 * @return {void} This method does not return any value.
-	 */
-	static disableDebug() {
-
-		this.log('Debug mode disabled');
-		this.debug = false;
-	}
-
-	static getVisualToneSymbol(frequency, symbolSet = 'default') {
-
-		const config = this.visualAudioConstants.toneGeneration;
-		const maxFreq = this.audioConstants.frequencies.downbeat;
-
-		// Calcular intensidad usando configuración centralizada
-		const intensity = Math.floor(
-			(frequency / maxFreq) * config.mapping.maxIntensity
-		);
-
-		// Seleccionar set de símbolos
-		let symbols = config.musicSymbols.chars;
-		if (symbolSet !== 'default' && this.visualAudioConstants.alternativeSymbols[symbolSet]) {
-			symbols = this.visualAudioConstants.alternativeSymbols[symbolSet];
-		}
-
-		// Obtener índice con clamp opcional
-		let index = intensity;
-		if (config.mapping.clampToRange) {
-			index = Math.min(intensity, config.maxSymbolIndex);
-			index = Math.max(index, 0);
-		}
-
-		return symbols[index] || symbols[symbols.length - 1];
-	}
-
-	static generateCrescendoSections() {
-
-		const config = this.timelineConstants.tempoCrescendo.crescendoConfig;
-		const sections = [];
-		let currentBpm = config.startBpm;
-
-		// Fase ascendente
-		for (let i = 0; i < config.stepsUp; i++) {
-			sections.push({
-				id: `crescendo_step_${i + 1}`,
-				duration: config.stepDuration,
-				bpm: currentBpm,
-				pattern: 'straight',
-				description: this._getCrescendoDescription(currentBpm, 'ascending'),
-				tags: ['crescendo', 'ascending', `step_${i + 1}`]
-			});
-			currentBpm += config.bpmIncrement;
-		}
-
-		// Pico
-		sections.push({
-			id: 'peak',
-			duration: config.stepDuration,
-			bpm: config.peakBpm,
-			pattern: 'straight',
-			description: 'Peak tempo',
-			tags: ['peak', 'maximum_tempo']
-		});
-
-		// Fase descendente
-		currentBpm = config.peakBpm - config.bpmIncrement;
-		for (let i = 0; i < config.stepsDown; i++) {
-			sections.push({
-				id: `diminuendo_step_${i + 1}`,
-				duration: config.stepDuration,
-				bpm: currentBpm,
-				pattern: 'straight',
-				description: this._getCrescendoDescription(currentBpm, 'descending'),
-				tags: ['diminuendo', 'descending', `step_${i + 1}`]
-			});
-			currentBpm -= config.bpmIncrement;
-		}
-
-		return sections;
-	}
-
-
-	static _getCrescendoDescription(bpm, phase) {
-
-		const tempoName = this.getTempoName(bpm);
-		if (phase === 'ascending') {
-			return `Gradual acceleration - ${bpm} BPM (${tempoName})`;
-		} else {
-			return `Controlled descent - ${bpm} BPM (${tempoName})`;
-		}
-	}
-
-
-	static getPresetsByCategory(category, subcategory) {
-
-		const categoryMap = this.presetCategories[category];
-		if (!categoryMap || !categoryMap[subcategory]) {
-			return [];
-		}
-
-		return categoryMap[subcategory].map(presetName => ({
-			name: presetName,
-			...this.presetDefinitions[presetName]
-		}));
-	}
-
 	static validateExtendedPreset(preset) {
 
 		if (!this.validatePreset(preset)) {
 			return false;
 		}
 
-		// Validaciones adicionales opcionales
 		const validGenres = ['classical', 'jazz', 'rock', 'latin', 'ballad', 'funk', 'metal', 'reggae', 'custom'];
 		const validDifficulties = ['beginner', 'intermediate', 'advanced'];
 
@@ -903,6 +782,124 @@ class Settings {
 		}
 
 		return true;
+	}
+
+
+	// ============================================================================
+	// UTILITY METHODS
+	// ============================================================================
+
+	/**
+	 * Debug logging utility
+	 */
+	static log(...args) {
+
+		if (this.debug) {
+			console.log('[DEBUG]', new Date().toISOString(), ...args);
+		}
+	}
+
+
+	/**
+	 * Get list of tempo names
+	 */
+	static getTempoList() {
+
+		return Settings.tempoNames;
+	}
+
+
+	/**
+	 * Get tempo name for BPM value
+	 */
+	static getTempoName(bpm) {
+
+		for (const tempoName in Settings.tempoNames) {
+			const [min, max] = Settings.tempoNames[tempoName];
+			if (bpm >= min && bpm <= max) {
+				return tempoName;
+			}
+		}
+		return 'unknown';
+	}
+
+
+	/**
+	 * Get division name
+	 */
+	static getDivisionName(division) {
+
+		return Settings.divisionNames[division] || `División ${division}`;
+	}
+
+
+	/**
+	 * Calculates and returns a visual symbol representing the tone intensity based on a given frequency.
+	 * It uses a predefined configuration and symbol set to determine the appropriate visual representation.
+	 *
+	 * @param {number} frequency The frequency value to calculate the tone intensity and corresponding symbol.
+	 * @param {string} [symbolSet='default'] The name of the symbol set to use for obtaining visual symbols. Defaults to 'default'.
+	 * @return {string} The visual symbol corresponding to the calculated tone intensity.
+	 */
+	static getVisualToneSymbol(frequency, symbolSet = 'default') {
+
+		const config = Settings.visualAudioConstants.toneGeneration;
+		const maxFreq = Settings.audioConstants.frequencies.downbeat;
+
+		const intensity = Math.floor(
+			(frequency / maxFreq) * config.mapping.maxIntensity
+		);
+
+		let symbols = config.musicSymbols.chars;
+		if (symbolSet !== 'default' && Settings.visualAudioConstants.alternativeSymbols[symbolSet]) {
+			symbols = Settings.visualAudioConstants.alternativeSymbols[symbolSet];
+		}
+
+		let index = intensity;
+		if (config.mapping.clampToRange) {
+			index = Math.min(intensity, config.maxSymbolIndex);
+			index = Math.max(index, 0);
+		}
+
+		return symbols[index] || symbols[symbols.length - 1];
+	}
+
+
+	/**
+	 * Get presets filtered by category and subcategory
+	 * @deprecated Use SettingsValidator.getPresetsByCategory() instead
+	 */
+	static getPresetsByCategory(category, subcategory) {
+
+		const categoryMap = Settings.presetCategories[category];
+		if (!categoryMap || !categoryMap[subcategory]) {
+			return [];
+		}
+
+		return categoryMap[subcategory].map(presetName => ({
+			name: presetName,
+			...Settings.presetDefinitions[presetName]
+		}));
+	}
+
+
+	/**
+	 * Enable debug mode
+	 */
+	static enableDebug() {
+
+		this.debug = true;
+		this.log('Debug mode enabled');
+	}
+
+
+	/**
+	 * Disable debug mode
+	 */
+	static disableDebug() {
+
+		this.log('Debug mode disabled');
+		this.debug = false;
 	}
 }
 

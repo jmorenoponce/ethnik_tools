@@ -18,7 +18,6 @@ class TapTempoManager {
 
 		this._tapTimes = [];
 
-		// ✅ REFACTORED: Usar configuración centralizada de tapTempoConstants
 		this._maxTaps = Settings.tapTempoConstants.maxTapHistory;
 		this._debounceTime = Settings.defaultParams.debounceTime;
 		this._timeoutMs = Settings.defaultParams.tapTimeoutMs;
@@ -27,7 +26,6 @@ class TapTempoManager {
 		this._observers = new Set();
 		this._cleanupTimer = null;
 
-		// ✅ ENHANCED: Configuración adicional desde Settings
 		this._config = Settings.tapTempoConstants;
 	}
 
@@ -42,7 +40,6 @@ class TapTempoManager {
 
 		const now = performance.now();
 
-		// ✅ REFACTORED: Usar debounce centralizado con información detallada
 		if (now - this._lastTapTime < this._debounceTime) {
 			return {
 				success: false,
@@ -56,14 +53,12 @@ class TapTempoManager {
 		this._lastTapTime = now;
 		this._tapTimes.push(now);
 
-		// ✅ REFACTORED: Usar límite centralizado
 		if (this._tapTimes.length > this._maxTaps) {
 			this._tapTimes.shift();
 		}
 
 		this._scheduleCleanup();
 
-		// ✅ ENHANCED: Usar configuración centralizada para validación mínima
 		const minTaps = this._config.minTapsForCalculation;
 
 		if (this._tapTimes.length >= minTaps) {
@@ -123,7 +118,6 @@ class TapTempoManager {
 			intervals.push(this._tapTimes[i] - this._tapTimes[i - 1]);
 		}
 
-		// ✅ ENHANCED: Usar configuración centralizada para filtrado de outliers
 		let activeIntervals = intervals;
 
 		if (this._config.outlierDetection && intervals.length >= 3) {
@@ -136,7 +130,6 @@ class TapTempoManager {
 			activeIntervals = filteredIntervals.length >= 2 ? filteredIntervals : intervals;
 		}
 
-		// ✅ ENHANCED: Usar mediana si está configurado para mayor precisión
 		let avgInterval;
 		if (this._config.useMedian && activeIntervals.length >= 3) {
 			avgInterval = this._calculateMedian(activeIntervals);
@@ -403,7 +396,6 @@ class TapTempoManager {
 			currentBpm: this._tapTimes.length >= this._config.minTapsForCalculation ? this._calculateBpm() : null
 		};
 
-		// ✅ ENHANCED: Agregar información detallada
 		if (basicStatus.canCalculateBpm) {
 			return {
 				...basicStatus,

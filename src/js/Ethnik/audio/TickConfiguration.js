@@ -1,5 +1,6 @@
 import Settings from '../core/Settings.js';
 
+
 /**
  * The TickConfiguration class is a utility class that provides methods to retrieve
  * audio and visual configurations for different accent levels within a rhythmic sequence.
@@ -59,6 +60,7 @@ class TickConfiguration {
 	 */
 	static getTickType(accent) {
 
+		// TODO: Hardcoded strings
 		switch (accent) {
 			case 2:
 				return 'downbeat';
@@ -80,6 +82,7 @@ class TickConfiguration {
 	 */
 	static getSymbol(accent) {
 
+		// TODO: Hardcoded symbols
 		switch (accent) {
 			case 2:
 				return '🔴'; // Downbeat

@@ -1,3 +1,4 @@
+
 import Command from "../base/Command.js";
 
 /**

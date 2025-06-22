@@ -1,9 +1,7 @@
-// =============================================================================
-// PresetCommand.js - VERSIÓN SIMPLIFICADA QUE FUNCIONA
-// =============================================================================
 
 import Command from '../base/Command.js';
 import Settings from '../../core/Settings.js';
+
 
 /**
  * Represents a command to load predefined metronome configuration presets.
@@ -73,7 +71,7 @@ class PresetCommand extends Command {
 	_showAvailablePresets() {
 
 		try {
-			// ✅ SIMPLIFICADO: Usar Settings directamente
+
 			const presetDefinitions = Settings.presetDefinitions;
 			const presetCategories = Settings.presetCategories;
 
@@ -102,6 +100,7 @@ class PresetCommand extends Command {
 
 		} catch (error) {
 			// Fallback absoluto
+			// TODO: Hardcoded presets
 			console.log('💡 Available presets: classical, jazz, rock, latin, ballad, funk, metal, reggae');
 			console.log('💡 Usage: preset [classical/jazz/rock/latin/ballad/funk/metal/reggae]');
 		}
@@ -114,7 +113,6 @@ class PresetCommand extends Command {
 	_showDetailedPresetList() {
 
 		try {
-			// ✅ SIMPLIFICADO: Usar Settings directamente
 			const presetDefinitions = Settings.presetDefinitions;
 
 			console.log('🎵 Detailed Preset List:\n');
@@ -147,7 +145,7 @@ class PresetCommand extends Command {
 	_showPresetInfo(presetName) {
 
 		try {
-			// ✅ SIMPLIFICADO: Usar Settings directamente
+
 			const presetDefinitions = Settings.presetDefinitions;
 			const preset = presetDefinitions[presetName];
 
@@ -204,16 +202,19 @@ class PresetCommand extends Command {
 
 		const presetName = args[0].toLowerCase();
 
+		// TODO: Hardcoded commands
 		// Comandos especiales siempre válidos
 		if (['list', 'info'].includes(presetName)) {
 			return true;
 		}
 
 		try {
-			// ✅ SIMPLIFICADO: Validar contra Settings directamente
+
 			const presetDefinitions = Settings.presetDefinitions;
 			return Object.prototype.hasOwnProperty.call(presetDefinitions, presetName);
+
 		} catch (error) {
+
 			// Fallback: validar contra presets conocidos
 			const basicPresets = ['classical', 'jazz', 'rock', 'latin', 'ballad', 'funk', 'metal', 'reggae'];
 			return basicPresets.includes(presetName);
