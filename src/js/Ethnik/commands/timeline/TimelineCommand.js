@@ -2,29 +2,34 @@ import Command from '../base/Command.js';
 
 
 /**
- * Timeline command implementation with subcommand handling.
+ * Represents a command to manage and control training timelines.
+ * The class allows for starting, stopping, checking the status, skipping, and listing available timelines.
+ * It processes specific subcommands (e.g., start, stop) and performs corresponding operations via the provided core instance.
  */
 class TimelineCommand extends Command {
 
 	/**
-	 * Creates a new TimelineCommand.
+	 * Constructs an instance of the class and initializes it with the provided core object.
 	 *
-	 * @param {Object} core - Core metronome instance.
-	 * @return {void} No return value.
+	 * @param {Object} core - The core object used for initialization.
+	 * @return {undefined} This constructor does not return a value.
 	 */
 	constructor(core) {
+
 		super();
 		this._core = core;
 	}
 
 
 	/**
-	 * Executes the timeline command with subcommands.
+	 * Executes the specified subcommand with its arguments.
 	 *
-	 * @param {Array<string>} args - Command arguments.
-	 * @return {void} No return value.
+	 * @param {Array<string>} args - The array of arguments where the first element is the subcommand,
+	 * and the remaining elements are the arguments for that subcommand.
+	 * @return {void} This method does not return a value but performs operations based on the subcommand.
 	 */
 	execute(args) {
+
 		if (!this.validateArgs(args)) {
 			console.log(`💡 ${this.getUsage()}`);
 			return;
@@ -62,63 +67,76 @@ class TimelineCommand extends Command {
 
 
 	/**
-	 * Executes the timeline start subcommand.
+	 * Executes the start process for a specified timeline type.
 	 *
-	 * @param {Array<string>} args - Subcommand arguments.
-	 * @return {void} No return value.
+	 * @param {Array} args - An array of arguments where the first element specifies the type of timeline.
+	 *                        If not provided, defaults to 'basic_training'.
+	 * @return {void} This method does not return any value.
 	 */
 	_executeStart(args) {
+
 		const timelineType = args[0] || 'basic_training';
 		this._core.startTimeline(timelineType);
 	}
 
 
 	/**
-	 * Executes the timeline stop subcommand.
+	 * Stops the timeline execution by invoking the stopTimeline method of the core.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} Does not return a value.
 	 */
 	_executeStop() {
+
 		this._core.stopTimeline();
 	}
 
 
 	/**
-	 * Executes the timeline status subcommand.
+	 * Executes the status retrieval from the timeline using the core functionality.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} This method does not return a value.
 	 */
 	_executeStatus() {
+
 		this._core.getTimelineStatus();
 	}
 
 
 	/**
-	 * Executes the timeline skip subcommand.
+	 * Executes the skip functionality by progressing the timeline section.
 	 *
-	 * @return {void} No return value.
+	 * This method triggers the associated core functionality to skip the current section of the timeline being processed.
+	 *
+	 * @return {void} Does not return a value.
 	 */
 	_executeSkip() {
+
 		this._core.skipTimelineSection();
 	}
 
 
 	/**
-	 * Executes the timeline list subcommand.
+	 * Executes the logic to display a list of available timelines.
 	 *
-	 * @return {void} No return value.
+	 * This method internally invokes `_showAvailableTimelines` to handle the display
+	 * of timelines that are currently available.
+	 *
+	 * @return {void} Does not return any value.
 	 */
 	_executeList() {
+
 		this._showAvailableTimelines();
 	}
 
 
 	/**
-	 * Shows available timeline types.
+	 * Displays a list of available timelines for training, along with their descriptions.
+	 * The output includes the timeline names and their respective purposes.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} No return value. Outputs the information directly to the console.
 	 */
 	_showAvailableTimelines() {
+
 		console.log('🎬 Available Training Timelines:');
 		console.log('   basic_training     - Progressive basic training');
 		console.log('   rhythm_challenge   - Advanced rhythmic challenge');
@@ -128,12 +146,13 @@ class TimelineCommand extends Command {
 
 
 	/**
-	 * Validates timeline command arguments.
+	 * Validates the provided arguments to ensure they contain a valid subcommand.
 	 *
-	 * @param {Array<string>} args - Command arguments to validate.
-	 * @return {boolean} True if arguments are valid.
+	 * @param {Array} args - An array of arguments where the first element is expected to be a subcommand.
+	 * @return {boolean} Returns true if the first argument is a valid subcommand, otherwise false.
 	 */
 	validateArgs(args) {
+
 		if (args.length === 0) return false;
 
 		const validSubcommands = ['start', 'stop', 'status', 'skip', 'list'];
@@ -142,21 +161,23 @@ class TimelineCommand extends Command {
 
 
 	/**
-	 * Gets usage help text for the timeline command.
+	 * Retrieves the usage instructions for the timeline command.
 	 *
-	 * @return {string} Usage help text.
+	 * @return {string} A string describing the syntax and available options for the timeline command.
 	 */
 	getUsage() {
+
 		return 'Usage: timeline [start|stop|status|skip|list] [options...]';
 	}
 
 
 	/**
-	 * Gets a description of the timeline command.
+	 * Retrieves the description of the functionality provided by this method.
 	 *
-	 * @return {string} Command description.
+	 * @return {string} A brief description of how training timelines and patterns are managed.
 	 */
 	getDescription() {
+
 		return 'Manages training timelines with multiple sections and patterns';
 	}
 }

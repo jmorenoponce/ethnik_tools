@@ -1,18 +1,20 @@
 import SystemCoordinator from "./SystemCoordinator.js";
 
 /**
- * Core - Minimal entry point for the metronome application.
- * True Facade pattern implementation that delegates everything to SystemCoordinator.
- * Maintains Singleton pattern for backward compatibility.
+ * Core is a singleton class that acts as the main interface for controlling and managing
+ * the application's system. It interacts with the SystemCoordinator to handle tasks
+ * such as playback control, configuration, timeline management, and more.
  */
 class Core {
 
 	static _instance = null;
 
+
 	/**
-	 * Gets the singleton instance of Core.
+	 * Retrieves the singleton instance of the Core class.
+	 * Ensures that only one instance of the Core class is created and reused.
 	 *
-	 * @return {Core} The Core singleton instance.
+	 * @return {Core} The singleton instance of the Core class.
 	 */
 	static getInstance() {
 
@@ -22,10 +24,14 @@ class Core {
 		return Core._instance;
 	}
 
+
 	/**
-	 * Constructs a new Core instance with SystemCoordinator.
+	 * Constructs the Core instance and initializes the system coordinator.
+	 * Ensures the class adheres to the singleton pattern by preventing
+	 * multiple instances.
 	 *
-	 * @return {void} No return value.
+	 * @throws {Error} Throws an error if an attempt is made to create another instance of the singleton class.
+	 * @return {Core} Returns an instance of the Core class.
 	 */
 	constructor() {
 
@@ -41,52 +47,162 @@ class Core {
 		this._coordinator.initialize();
 	}
 
-	// =====================================================
-	// PUBLIC API - All methods delegate to SystemCoordinator
-	// =====================================================
 
-	// Getters
-	get isPlaying() { return this._coordinator.isPlaying; }
-	get bpm() { return this._coordinator.bpm; }
-	get division() { return this._coordinator.division; }
-	get volume() { return this._coordinator.volume; }
-	get accent() { return this._coordinator.accent; }
-	get currentPattern() { return this._coordinator.currentPattern; }
-	get audioEngine() { return this._coordinator.audioEngine; }
+	get isPlaying() {
 
-	// Playback control
-	async play() { return this._coordinator.play(); }
-	stop() { return this._coordinator.stop(); }
+		return this._coordinator.isPlaying;
+	}
 
-	// Configuration
-	setTempo(newTempo) { return this._coordinator.setTempo(newTempo); }
-	setDivision(division) { return this._coordinator.setDivision(division); }
-	setAccent(enabled) { return this._coordinator.setAccent(enabled); }
-	setPattern(pattern) { return this._coordinator.setPattern(pattern); }
-	setVolume(volume) { return this._coordinator.setVolume(volume); }
 
-	// Presets
-	loadPreset(name) { return this._coordinator.loadPreset(name); }
+	get bpm() {
 
-	// Tap tempo
-	tapTempo() { return this._coordinator.tapTempo(); }
+		return this._coordinator.bpm;
+	}
 
-	// Status
-	getStatus() { return this._coordinator.getStatus(); }
 
-	// Timeline
-	startTimeline(timelineType) { return this._coordinator.startTimeline(timelineType); }
-	stopTimeline() { return this._coordinator.stopTimeline(); }
-	getTimelineStatus() { return this._coordinator.getTimelineStatus(); }
-	skipTimelineSection() { return this._coordinator.skipTimelineSection(); }
-	getAvailableTimelineTypes() { return this._coordinator.getAvailableTimelineTypes(); }
+	get division() {
 
-	// System lifecycle
-	async initialize() { return this._coordinator.initialize(); }
+		return this._coordinator.division;
+	}
+
+
+	get volume() {
+
+		return this._coordinator.volume;
+	}
+
+
+	get accent() {
+
+		return this._coordinator.accent;
+	}
+
+
+	get currentPattern() {
+
+		return this._coordinator.currentPattern;
+	}
+
+
+	get audioEngine() {
+
+		return this._coordinator.audioEngine;
+	}
+
+
+	async play() {
+
+		return this._coordinator.play();
+	}
+
+
+	stop() {
+
+		return this._coordinator.stop();
+	}
+
+
+	setTempo(newTempo) {
+
+		return this._coordinator.setTempo(newTempo);
+	}
+
+
+	setDivision(division) {
+
+		return this._coordinator.setDivision(division);
+	}
+
+
+	setAccent(enabled) {
+
+		return this._coordinator.setAccent(enabled);
+	}
+
+
+	setPattern(pattern) {
+
+		return this._coordinator.setPattern(pattern);
+	}
+
+
+	setVolume(volume) {
+
+		return this._coordinator.setVolume(volume);
+	}
+
+
+	loadPreset(name) {
+
+		return this._coordinator.loadPreset(name);
+	}
+
+
+	tapTempo() {
+
+		return this._coordinator.tapTempo();
+	}
+
+
+	getStatus() {
+
+		return this._coordinator.getStatus();
+	}
+
+
+	startTimeline(timelineType) {
+
+		return this._coordinator.startTimeline(timelineType);
+	}
+
+
+	stopTimeline() {
+
+		return this._coordinator.stopTimeline();
+	}
+
+
+	getTimelineStatus() {
+
+		return this._coordinator.getTimelineStatus();
+	}
+
+
+	skipTimelineSection() {
+
+		return this._coordinator.skipTimelineSection();
+	}
+
 
 	/**
-	 * Cleanup method to be called when shutting down.
-	 * IMPORTANT: This method is now synchronous for compatibility with ExitCommand
+	 * Retrieves the available timeline types supported by the coordinator.
+	 *
+	 * @return {Array<string>} An array of strings representing the available timeline types.
+	 */
+	getAvailableTimelineTypes() {
+
+		return this._coordinator.getAvailableTimelineTypes();
+	}
+
+
+	/**
+	 * Initializes the coordinator instance, setting up any necessary configurations
+	 * and state for subsequent operations.
+	 *
+	 * @return {Promise<void>} A promise that resolves when the initialization process is complete.
+	 */
+	async initialize() {
+
+		return this._coordinator.initialize();
+	}
+
+
+	/**
+	 * Destroys the Core instance by shutting down the SystemCoordinator
+	 * asynchronously and clearing the singleton instance.
+	 *
+	 * Any errors encountered during the shutdown process or cleanup are logged
+	 * and the singleton is cleared to avoid a stuck state.
 	 *
 	 * @return {void} No return value.
 	 */
@@ -109,10 +225,15 @@ class Core {
 		}
 	}
 
+
 	/**
-	 * Asynchronous version of destroy for when you can await.
+	 * Asynchronously shuts down the core system and cleans up resources.
+	 * This method ensures that the internal coordinator is properly shut down
+	 * and resets the Core singleton instance to null. Any errors during
+	 * the cleanup process are logged to the console.
 	 *
-	 * @return {Promise<void>} Resolves when cleanup is complete.
+	 * @return {Promise<void>} A promise that resolves when the core system
+	 * has been successfully shut down and resources are cleaned up.
 	 */
 	async destroyAsync() {
 

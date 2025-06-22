@@ -10,17 +10,30 @@ import MetronomeEngine from "./MetronomeEngine.js";
 import ConfigurationManager from "./ConfigurationManager.js";
 import EventBus from "./EventBus.js";
 
+
 /**
- * SystemCoordinator - Central coordinator responsible for managing all subsystems,
- * their interactions, and the overall application lifecycle.
- * Extracted from Core.js to implement true Facade pattern.
+ * SystemCoordinator class is responsible for managing the initialization,
+ * coordination, and lifecycle of the system components. It acts as a
+ * central control point for subsystems such as audio, metronome,
+ * configuration, and more.
  */
 class SystemCoordinator {
 
 	/**
-	 * Creates a SystemCoordinator instance.
+	 * Constructor to initialize the system and its core components with optional dependency injection.
 	 *
-	 * @param {Object} dependencies - Dependency injection object (optional).
+	 * @param {Object} dependencies - An object containing optional dependencies for initializing various components.
+	 * @param {EventBus} [dependencies.eventBus] - The event bus for handling events.
+	 * @param {AudioEngine} [dependencies.audioEngine] - The audio engine for managing audio operations.
+	 * @param {PerformanceMonitor} [dependencies.performanceMonitor] - The performance monitor for tracking system performance.
+	 * @param {TapTempoManager} [dependencies.tapTempoManager] - The tap tempo manager for tempo-related operations.
+	 * @param {ConfigurationManager} [dependencies.configurationManager] - The configuration manager for managing system settings.
+	 * @param {MetronomeEngine} [dependencies.metronomeEngine] - The metronome engine for rhythm and timing control.
+	 * @param {TimelineManager} [dependencies.timelineManager] - The timeline manager for coordinating timeline events.
+	 * @param {ConsoleManager} [dependencies.console] - The console manager for system debugging and interaction.
+	 * @param {PresetFactory} [dependencies.presetFactory] - The factory for managing and creating presets.
+	 *
+	 * @return {void}
 	 */
 	constructor(dependencies = {}) {
 
@@ -56,14 +69,12 @@ class SystemCoordinator {
 		this._setupEventHandlers();
 	}
 
-	// =====================================================
-	// PUBLIC API - System Lifecycle
-	// =====================================================
 
 	/**
-	 * Initializes the entire system.
+	 * Initializes the system by setting up necessary components, logging system information, and emitting the initialization event.
+	 * Ensures the system is initialized only once. If already initialized, it logs a warning and exits.
 	 *
-	 * @return {Promise<boolean>} True if initialization was successful.
+	 * @return {Promise<boolean>} A promise that resolves to `true` if initialization is successful, `false` if it fails.
 	 */
 	async initialize() {
 
@@ -96,10 +107,14 @@ class SystemCoordinator {
 		}
 	}
 
+
 	/**
-	 * Shuts down the system gracefully.
+	 * Gracefully shuts down the system by stopping active processes, cleaning up subsystems,
+	 * and emitting necessary shutdown events.
+	 * The method ensures that resources are released and the system's state is reset.
+	 * If the system is already in the process of shutting down, it logs a warning and exits early.
 	 *
-	 * @return {Promise<void>} Resolves when shutdown is complete.
+	 * @return {Promise<void>} Resolves when the shutdown process is complete.
 	 */
 	async shutdown() {
 
@@ -133,14 +148,13 @@ class SystemCoordinator {
 		}
 	}
 
-	// =====================================================
-	// PUBLIC API - Playback Control
-	// =====================================================
 
 	/**
-	 * Starts metronome playback.
+	 * Initiates the playback system, ensuring all checks and preconditions are met before starting.
+	 * Validates the timeline mode status and initialization state before triggering the metronome engine.
+	 * Emits appropriate events and logs feedback to the console based on the playback status.
 	 *
-	 * @return {Promise<boolean>} True if playback started successfully.
+	 * @return {Promise<boolean>} A promise that resolves to true if playback starts successfully, or false if an error occurs or a precondition is not met.
 	 */
 	async play() {
 
@@ -169,15 +183,18 @@ class SystemCoordinator {
 			return result;
 		} catch (error) {
 			console.error("Failed to start playback:", error);
-			this._eventBus.emit('system.error', { type: 'playback', error: error.message });
+			this._eventBus.emit('system.error', {type: 'playback', error: error.message});
 			return false;
 		}
 	}
 
+
 	/**
-	 * Stops metronome playback.
+	 * Stops the metronome engine and performs necessary operations when playback is halted.
+	 * Triggers the 'system.playbackStopped' event on the event bus if the stop operation is successful.
+	 * If the operation succeeds, performance statistics are displayed.
 	 *
-	 * @return {boolean} True if playback stopped successfully.
+	 * @return {boolean} Returns true if the stop operation was successful, false otherwise.
 	 */
 	stop() {
 
@@ -191,15 +208,12 @@ class SystemCoordinator {
 		return result;
 	}
 
-	// =====================================================
-	// PUBLIC API - Configuration (Delegation)
-	// =====================================================
 
 	/**
-	 * Sets the tempo with validation and coordination.
+	 * Sets the tempo for the playback.
 	 *
-	 * @param {number|string} newTempo - New tempo value.
-	 * @return {boolean} True if tempo was set successfully.
+	 * @param {number} newTempo - The new tempo value in beats per minute (BPM).
+	 * @return {boolean} Returns true if the tempo was successfully updated, false otherwise.
 	 */
 	setTempo(newTempo) {
 
@@ -216,11 +230,12 @@ class SystemCoordinator {
 		});
 	}
 
+
 	/**
-	 * Sets the division with validation and coordination.
+	 * Updates the division configuration and logs the result.
 	 *
-	 * @param {number|string} division - New division value.
-	 * @return {boolean} True if division was set successfully.
+	 * @param {string} division - The name or identifier of the division to set.
+	 * @return {boolean} Returns true if the division was successfully updated, otherwise false.
 	 */
 	setDivision(division) {
 
@@ -237,11 +252,12 @@ class SystemCoordinator {
 		});
 	}
 
+
 	/**
-	 * Sets the accent state.
+	 * Sets the accent feature to either enabled or disabled.
 	 *
-	 * @param {boolean} enabled - Whether accents are enabled.
-	 * @return {boolean} True if accent was set successfully.
+	 * @param {boolean} enabled - A boolean value where `true` enables the accent feature and `false` disables it.
+	 * @return {boolean} Returns `true` after attempting to set the accent feature.
 	 */
 	setAccent(enabled) {
 
@@ -250,11 +266,12 @@ class SystemCoordinator {
 		return true;
 	}
 
+
 	/**
-	 * Sets the rhythmic pattern.
+	 * Updates the rhythmic pattern in the configuration manager.
 	 *
-	 * @param {string} pattern - Pattern name.
-	 * @return {boolean} True if pattern was set successfully.
+	 * @param {string} pattern - The new rhythmic pattern to be set.
+	 * @return {boolean} Returns true if the pattern was successfully updated; otherwise, false.
 	 */
 	setPattern(pattern) {
 
@@ -269,11 +286,12 @@ class SystemCoordinator {
 		return true;
 	}
 
+
 	/**
-	 * Sets the volume level.
+	 * Sets the audio volume to the specified level.
 	 *
-	 * @param {number} volume - Volume level (0-100).
-	 * @return {boolean} True if volume was set successfully.
+	 * @param {number} volume - The desired volume level. Must be within the acceptable range defined by the configuration manager.
+	 * @return {boolean} Returns true if the volume was successfully updated, otherwise returns false.
 	 */
 	setVolume(volume) {
 
@@ -289,15 +307,12 @@ class SystemCoordinator {
 		return true;
 	}
 
-	// =====================================================
-	// PUBLIC API - Preset Management
-	// =====================================================
 
 	/**
-	 * Loads a preset configuration.
+	 * Loads and applies a preset configuration by its name.
 	 *
-	 * @param {string} name - Preset name.
-	 * @return {boolean} True if preset was loaded successfully.
+	 * @param {string} name - The name of the preset to load.
+	 * @return {boolean} Returns true if the preset was successfully loaded and applied, otherwise false.
 	 */
 	loadPreset(name) {
 
@@ -327,14 +342,19 @@ class SystemCoordinator {
 		});
 	}
 
-	// =====================================================
-	// PUBLIC API - Tap Tempo
-	// =====================================================
 
 	/**
-	 * Handles tap tempo functionality.
+	 * Analyzes the user's tap input to detect a tempo in beats per minute (BPM).
+	 * The method uses the tap input to calculate and provide feedback on the detected BPM.
 	 *
-	 * @return {void}
+	 * If sufficient taps have been detected, it returns a success result with the identified tempo.
+	 * If fewer than the required number of taps are detected, the method provides feedback indicating the number of taps so far and encourages additional taps.
+	 *
+	 * @return {Object} An object representing the result of the tap detection. The result includes:
+	 * - `success` (boolean): Indicates whether the tempo was successfully detected.
+	 * - `bpm` (number, optional): The calculated beats per minute if the tempo was successfully detected.
+	 * - `tapCount` (number): The number of taps detected so far.
+	 * - `reason` (string, optional): The reason for failure, e.g., 'insufficient_taps', if the detection was unsuccessful.
 	 */
 	tapTempo() {
 
@@ -349,14 +369,12 @@ class SystemCoordinator {
 		}
 	}
 
-	// =====================================================
-	// PUBLIC API - Status and Information
-	// =====================================================
 
 	/**
-	 * Gets comprehensive system status.
+	 * Retrieves and displays the current system status, including details about audio configuration, metronome state,
+	 * event bus statistics, and other relevant operational metrics.
 	 *
-	 * @return {void}
+	 * @return {void} This method does not return a value; it only logs the system status to the console.
 	 */
 	getStatus() {
 
@@ -383,15 +401,13 @@ class SystemCoordinator {
 		console.log();
 	}
 
-	// =====================================================
-	// PUBLIC API - Timeline Management
-	// =====================================================
 
 	/**
-	 * Starts a timeline session.
+	 * Starts a timeline of the specified type using the timeline manager.
+	 * If the metronome is currently playing, it will prevent starting the timeline and log a warning message.
 	 *
-	 * @param {string} timelineType - Type of timeline to start.
-	 * @return {boolean} True if timeline started successfully.
+	 * @param {string} timelineType The type of timeline to start, as defined in the timeline manager's presets.
+	 * @return {boolean} Returns true if the timeline starts successfully, otherwise false.
 	 */
 	startTimeline(timelineType) {
 
@@ -404,67 +420,100 @@ class SystemCoordinator {
 		return this._timelineManager.startTimeline();
 	}
 
+
 	/**
-	 * Stops the current timeline session.
+	 * Stops the current timeline managed by the internal timeline manager and returns the result.
 	 *
-	 * @return {boolean} True if timeline stopped successfully.
+	 * @return {*} The result of the stop operation executed by the timeline manager.
 	 */
 	stopTimeline() {
 
 		return this._timelineManager.stopTimeline();
 	}
 
+
 	/**
-	 * Gets timeline status.
+	 * Retrieves the current status of the timeline from the timeline manager.
 	 *
-	 * @return {void}
+	 * @return {any} The status of the timeline as provided by the timeline manager.
 	 */
 	getTimelineStatus() {
 
 		this._timelineManager.getTimelineStatus();
 	}
 
+
 	/**
-	 * Skips to next timeline section.
+	 * Skips the current timeline section and moves to the next section as managed by the timeline manager.
 	 *
-	 * @return {boolean} True if skip was successful.
+	 * @return {boolean} Returns true if the operation was successful, otherwise false.
 	 */
 	skipTimelineSection() {
 
 		return this._timelineManager.skipToNextSection();
 	}
 
+
 	/**
-	 * Gets available timeline types.
+	 * Retrieves the available timeline types from the timeline manager.
 	 *
-	 * @return {Array<string>} Array of timeline types.
+	 * @return {Array<string>} An array of strings representing the available timeline types.
 	 */
 	getAvailableTimelineTypes() {
 
 		return this._timelineManager.getAvailableTimelineTypes();
 	}
 
-	// =====================================================
-	// PUBLIC API - Getters
-	// =====================================================
 
-	get isPlaying() { return this._metronomeEngine.isPlaying; }
-	get bpm() { return this._configurationManager.bpm; }
-	get division() { return this._configurationManager.division; }
-	get volume() { return this._configurationManager.volume; }
-	get accent() { return this._configurationManager.accent; }
-	get currentPattern() { return this._configurationManager.currentPattern; }
-	get audioEngine() { return this._audioEngine; }
-	get isInitialized() { return this._isInitialized; }
+	get isPlaying() {
 
-	// =====================================================
-	// PRIVATE METHODS - System Setup
-	// =====================================================
+		return this._metronomeEngine.isPlaying;
+	}
+
+	get bpm() {
+
+		return this._configurationManager.bpm;
+	}
+
+	get division() {
+
+		return this._configurationManager.division;
+	}
+
+	get volume() {
+
+		return this._configurationManager.volume;
+	}
+
+	get accent() {
+
+		return this._configurationManager.accent;
+	}
+
+	get currentPattern() {
+
+		return this._configurationManager.currentPattern;
+	}
+
+	get audioEngine() {
+
+		return this._audioEngine;
+	}
+
+	get isInitialized() {
+
+		return this._isInitialized;
+	}
+
 
 	/**
-	 * Sets up observers for subsystem communication.
+	 * Sets up observers required for managing application state or behavior.
 	 *
-	 * @return {void}
+	 * This method establishes observers to monitor specific events or changes
+	 * in external components like the tap tempo manager. Observed changes are
+	 * used to update the internal state of the object or execute relevant actions.
+	 *
+	 * @return {void} This method does not return a value.
 	 */
 	_setupObservers() {
 
@@ -474,10 +523,15 @@ class SystemCoordinator {
 		});
 	}
 
+
 	/**
-	 * Sets up automatic synchronization between subsystems.
+	 * Sets up automatic synchronization of configuration changes with the MetronomeEngine.
 	 *
-	 * @return {void}
+	 * This method listens for events related to configuration changes, batch changes, and preset applications.
+	 * It ensures that relevant subsystems are synced when these events occur.
+	 * Additionally, it performs an initial synchronization of all subsystems.
+	 *
+	 * @return {void} This method does not return a value.
 	 */
 	_setupAutoSync() {
 
@@ -500,10 +554,15 @@ class SystemCoordinator {
 		this._syncAllSubsystems();
 	}
 
+
 	/**
-	 * Sets up system-wide event handlers.
+	 * Sets up event handlers for various system, metronome, and configuration events.
 	 *
-	 * @return {void}
+	 * This method listens for specific events emitted by the event bus, such as errors
+	 * or configuration-related issues, and logs these events to the console or performs
+	 * other operations as needed.
+	 *
+	 * @return {void} This method does not return a value.
 	 */
 	_setupEventHandlers() {
 
@@ -524,10 +583,17 @@ class SystemCoordinator {
 		});
 	}
 
+
 	/**
-	 * Handles individual configuration changes.
+	 * Handles the configuration change for the metronome engine.
+	 * Updates the internal state of the metronome based on the type of configuration change.
+	 * If the change is marked as an undo action, it will be ignored.
 	 *
-	 * @param {Object} change - Configuration change object.
+	 * @param {Object} change - The change object containing details about the configuration change.
+	 * @param {boolean} change.isUndo - Flag indicating whether the change is an undo operation.
+	 * @param {string} change.type - The type of configuration change (e.g., 'bpm', 'division', 'accent', 'pattern').
+	 * @param {*} change.newValue - The new value to apply based on the type of change.
+	 *
 	 * @return {void}
 	 */
 	_handleConfigurationChange(change) {
@@ -550,10 +616,13 @@ class SystemCoordinator {
 		}
 	}
 
+
 	/**
-	 * Synchronizes all subsystems with current configuration.
+	 * Synchronizes all subsystems of the application based on the current configuration.
+	 * Updates the metronome engine with tempo, division, accent, and pattern values.
+	 * Updates the audio engine with the specified volume level.
 	 *
-	 * @return {void}
+	 * @return {void} Does not return a value.
 	 */
 	_syncAllSubsystems() {
 
@@ -567,15 +636,12 @@ class SystemCoordinator {
 		this._audioEngine.setVolume(config.volume);
 	}
 
-	// =====================================================
-	// PRIVATE METHODS - Utilities
-	// =====================================================
 
 	/**
-	 * Executes a callback with playback paused if necessary.
+	 * Executes a given callback function while ensuring playback is paused and resumed as necessary.
 	 *
-	 * @param {Function} callback - Callback to execute.
-	 * @return {*} Result of callback.
+	 * @param {Function} callback - The function to execute while playback is paused.
+	 * @return {*} Returns the result of the callback function.
 	 */
 	_withPlaybackPause(callback) {
 
@@ -594,10 +660,11 @@ class SystemCoordinator {
 		return result;
 	}
 
+
 	/**
-	 * Logs system information during initialization.
+	 * Logs system information regarding audio engine settings and configuration summary, including audio method, latency, tempo, division, accents, and volume settings.
 	 *
-	 * @return {void}
+	 * @return {void} This method does not return a value.
 	 */
 	_logSystemInfo() {
 
@@ -611,10 +678,13 @@ class SystemCoordinator {
 		console.log(`🔊 Volume: ${config.volume}%`);
 	}
 
+
 	/**
-	 * Shows performance statistics after playback stops.
+	 * Displays performance metrics of the metronome engine if statistics are available.
 	 *
-	 * @return {void}
+	 * This method logs information such as total time, number of ticks played, number of complete measures, accuracy, average drift, and the audio method used.
+	 *
+	 * @return {void} This method does not return a value but outputs performance metrics to the console.
 	 */
 	_showPerformanceStats() {
 

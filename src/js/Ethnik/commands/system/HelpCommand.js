@@ -2,29 +2,31 @@ import Command from '../base/Command.js';
 
 
 /**
- * Help command implementation.
+ * Represents a command that displays help information about available commands.
  */
 class HelpCommand extends Command {
 
 	/**
-	 * Creates a new HelpCommand.
+	 * Creates an instance of the class and initializes it with the provided console manager.
 	 *
-	 * @param {Object} consoleManager - Console manager instance for showing help.
-	 * @return {void} No return value.
+	 * @param {Object} consoleManager - An instance of the console manager used for managing console operations.
+	 * @return {void}
 	 */
 	constructor(consoleManager) {
+
 		super();
 		this._consoleManager = consoleManager;
 	}
 
 
 	/**
-	 * Executes the help command.
+	 * Executes a command to display help information.
 	 *
-	 * @param {Array<string>} args - Command arguments.
-	 * @return {void} No return value.
+	 * @param {string[]} args - An array of arguments specifying the command to display help for. If no arguments are provided, general help information is shown.
+	 * @return {void} This method does not return a value.
 	 */
 	execute(args) {
+
 		if (args.length > 0) {
 			// Show help for specific command
 			this._showCommandHelp(args[0]);
@@ -36,12 +38,13 @@ class HelpCommand extends Command {
 
 
 	/**
-	 * Shows help for a specific command.
+	 * Displays help information for a specific command.
 	 *
-	 * @param {string} commandName - Name of the command to show help for.
-	 * @return {void} No return value.
+	 * @param {string} commandName - The name of the command to display help for.
+	 * @return {void} This method does not return any value.
 	 */
 	_showCommandHelp(commandName) {
+
 		const commands = this._consoleManager.getCommands();
 		const command = commands.get(commandName.toLowerCase());
 
@@ -57,24 +60,25 @@ class HelpCommand extends Command {
 
 
 	/**
-	 * Gets usage help text for the help command.
+	 * Provides usage instructions for commands within the application.
 	 *
-	 * @return {string} Usage help text.
+	 * @return {string} A string describing how to use the application commands.
 	 */
 	getUsage() {
+
 		return 'Usage: help [command_name]';
 	}
 
 
 	/**
-	 * Gets a description of the help command.
+	 * Provides a description detailing the help information for commands.
 	 *
-	 * @return {string} Command description.
+	 * @return {string} A string containing the help description.
 	 */
 	getDescription() {
+
 		return 'Shows help information for commands';
 	}
 }
-
 
 export default HelpCommand;

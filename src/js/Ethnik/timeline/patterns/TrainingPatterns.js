@@ -1,15 +1,19 @@
-
 /**
- * Collection of training-specific patterns for skill development.
+ * A class providing functionality to retrieve and filter training patterns.
  */
 class TrainingPatterns {
 
 	/**
-	 * Gets all training patterns.
+	 * Retrieves a collection of rhythm patterns used for training various musical skills.
 	 *
-	 * @return {Map} Map of pattern names to pattern objects.
+	 * Each pattern includes attributes such as beats, accents, description, difficulty level,
+	 * category, and a list of skills the pattern aims to develop.
+	 *
+	 * @return {Map<string, Object>} A map where the key is the pattern name and the value is an object
+	 * containing details about the rhythm pattern.
 	 */
 	static getPatterns() {
+
 		return new Map([
 			['offbeat_only', {
 				beats: [0, 1, 0, 1],
@@ -58,13 +62,15 @@ class TrainingPatterns {
 		]);
 	}
 
+
 	/**
-	 * Gets patterns that develop specific skills.
+	 * Retrieves a filtered map of patterns that are associated with the specified skill.
 	 *
-	 * @param {string} skill - Target skill to develop.
-	 * @return {Map} Patterns that develop the specified skill.
+	 * @param {string} skill - The skill used to filter patterns.
+	 * @return {Map<string, Object>} A map containing pattern names as keys and their respective pattern objects as values, filtered by the provided skill.
 	 */
 	static getPatternsBySkill(skill) {
+
 		const patterns = this.getPatterns();
 		const filtered = new Map();
 

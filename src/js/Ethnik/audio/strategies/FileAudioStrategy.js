@@ -3,15 +3,16 @@ import fs from "fs";
 import AudioPlaybackStrategy from './AudioPlaybackStrategy.js';
 
 /**
- * File-based audio playback strategy
+ * Strategy for audio playback that uses sound files located on the file system.
+ * This class extends the AudioPlaybackStrategy and implements audio playback using platform-specific commands.
  */
 class FileAudioStrategy extends AudioPlaybackStrategy {
 
 	/**
-	 * Constructs an instance of the FileAudioStrategy.
+	 * Creates an instance of the class and initializes it with the provided sound files.
 	 *
-	 * @param {Object} soundFiles - Object containing paths to sound files.
-	 * @return {void} No return value.
+	 * @param {Array|string} soundFiles - The list of sound files or a single sound file name to be assigned.
+	 * @return {Object} A new instance of the class.
 	 */
 	constructor(soundFiles) {
 
@@ -21,12 +22,13 @@ class FileAudioStrategy extends AudioPlaybackStrategy {
 
 
 	/**
-	 * Play an audio file based on the provided type and system platform.
+	 * Plays a tick sound based on the provided type, frequency, and duration.
+	 * Uses platform-specific audio playback mechanisms to play the sound.
 	 *
-	 * @param {string} type - The type of sound file to play, which determines the file to be used.
-	 * @param {number} frequency - Not used in file strategy but kept for interface consistency.
-	 * @param {number} duration - Not used in file strategy but kept for interface consistency.
-	 * @return {Promise<void>} A promise that resolves when the file playback is initiated.
+	 * @param {string} type - The type of sound to play (e.g., 'beat'). Falls back to a default sound if the type is not found.
+	 * @param {number} frequency - The frequency of the sound in Hz.
+	 * @param {number} duration - The duration of the sound in milliseconds.
+	 * @return {Promise<void>} A promise that resolves when the sound play operation is initiated successfully.
 	 */
 	async playTick(type, frequency, duration) {
 
@@ -64,9 +66,9 @@ class FileAudioStrategy extends AudioPlaybackStrategy {
 
 
 	/**
-	 * Check if sound files exist and are accessible.
+	 * Checks if at least one of the sound files in the `_soundFiles` object exists on the file system.
 	 *
-	 * @return {Promise<boolean>} A promise that resolves to true if files are available.
+	 * @return {Promise<boolean>} A promise that resolves to `true` if any sound file exists, otherwise `false`.
 	 */
 	async isAvailable() {
 

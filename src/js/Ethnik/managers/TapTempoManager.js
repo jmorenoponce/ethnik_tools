@@ -1,17 +1,16 @@
-import { performance } from 'perf_hooks';
+import {performance} from 'perf_hooks';
 import Settings from '../core/Settings.js';
 
 
 /**
- * Manages tap tempo functionality with intelligent averaging and timeout handling.
- * Implements Observer pattern for tempo change notifications.
+ * Manages the detection and calculation of tempo (BPM) based on user tap input.
  */
 class TapTempoManager {
 
 	/**
-	 * Constructs a new TapTempoManager instance.
+	 * Creates a new instance of the class, initializing properties related to tap timing, debounce settings, and observer management.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} Does not return a value.
 	 */
 	constructor() {
 
@@ -26,9 +25,17 @@ class TapTempoManager {
 
 
 	/**
-	 * Registers a tap and calculates BPM if enough taps are available.
+	 * Registers a tap action, tracks the time intervals between taps, and calculates the beats per minute (BPM) if enough valid taps are detected.
+	 * Debounces taps that occur too close together and maintains a history of recent tap times up to a specified maximum.
+	 * Notifies observers if a valid BPM is calculated.
 	 *
-	 * @return {Object} Result object containing success status, BPM, and tap count.
+	 * @return {Object} An object representing the result of the tap action:
+	 * - `success` (boolean): Indicates whether the operation was successful.
+	 * - `bpm` (number, optional): The calculated beats per minute, present if `success` is true.
+	 * - `reason` (string, optional): The reason for failure, present if `success` is false. Possible values include:
+	 *    - `'debounce'`: Too little time has passed since the last tap.
+	 *    - `'insufficient_taps'`: Not enough taps have been registered to calculate BPM.
+	 * - `tapCount` (number): The number of taps registered so far.
 	 */
 	tap() {
 
@@ -76,9 +83,12 @@ class TapTempoManager {
 
 
 	/**
-	 * Calculates BPM from the current tap times using intelligent averaging.
+	 * Calculates the beats per minute (BPM) based on recorded tap times.
+	 * The method computes time intervals between consecutive taps, filters outliers
+	 * to ensure accuracy, and uses the average interval to determine the BPM.
+	 * If fewer than two tap times are recorded, the method returns 0.
 	 *
-	 * @return {number} The calculated BPM value.
+	 * @return {number} The calculated BPM value. Returns 0 if there are insufficient tap times.
 	 */
 	_calculateBpm() {
 
@@ -107,10 +117,10 @@ class TapTempoManager {
 
 
 	/**
-	 * Calculates the median value of an array.
+	 * Calculates the median of a given array of numbers.
 	 *
-	 * @param {Array<number>} values - Array of numbers to find median of.
-	 * @return {number} The median value.
+	 * @param {number[]} values - An array of numbers for which the median is to be calculated.
+	 * @return {number} The median value of the input array.
 	 */
 	_calculateMedian(values) {
 
@@ -124,9 +134,11 @@ class TapTempoManager {
 
 
 	/**
-	 * Schedules cleanup of old tap times.
+	 * Schedules a cleanup operation by setting a timer. If a previous cleanup timer exists, it is cleared
+	 * before scheduling a new one. The cleanup operation will invoke the `_cleanupOldTaps` method after the
+	 * specified timeout duration.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} Does not return a value.
 	 */
 	_scheduleCleanup() {
 
@@ -141,9 +153,12 @@ class TapTempoManager {
 
 
 	/**
-	 * Removes tap times that are older than the timeout period.
+	 * Cleans up old tap timestamps from the `_tapTimes` array that exceed the specified timeout duration.
+	 * This method ensures that only recent taps within the timeout window are retained.
 	 *
-	 * @return {void} No return value.
+	 * If no taps remain after cleanup, the associated cleanup timer is cleared.
+	 *
+	 * @return {void} Does not return any value.
 	 */
 	_cleanupOldTaps() {
 
@@ -157,9 +172,11 @@ class TapTempoManager {
 
 
 	/**
-	 * Clears the cleanup timer.
+	 * Clears the cleanup timer if it is set and resets it to null.
 	 *
-	 * @return {void} No return value.
+	 * The method checks if a cleanup timer exists, and if so, it clears the timeout and nullifies the timer reference.
+	 *
+	 * @return {void} Does not return any value.
 	 */
 	_clearCleanupTimer() {
 
@@ -171,10 +188,10 @@ class TapTempoManager {
 
 
 	/**
-	 * Adds an observer to be notified of tempo changes.
+	 * Registers a callback function as an observer to be notified of updates or changes.
 	 *
-	 * @param {Function} callback - Function to call when tempo changes.
-	 * @return {void} No return value.
+	 * @param {Function} callback - The function to be called when an update occurs.
+	 * @return {void} Does not return any value.
 	 */
 	addObserver(callback) {
 
@@ -183,10 +200,10 @@ class TapTempoManager {
 
 
 	/**
-	 * Removes an observer from tempo change notifications.
+	 * Removes the specified callback function from the list of observers.
 	 *
-	 * @param {Function} callback - Function to remove from observers.
-	 * @return {void} No return value.
+	 * @param {Function} callback - The function to be removed from the observers.
+	 * @return {void} This method does not return any value.
 	 */
 	removeObserver(callback) {
 
@@ -195,10 +212,10 @@ class TapTempoManager {
 
 
 	/**
-	 * Notifies all observers of a tempo change.
+	 * Notifies all registered observers by invoking each callback function with the provided BPM value.
 	 *
-	 * @param {number} bpm - The new BPM value.
-	 * @return {void} No return value.
+	 * @param {number} bpm - The beats per minute (BPM) value to be passed to each observer callback.
+	 * @return {void} This method does not return any value.
 	 */
 	_notifyObservers(bpm) {
 
@@ -213,9 +230,10 @@ class TapTempoManager {
 
 
 	/**
-	 * Resets all tap data.
+	 * Resets the internal state by clearing the array of tap times,
+	 * resetting the last tap time to zero, and clearing any active cleanup timers.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} This method does not return a value.
 	 */
 	reset() {
 
@@ -226,9 +244,14 @@ class TapTempoManager {
 
 
 	/**
-	 * Gets current tap tempo status.
+	 * Retrieves the current status of the tap tracking system.
 	 *
-	 * @return {Object} Status information about tap tempo.
+	 * @return {Object} An object containing the following status properties:
+	 * - tapCount: The number of recorded taps.
+	 * - lastTapTime: The time of the most recent tap.
+	 * - hasActiveTaps: A boolean indicating if there are any recorded taps.
+	 * - canCalculateBpm: A boolean indicating if BPM (beats per minute) can be calculated (requires at least 2 taps).
+	 * - currentBpm: The calculated BPM if at least 2 taps are recorded, otherwise null.
 	 */
 	getStatus() {
 
@@ -243,9 +266,9 @@ class TapTempoManager {
 
 
 	/**
-	 * Cleanup method to be called when the manager is no longer needed.
+	 * Performs cleanup operations by clearing timers, removing observers, and resetting internal state.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} Does not return a value.
 	 */
 	destroy() {
 

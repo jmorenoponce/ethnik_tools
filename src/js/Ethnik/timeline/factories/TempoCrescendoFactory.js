@@ -1,16 +1,25 @@
 import TimelineFactory from './TimelineFactory.js';
 
 /**
- * Factory for creating tempo crescendo timelines.
+ * This class is responsible for creating a tempo crescendo timeline.
+ * It extends the TimelineFactory base class to generate a structured
+ * series of tempo-based workout sections with increasing and decreasing speeds.
+ *
+ * The timeline includes distinct sections, each defined by a specific
+ * duration and beats per minute (BPM), representing a gradual increase
+ * to a peak tempo and subsequent controlled deceleration.
  */
 class TempoCrescendoFactory extends TimelineFactory {
 
 	/**
-	 * Creates a tempo crescendo timeline with gradual speed increases.
+	 * Creates and returns a timeline configuration for a training session.
+	 * The timeline consists of multiple sections, each with specific duration, BPM (beats per minute),
+	 * pattern, and description to guide the training progression.
 	 *
-	 * @return {Object} Tempo crescendo timeline.
+	 * @return {Object} An object representing the training timeline with specified sections.
 	 */
 	createTimeline() {
+
 		const sections = [
 			{
 				duration: 8,

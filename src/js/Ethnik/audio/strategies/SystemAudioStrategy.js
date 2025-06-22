@@ -2,17 +2,19 @@ import { spawn } from 'child_process';
 import AudioPlaybackStrategy from './AudioPlaybackStrategy.js';
 
 /**
- * System beep audio playback strategy
+ * Represents a strategy for playing system-level audio feedback like beeps.
+ * This class uses system commands to produce audio and verifies the availability of such capabilities on the host platform.
  */
 class SystemAudioStrategy extends AudioPlaybackStrategy {
 
 	/**
-	 * Play a system beep sound with specified frequency and duration.
+	 * Plays a beep sound based on the given type, frequency, and duration. The implementation uses platform-specific methods
+	 * to generate the sound.
 	 *
-	 * @param {string} type - Not used in system strategy but kept for interface consistency.
-	 * @param {number} frequency - The frequency of the beep sound in hertz.
-	 * @param {number} duration - The duration of the beep sound in milliseconds.
-	 * @return {Promise<void>} A promise that resolves when the beep is initiated.
+	 * @param {string} type - The type of beep sound to play. This parameter is not used in the current implementation but might be used for future extensions or differentiating sound types.
+	 * @param {number} frequency - The frequency of the beep sound in Hertz (Hz). This parameter is utilized for generating different tones.
+	 * @param {number} duration - The duration of the beep sound in milliseconds (ms). Higher values produce a longer beep.
+	 * @return {Promise<void>} A promise that resolves once the beep process has been successfully triggered.
 	 */
 	async playTick(type, frequency, duration) {
 
@@ -40,9 +42,9 @@ class SystemAudioStrategy extends AudioPlaybackStrategy {
 
 
 	/**
-	 * Test if system audio commands are available.
+	 * Determines if the system's audio output is available and functional by testing platform-specific commands.
 	 *
-	 * @return {Promise<boolean>} A promise that resolves to true if system audio is available.
+	 * @return {Promise<boolean>} A promise that resolves to `true` if the platform command is successfully executed, indicating audio output is available; otherwise `false`.
 	 */
 	async isAvailable() {
 
@@ -66,11 +68,11 @@ class SystemAudioStrategy extends AudioPlaybackStrategy {
 
 
 	/**
-	 * Test a command to see if it's available.
+	 * Executes a command with the given arguments in a child process and resolves or rejects based on the process outcome.
 	 *
-	 * @param {string} command - The command to test.
-	 * @param {Array<string>} args - Arguments for the command.
-	 * @return {Promise<void>} A promise that resolves if command succeeds.
+	 * @param {string} command The command to execute.
+	 * @param {string[]} args An array of arguments to pass to the command.
+	 * @return {Promise<void>} A promise that resolves if the command completes successfully or rejects if it fails.
 	 */
 	_testCommand(command, args) {
 

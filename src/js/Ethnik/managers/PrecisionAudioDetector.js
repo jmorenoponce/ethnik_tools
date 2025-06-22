@@ -1,6 +1,17 @@
-
+/**
+ * The PrecisionAudioDetector class provides mechanisms for audio signal analysis and sound event detection
+ * using input from the user's microphone. It supports frequency analysis, visualization of audio levels,
+ * and detection of specific sound events such as peaks or attacks.
+ */
 class PrecisionAudioDetector {
 
+	/**
+	 * Constructor for initializing the audio processing and event detection instance.
+	 * Initializes various properties related to audio context, media stream, frequency analysis, and event detection.
+	 * Also sets up required elements and event listeners necessary for operation.
+	 *
+	 * @return {void} Does not return a value.
+	 */
 	constructor() {
 
 		this.audioContext = null;
@@ -29,6 +40,11 @@ class PrecisionAudioDetector {
 	}
 
 
+	/**
+	 * Initializes all the necessary DOM elements by assigning them to their respective properties.
+	 *
+	 * @return {void} This method does not return a value.
+	 */
 	initializeElements() {
 
 		this.startBtn = document.getElementById('startBtn');
@@ -48,6 +64,12 @@ class PrecisionAudioDetector {
 	}
 
 
+	/**
+	 * Sets up event listeners for various interactive elements.
+	 * Binds actions to button clicks and slider input changes for controlling and configuring features.
+	 *
+	 * @return {void} This method does not return a value.
+	 */
 	setupEventListeners() {
 
 		this.startBtn.addEventListener('click', () => this.startDetection());
@@ -67,6 +89,12 @@ class PrecisionAudioDetector {
 	}
 
 
+	/**
+	 * Initiates the detection process by accessing the microphone, setting up the audio context, and configuring audio analysis tools.
+	 * Begins the process of capturing and analyzing audio data.
+	 *
+	 * @return {Promise<void>} Resolves when the detection process starts successfully, or handles any error during initialization.
+	 */
 	async startDetection() {
 
 		try {
@@ -115,6 +143,13 @@ class PrecisionAudioDetector {
 	}
 
 
+	/**
+	 * Stops the ongoing detection process, including media stream and audio context operations.
+	 * Resets relevant UI controls and updates the audio meter to reflect the stopped state.
+	 * Logs the stop action.
+	 *
+	 * @return {void} No return value.
+	 */
 	stopDetection() {
 
 		this.isRecording = false;
@@ -135,6 +170,12 @@ class PrecisionAudioDetector {
 	}
 
 
+	/**
+	 * Analyzes the current audio data from the specified audio source, computes frequency levels,
+	 * updates the visual audio meter, and detects sound events based on the analysis.
+	 *
+	 * @return {void} Does not return any value. This method performs operations like updating visual audio feedback and detecting sound events in a loop.
+	 */
 	analyze() {
 
 		if (!this.isRecording) return;
@@ -161,6 +202,13 @@ class PrecisionAudioDetector {
 	}
 
 
+	/**
+	 * Calculates the average level of values within a specified range of indices.
+	 *
+	 * @param {number} startBin - The starting index of the range (inclusive).
+	 * @param {number} endBin - The ending index of the range (exclusive).
+	 * @return {number} The average level of the values in the specified range.
+	 */
 	getAverageLevel(startBin, endBin) {
 
 		let sum = 0;
@@ -174,6 +222,13 @@ class PrecisionAudioDetector {
 	}
 
 
+	/**
+	 * Detects a sound event based on the input level and a predefined threshold.
+	 * Executes a callback when a valid sound event is detected.
+	 *
+	 * @param {number} level The audio level to be analyzed for detecting a sound event.
+	 * @return {void} Does not return a value.
+	 */
 	detectSoundEvent(level) {
 
 		const currentTime = performance.now();
@@ -197,6 +252,14 @@ class PrecisionAudioDetector {
 	}
 
 
+	/**
+	 * Handles the detection of a sound event, processes the detection data,
+	 * updates statistics, and logs the detection.
+	 *
+	 * @param {number} timestamp - The time at which the sound was detected, in milliseconds.
+	 * @param {number} level - The intensity level of the detected sound, represented as a value between 0 and 1.
+	 * @return {void}
+	 */
 	onSoundDetected(timestamp, level) {
 
 		this.detectionCount++;
@@ -216,6 +279,12 @@ class PrecisionAudioDetector {
 	}
 
 
+	/**
+	 * Updates the statistics displayed in the user interface, including detection count,
+	 * average interval between detections, and an estimate of beats per minute (BPM) when applicable.
+	 *
+	 * @return {void} This method does not return a value. It updates the relevant UI elements based on the calculated statistics.
+	 */
 	updateStats() {
 
 		this.detectionCountEl.textContent = this.detectionCount;
@@ -237,12 +306,27 @@ class PrecisionAudioDetector {
 	}
 
 
+	/**
+	 * Updates the position of the threshold line according to the current threshold value.
+	 *
+	 * The method adjusts the left style property of the threshold line element
+	 * to align with the calculated percentage based on the threshold value.
+	 *
+	 * @return {void} Does not return a value.
+	 */
 	updateThresholdLine() {
 
 		this.thresholdLine.style.left = `${this.threshold * 100}%`;
 	}
 
 
+	/**
+	 * Adds a new log entry to the log container. The log entry includes a timestamp and the provided message.
+	 * Limits the log to the 20 most recent entries.
+	 *
+	 * @param {string} message - The message to be logged.
+	 * @return {void}
+	 */
 	addLog(message) {
 
 		const logEntry = document.createElement('div');
@@ -258,6 +342,12 @@ class PrecisionAudioDetector {
 	}
 
 
+	/**
+	 * Clears the log by resetting its content and related statistics.
+	 * Resets detection count and detection times. Updates statistics after clearing the log.
+	 *
+	 * @return {void} This method does not return any value.
+	 */
 	clearLog() {
 
 		this.logContainer.innerHTML = '<div style="color: #888; font-style: italic;">Log limpiado...</div>';
@@ -267,7 +357,7 @@ class PrecisionAudioDetector {
 	}
 }
 
-// Inicializar cuando la página esté lista
+
 document.addEventListener('DOMContentLoaded', () => {
 	new PrecisionAudioDetector();
 });

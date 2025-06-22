@@ -1,15 +1,16 @@
 import Settings from './Settings.js';
 
 /**
- * ConfigurationManager - Responsible for managing metronome configuration,
- * presets, and validation. Extracted from Core.js to follow Single Responsibility Principle.
+ * Manages configuration settings, validation, and history for a system.
+ * Provides methods for retrieving, updating, and applying configuration options atomically.
  */
 class ConfigurationManager {
 
 	/**
-	 * Creates a ConfigurationManager instance.
+	 * Constructs a new instance of a class with optional event bus and initializes configuration.
 	 *
-	 * @param {Object} eventBus - Event bus for notifications (optional).
+	 * @param {Object|null} eventBus - An optional event bus object for event handling. Defaults to null.
+	 * @return {Object} A new instance of the class initialized with default settings and configuration.
 	 */
 	constructor(eventBus = null) {
 
@@ -31,20 +32,42 @@ class ConfigurationManager {
 		this._validationCacheTime = 0;
 	}
 
-	// =====================================================
-	// PUBLIC API - Getters
-	// =====================================================
+	get bpm() {
 
-	get bpm() { return this._bpm; }
-	get division() { return this._division; }
-	get volume() { return this._volume; }
-	get accent() { return this._accent; }
-	get currentPattern() { return this._currentPattern; }
+		return this._bpm;
+	}
+
+	get division() {
+
+		return this._division;
+	}
+
+	get volume() {
+
+		return this._volume;
+	}
+
+	get accent() {
+
+		return this._accent;
+	}
+
+	get currentPattern() {
+
+		return this._currentPattern;
+	}
+
 
 	/**
-	 * Gets current configuration as object.
+	 * Retrieves the current configuration of the system.
 	 *
-	 * @return {Object} Current configuration.
+	 * @return {Object} An object containing the configuration properties:
+	 * - bpm: The beats per minute setting.
+	 * - division: The division configuration.
+	 * - volume: The volume level.
+	 * - accent: The accent setting.
+	 * - pattern: The current pattern being used.
+	 * - timestamp: The timestamp of when the configuration was retrieved.
 	 */
 	getConfiguration() {
 
@@ -58,10 +81,14 @@ class ConfigurationManager {
 		};
 	}
 
+
 	/**
-	 * Gets configuration summary with metadata.
+	 * Retrieves a summary of the current configuration, combining existing configuration data
+	 * with additional computed properties such as tempo name, division name, and validation status.
 	 *
-	 * @return {Object} Configuration summary.
+	 * @return {Object} An object representing the configuration summary, containing all current configuration data,
+	 *                  along with tempo name as a string, division name as a string, and a boolean flag
+	 *                  indicating if the configuration is valid.
 	 */
 	getConfigurationSummary() {
 
@@ -73,15 +100,15 @@ class ConfigurationManager {
 		};
 	}
 
-	// =====================================================
-	// PUBLIC API - Basic Configuration
-	// =====================================================
 
 	/**
-	 * Sets the tempo (BPM) with validation and history.
+	 * Sets the beats per minute (BPM) for the system and emits configuration update events.
 	 *
-	 * @param {number|string} bpm - New tempo value.
-	 * @return {Object} Result object with success status and message.
+	 * @param {number|string} bpm - The new BPM value to set. It can be provided as a number or a string.
+	 * @return {Object} Result of the operation containing:
+	 *                  - success: A boolean indicating whether the BPM update was successful.
+	 *                  - change: If successful, an object detailing the old BPM value, new BPM value, and tempo name.
+	 *                  - error: If unsuccessful, a description of the error.
 	 */
 	setBpm(bpm) {
 
@@ -89,8 +116,8 @@ class ConfigurationManager {
 
 		if (!Settings.isValidBpm(numBpm)) {
 			const error = `Invalid BPM: ${bpm}. Range: ${Settings.defaultParams.bpmMin}-${Settings.defaultParams.bpmMax}`;
-			this._emit('configurationError', { type: 'bpm', error, value: bpm });
-			return { success: false, error };
+			this._emit('configurationError', {type: 'bpm', error, value: bpm});
+			return {success: false, error};
 		}
 
 		const oldValue = this._bpm;
@@ -105,14 +132,16 @@ class ConfigurationManager {
 		};
 
 		this._emit('configurationChanged', change);
-		return { success: true, change };
+		return {success: true, change};
 	}
 
+
 	/**
-	 * Sets the beat division with validation.
+	 * Sets the division for the current configuration.
 	 *
-	 * @param {number|string} division - New division value.
-	 * @return {Object} Result object with success status and message.
+	 * @param {string|number} division - The division value to be set. Must be a number between 1 and 16.
+	 * @return {Object} Returns an object indicating the success status. If successful, includes the change details,
+	 *                  otherwise includes the error information.
 	 */
 	setDivision(division) {
 
@@ -120,8 +149,8 @@ class ConfigurationManager {
 
 		if (!Settings.isValidDivision(numDiv)) {
 			const error = `Invalid division: ${division}. Range: 1-16`;
-			this._emit('configurationError', { type: 'division', error, value: division });
-			return { success: false, error };
+			this._emit('configurationError', {type: 'division', error, value: division});
+			return {success: false, error};
 		}
 
 		const oldValue = this._division;
@@ -136,14 +165,16 @@ class ConfigurationManager {
 		};
 
 		this._emit('configurationChanged', change);
-		return { success: true, change };
+		return {success: true, change};
 	}
 
+
 	/**
-	 * Sets the volume level with validation.
+	 * Sets the volume level after validating it.
 	 *
-	 * @param {number|string} volume - New volume value.
-	 * @return {Object} Result object with success status and message.
+	 * @param {number|string} volume - The desired volume level, which will be parsed and validated. It must be within the range of 0-100.
+	 * @return {Object} An object representing the result of the operation. Contains a `success` property (boolean) indicating whether the operation was successful.
+	 * If unsuccessful, it also contains an `error` property with details. If successful, it contains a `change` property describing the modification made.
 	 */
 	setVolume(volume) {
 
@@ -151,8 +182,8 @@ class ConfigurationManager {
 
 		if (!Settings.isValidVolume(numVol)) {
 			const error = `Invalid volume: ${volume}. Range: 0-100`;
-			this._emit('configurationError', { type: 'volume', error, value: volume });
-			return { success: false, error };
+			this._emit('configurationError', {type: 'volume', error, value: volume});
+			return {success: false, error};
 		}
 
 		const oldValue = this._volume;
@@ -166,14 +197,15 @@ class ConfigurationManager {
 		};
 
 		this._emit('configurationChanged', change);
-		return { success: true, change };
+		return {success: true, change};
 	}
 
+
 	/**
-	 * Sets accent state.
+	 * Sets the accent state for the configuration.
 	 *
-	 * @param {boolean} enabled - Whether accents are enabled.
-	 * @return {Object} Result object with success status.
+	 * @param {boolean} enabled - Determines whether the accent is enabled or disabled.
+	 * @return {Object} An object containing the success status of the operation and the details of the change made.
 	 */
 	setAccent(enabled) {
 
@@ -190,14 +222,17 @@ class ConfigurationManager {
 		};
 
 		this._emit('configurationChanged', change);
-		return { success: true, change };
+		return {success: true, change};
 	}
 
+
 	/**
-	 * Sets rhythmic pattern with validation.
+	 * Updates the current pattern configuration. Validates the input pattern and emits corresponding events
+	 * based on the change or errors encountered during the update process.
 	 *
-	 * @param {string} pattern - Pattern name.
-	 * @return {Object} Result object with success status and message.
+	 * @param {string} pattern - The new pattern to set. Valid patterns are 'straight', 'swing', and 'custom'.
+	 * @return {Object} Returns an object indicating the success or failure of the operation. If successful, includes
+	 *                  details of the change (type, oldValue, newValue). In case of failure, contains an error message.
 	 */
 	setPattern(pattern) {
 
@@ -205,8 +240,8 @@ class ConfigurationManager {
 
 		if (!validPatterns.includes(pattern)) {
 			const error = `Invalid pattern: ${pattern}. Valid: ${validPatterns.join(', ')}`;
-			this._emit('configurationError', { type: 'pattern', error, value: pattern });
-			return { success: false, error };
+			this._emit('configurationError', {type: 'pattern', error, value: pattern});
+			return {success: false, error};
 		}
 
 		const oldValue = this._currentPattern;
@@ -220,18 +255,24 @@ class ConfigurationManager {
 		};
 
 		this._emit('configurationChanged', change);
-		return { success: true, change };
+		return {success: true, change};
 	}
 
-	// =====================================================
-	// PUBLIC API - Batch Configuration
-	// =====================================================
 
 	/**
-	 * Applies multiple configuration changes atomically.
+	 * Applies the given configuration to update multiple settings, validates the changes, and emits events based on success or errors.
 	 *
-	 * @param {Object} config - Configuration object with multiple properties.
-	 * @return {Object} Result object with success status and applied changes.
+	 * @param {Object} config - The configuration object containing settings to be applied.
+	 * @param {number} [config.bpm] - Beats per minute value to be set.
+	 * @param {string} [config.division] - Division value to be set.
+	 * @param {number} [config.volume] - Volume level to be set.
+	 * @param {boolean} [config.accent] - Accent status to be set.
+	 * @param {Array} [config.pattern] - Pattern data to be applied.
+	 * @return {Object} An object containing the status and details of the application process.
+	 * @return {boolean} return.success - Indicates if all changes were successfully applied.
+	 * @return {Array} return.changes - The list of changes successfully applied.
+	 * @return {Array} return.results - Detailed results of each change attempt.
+	 * @return {Array} [return.errors] - List of validation errors if any occurred during processing. Present only if validation fails.
 	 */
 	applyConfiguration(config) {
 
@@ -243,35 +284,35 @@ class ConfigurationManager {
 		if (config.bpm !== undefined) {
 			const result = this._validateBpm(config.bpm);
 			if (!result.valid) {
-				errors.push({ type: 'bpm', error: result.error });
+				errors.push({type: 'bpm', error: result.error});
 			}
 		}
 
 		if (config.division !== undefined) {
 			const result = this._validateDivision(config.division);
 			if (!result.valid) {
-				errors.push({ type: 'division', error: result.error });
+				errors.push({type: 'division', error: result.error});
 			}
 		}
 
 		if (config.volume !== undefined) {
 			const result = this._validateVolume(config.volume);
 			if (!result.valid) {
-				errors.push({ type: 'volume', error: result.error });
+				errors.push({type: 'volume', error: result.error});
 			}
 		}
 
 		if (config.pattern !== undefined) {
 			const result = this._validatePattern(config.pattern);
 			if (!result.valid) {
-				errors.push({ type: 'pattern', error: result.error });
+				errors.push({type: 'pattern', error: result.error});
 			}
 		}
 
 		// If any validation failed, return errors
 		if (errors.length > 0) {
-			this._emit('configurationError', { type: 'batch', errors });
-			return { success: false, errors };
+			this._emit('configurationError', {type: 'batch', errors});
+			return {success: false, errors};
 		}
 
 		// Apply all changes
@@ -305,19 +346,16 @@ class ConfigurationManager {
 			if (result.success) changes.push(result.change);
 		}
 
-		this._emit('batchConfigurationChanged', { changes });
-		return { success: true, changes, results };
+		this._emit('batchConfigurationChanged', {changes});
+		return {success: true, changes, results};
 	}
 
-	// =====================================================
-	// PUBLIC API - Presets
-	// =====================================================
 
 	/**
-	 * Creates a preset from current configuration.
+	 * Creates a new preset with the provided name and current state of the instance.
 	 *
-	 * @param {string} name - Preset name.
-	 * @return {Object} Created preset object.
+	 * @param {string} name - The name of the preset to be created.
+	 * @return {Object} An object representing the created preset, including details such as name, bpm, division, volume, accent, pattern, and creation timestamp.
 	 */
 	createPreset(name) {
 
@@ -335,18 +373,19 @@ class ConfigurationManager {
 		return preset;
 	}
 
+
 	/**
-	 * Applies a preset configuration.
+	 * Applies a given preset to the current configuration.
 	 *
-	 * @param {Object} preset - Preset object to apply.
-	 * @return {Object} Result object with success status.
+	 * @param {Object} preset - The preset to apply. Expected to contain properties such as bpm, division, volume, accent, and pattern.
+	 * @return {Object} Returns an object indicating the success or failure of applying the preset. If unsuccessful, an error message is included.
 	 */
 	applyPreset(preset) {
 
 		if (!this._validatePreset(preset)) {
 			const error = 'Invalid preset configuration';
-			this._emit('configurationError', { type: 'preset', error, preset });
-			return { success: false, error };
+			this._emit('configurationError', {type: 'preset', error, preset});
+			return {success: false, error};
 		}
 
 		const oldConfig = this.getConfiguration();
@@ -372,19 +411,17 @@ class ConfigurationManager {
 		return result;
 	}
 
-	// =====================================================
-	// PUBLIC API - History and Undo
-	// =====================================================
 
 	/**
-	 * Undoes the last configuration change.
+	 * Reverts the last configuration change from the history, if available.
 	 *
-	 * @return {Object} Result object with success status.
+	 * @return {Object} An object containing the result of the undo operation. If successful, the object includes
+	 *                  the details of the reverted change. If no history is available, an error message is returned.
 	 */
 	undo() {
 
 		if (this._configHistory.length === 0) {
-			return { success: false, error: 'No configuration history available' };
+			return {success: false, error: 'No configuration history available'};
 		}
 
 		const lastChange = this._configHistory.pop();
@@ -401,23 +438,26 @@ class ConfigurationManager {
 		};
 
 		this._emit('configurationChanged', change);
-		return { success: true, change };
+		return {success: true, change};
 	}
 
+
 	/**
-	 * Gets configuration history.
+	 * Retrieves the history of configuration changes.
 	 *
-	 * @return {Array} Array of configuration changes.
+	 * @return {Array} A copy of the configuration history stored in an array.
 	 */
 	getHistory() {
 
 		return [...this._configHistory];
 	}
 
+
 	/**
-	 * Clears configuration history.
+	 * Clears the history by resetting the internal configuration history
+	 * and emits a 'historyCleared' event.
 	 *
-	 * @return {void}
+	 * @return {void} This method does not return a value.
 	 */
 	clearHistory() {
 
@@ -425,15 +465,13 @@ class ConfigurationManager {
 		this._emit('historyCleared');
 	}
 
-	// =====================================================
-	// PRIVATE METHODS - Validation
-	// =====================================================
 
 	/**
-	 * Validates BPM value.
+	 * Validates the BPM (Beats Per Minute) value against the acceptable range defined in settings.
 	 *
-	 * @param {*} bpm - BPM value to validate.
-	 * @return {Object} Validation result.
+	 * @param {string|number} bpm - The BPM value to validate, which can be a string or a number.
+	 * @return {Object} An object with a `valid` property indicating if the BPM is valid.
+	 *                  If invalid, the object includes an `error` property with details.
 	 */
 	_validateBpm(bpm) {
 
@@ -444,14 +482,15 @@ class ConfigurationManager {
 				error: `Invalid BPM: ${bpm}. Range: ${Settings.defaultParams.bpmMin}-${Settings.defaultParams.bpmMax}`
 			};
 		}
-		return { valid: true };
+		return {valid: true};
 	}
 
+
 	/**
-	 * Validates division value.
+	 * Validates the given division to ensure it falls within an acceptable range.
 	 *
-	 * @param {*} division - Division value to validate.
-	 * @return {Object} Validation result.
+	 * @param {string|number} division - The division to validate, typically provided as a string or number.
+	 * @return {Object} An object containing the validation status. If invalid, includes an error message.
 	 */
 	_validateDivision(division) {
 
@@ -462,14 +501,16 @@ class ConfigurationManager {
 				error: `Invalid division: ${division}. Range: 1-16`
 			};
 		}
-		return { valid: true };
+		return {valid: true};
 	}
 
+
 	/**
-	 * Validates volume value.
+	 * Validates the given volume.
 	 *
-	 * @param {*} volume - Volume value to validate.
-	 * @return {Object} Validation result.
+	 * @param {string} volume - The volume value as a string to be validated.
+	 * @return {Object} An object containing the validation result with a `valid` property
+	 *                  indicating success or failure, and an `error` property if invalid.
 	 */
 	_validateVolume(volume) {
 
@@ -480,14 +521,17 @@ class ConfigurationManager {
 				error: `Invalid volume: ${volume}. Range: 0-100`
 			};
 		}
-		return { valid: true };
+		return {valid: true};
 	}
 
+
 	/**
-	 * Validates pattern value.
+	 * Validates the provided pattern against a predefined list of valid patterns.
 	 *
-	 * @param {*} pattern - Pattern value to validate.
-	 * @return {Object} Validation result.
+	 * @param {string} pattern - The pattern to be validated.
+	 * @return {Object} An object containing the validation result:
+	 *                  'valid' indicates if the pattern is valid,
+	 *                  'error' provides an error message if invalid.
 	 */
 	_validatePattern(pattern) {
 
@@ -498,14 +542,15 @@ class ConfigurationManager {
 				error: `Invalid pattern: ${pattern}. Valid: ${validPatterns.join(', ')}`
 			};
 		}
-		return { valid: true };
+		return {valid: true};
 	}
 
+
 	/**
-	 * Validates preset object.
+	 * Validates the provided preset object.
 	 *
-	 * @param {Object} preset - Preset to validate.
-	 * @return {boolean} True if preset is valid.
+	 * @param {Object} preset - The preset object to validate.
+	 * @return {boolean} Returns true if the preset is valid, otherwise false.
 	 */
 	_validatePreset(preset) {
 
@@ -516,10 +561,15 @@ class ConfigurationManager {
 		return Settings.validatePreset(preset);
 	}
 
+
 	/**
-	 * Validates current configuration.
+	 * Validates the current configuration of the application or object.
+	 * The validation checks parameters such as BPM (beats per minute), division, volume,
+	 * and ensures the current pattern is one of the allowable types ('straight', 'swing', 'custom').
+	 * Results of the validation are cached to improve performance and are reused if the method
+	 * is called within a short time frame (less than 1 second).
 	 *
-	 * @return {boolean} True if current configuration is valid.
+	 * @return {boolean} Returns true if the current configuration is valid, false otherwise.
 	 */
 	_validateCurrentConfiguration() {
 
@@ -541,15 +591,12 @@ class ConfigurationManager {
 		return isValid;
 	}
 
-	// =====================================================
-	// PRIVATE METHODS - History Management
-	// =====================================================
 
 	/**
-	 * Saves current value to history.
+	 * Saves a configuration change to the history list with a timestamp.
 	 *
-	 * @param {string} type - Configuration type.
-	 * @param {*} value - Value to save.
+	 * @param {string} type - The type or category of the configuration change.
+	 * @param {*} value - The value associated with the configuration change.
 	 * @return {void}
 	 */
 	_saveToHistory(type, value) {
@@ -566,15 +613,12 @@ class ConfigurationManager {
 		}
 	}
 
-	// =====================================================
-	// PRIVATE METHODS - Events
-	// =====================================================
 
 	/**
-	 * Emits events through the event bus if available.
+	 * Emits an event through the internal event bus.
 	 *
-	 * @param {string} event - Event name.
-	 * @param {*} data - Event data.
+	 * @param {string} event - The event name to emit.
+	 * @param {any} data - The data payload associated with the event.
 	 * @return {void}
 	 */
 	_emit(event, data) {
@@ -584,14 +628,16 @@ class ConfigurationManager {
 		}
 	}
 
-	// =====================================================
-	// PUBLIC METHODS - Lifecycle
-	// =====================================================
 
 	/**
-	 * Resets configuration to defaults.
+	 * Resets the configuration of the system or component to its default settings.
 	 *
-	 * @return {void}
+	 * The method restores the default parameters for BPM, division, volume, accents,
+	 * and pattern, while also clearing the history associated with the component.
+	 * It emits an event notifying the listeners about the configuration reset,
+	 * providing both the old and new configurations.
+	 *
+	 * @return {void} This method does not return a value.
 	 */
 	reset() {
 
@@ -611,10 +657,13 @@ class ConfigurationManager {
 		});
 	}
 
+
 	/**
-	 * Cleanup method for proper disposal.
+	 * Cleans up the resources used by the object, ensuring proper disposal.
+	 * It clears the object's history, nullifies the event bus,
+	 * and resets the last validation data.
 	 *
-	 * @return {void}
+	 * @return {void} Does not return any value.
 	 */
 	destroy() {
 

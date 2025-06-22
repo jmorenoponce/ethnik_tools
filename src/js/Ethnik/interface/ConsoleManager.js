@@ -17,16 +17,17 @@ import AccentCommand from "../commands/configuration/AccentCommand.js";
 
 
 /**
- * Manages the console interface for the metronome application.
- * Implements Command pattern for command processing and maintains command history.
+ * Manages console interactions and input processing for a command-line interface.
+ * This class handles user input, command registration, and execution,
+ * while also managing command history and providing utilities like tab completion.
  */
 class ConsoleManager {
 
 	/**
-	 * Initializes a new instance of the ConsoleManager with the specified core.
+	 * Constructs a new instance of the console interface with command handling capabilities.
 	 *
-	 * @param {Object} core - The core object that provides necessary functionality.
-	 * @return {void} No return value.
+	 * @param {Object} core - The core object that the console interacts with.
+	 * @return {void} This constructor does not return a value.
 	 */
 	constructor(core) {
 
@@ -50,9 +51,10 @@ class ConsoleManager {
 
 
 	/**
-	 * Initializes the command registry with all available commands.
+	 * Initializes and returns a map of command names to their corresponding command objects.
+	 * This method sets up various commands, categorized into playback, configuration, preset, timeline, and system commands.
 	 *
-	 * @return {Map} Map of command names to command objects.
+	 * @return {Map<string, Object>} A map containing command names as keys and their respective command objects as values.
 	 */
 	_initializeCommands() {
 
@@ -93,9 +95,11 @@ class ConsoleManager {
 
 
 	/**
-	 * Initializes the console interface for receiving and processing user input.
+	 * Initializes the console interface for capturing user input.
+	 * It sets up the necessary configurations for stdin to handle input
+	 * and binds event handlers for various input/output operations.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} This method does not return any value.
 	 */
 	_initConsoleInterface() {
 
@@ -121,10 +125,14 @@ class ConsoleManager {
 
 
 	/**
-	 * Handles individual key inputs from the console.
+	 * Handles keyboard input for a text-based interface. This method processes various key inputs like Enter, Backspace,
+	 * arrow keys, and Tab to facilitate command execution, input editing, and navigation.
 	 *
-	 * @param {string} key - The key that was pressed.
-	 * @return {void} No return value.
+	 * @param {string} key - A single character or control sequence representing the key input to process. Examples include
+	 *                       regular printable characters, control keys like Enter or Backspace, and ANSI escape sequences
+	 *                       for arrow keys.
+	 * @return {void} This method does not return a value, but it modifies the internal state, such as the input buffer
+	 *                and command history, or triggers associated functionality like command execution or navigation.
 	 */
 	_handleKeyInput(key) {
 
@@ -181,9 +189,13 @@ class ConsoleManager {
 
 
 	/**
-	 * Handles tab completion for commands.
+	 * Handles tab completion functionality for the input buffer.
+	 * Based on the current input, suggests or completes potential commands.
 	 *
-	 * @return {void} No return value.
+	 * If there is exactly one suggestion, it replaces the input with the suggestion.
+	 * If there are multiple suggestions, it displays a list of suggestions to the user.
+	 *
+	 * @return {void}
 	 */
 	_handleTabCompletion() {
 
@@ -204,10 +216,11 @@ class ConsoleManager {
 
 
 	/**
-	 * Navigates through command history.
+	 * Navigates through the command history in the specified direction.
+	 * Updates the command input based on the history index and displays the relevant historical command.
 	 *
-	 * @param {number} direction - Direction to navigate (-1 for up, 1 for down).
-	 * @return {void} No return value.
+	 * @param {number} direction - The direction to navigate the history. Positive values move forward, negative values move backward.
+	 * @return {void}
 	 */
 	_navigateHistory(direction) {
 
@@ -231,9 +244,10 @@ class ConsoleManager {
 
 
 	/**
-	 * Clears the current input line.
+	 * Clears the current input by moving the cursor to the beginning
+	 * of the input and erasing the characters from the buffer.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} This method does not return any value.
 	 */
 	_clearCurrentInput() {
 
@@ -245,10 +259,11 @@ class ConsoleManager {
 
 
 	/**
-	 * Adds a command to the history with memory management.
+	 * Adds a command to the history, ensuring no duplicate consecutive commands are added.
+	 * Manages memory by limiting the history size to a maximum value.
 	 *
-	 * @param {string} command - The command to add to history.
-	 * @return {void} No return value.
+	 * @param {string} command - The command to be added to the history.
+	 * @return {void}
 	 */
 	_addToHistory(command) {
 
@@ -270,9 +285,12 @@ class ConsoleManager {
 
 
 	/**
-	 * Displays a list of available commands and their descriptions.
+	 * Displays a list of available commands and their descriptions for the user interface.
 	 *
-	 * @return {void} No return value.
+	 * The commands are divided into categories such as playback, configuration, presets and utilities, system,
+	 * and timeline (training). It provides detailed instructions on usage and functionality.
+	 *
+	 * @return {void} This method does not return any value.
 	 */
 	_showCommands() {
 
@@ -311,9 +329,11 @@ class ConsoleManager {
 
 
 	/**
-	 * Displays a prompt showing current status and BPM.
+	 * Displays the prompt with the current playback status and BPM.
+	 * The prompt format indicates whether the system is playing or stopped,
+	 * followed by the BPM (beats per minute).
 	 *
-	 * @return {void} No return value.
+	 * @return {void} Does not return any value.
 	 */
 	_showPrompt() {
 
@@ -324,10 +344,11 @@ class ConsoleManager {
 
 
 	/**
-	 * Processes a given command string using the Command pattern.
+	 * Processes a given command by parsing the input, identifying the command, and executing it if valid.
+	 * Provides feedback for unknown commands and suggests possible alternatives.
 	 *
-	 * @param {string} input - The input command string.
-	 * @return {void} No return value.
+	 * @param {string} input - The raw command input as a string.
+	 * @return {void} This method does not return a value but logs outputs or errors.
 	 */
 	_processCommand(input) {
 
@@ -363,10 +384,12 @@ class ConsoleManager {
 
 
 	/**
-	 * Gets command suggestions based on partial input.
+	 * Retrieves a list of command suggestions based on a partial string input.
+	 * The method prioritizes prefix matches before considering substring matches if no prefixes are found.
+	 * Returns up to a maximum of five suggestions.
 	 *
-	 * @param {string} partial - Partial command input.
-	 * @return {Array<string>} Array of matching command names.
+	 * @param {string} partial The partial input string to match available commands against.
+	 * @return {string[]} An array of command suggestions that match the given partial string.
 	 */
 	_getCommandSuggestions(partial) {
 
@@ -390,9 +413,11 @@ class ConsoleManager {
 
 
 	/**
-	 * Handles the exit process of the application.
+	 * Handles the cleanup and termination process for the application.
+	 * This method ensures that resources are properly released, any ongoing
+	 * operations are stopped, and the application exits gracefully.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} This method does not return any value.
 	 */
 	_handleExit() {
 
@@ -411,9 +436,9 @@ class ConsoleManager {
 
 
 	/**
-	 * Gets the list of available commands for help display.
+	 * Retrieves the list of commands.
 	 *
-	 * @return {Map} Map of commands.
+	 * @return {Array} An array of commands stored in the object.
 	 */
 	getCommands() {
 
@@ -422,9 +447,9 @@ class ConsoleManager {
 
 
 	/**
-	 * Re-displays the command help.
+	 * Displays a list of available commands and their descriptions to assist the user.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} Does not return a value.
 	 */
 	showHelp() {
 
@@ -433,9 +458,10 @@ class ConsoleManager {
 
 
 	/**
-	 * Cleanup method to be called when the manager is no longer needed.
+	 * Destroys the ConsoleManager instance by removing event listeners,
+	 * resetting settings, and performing cleanup tasks to release resources.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} Does not return a value.
 	 */
 	destroy() {
 

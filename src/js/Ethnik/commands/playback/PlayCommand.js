@@ -2,53 +2,57 @@ import Command from '../base/Command.js';
 
 
 /**
- * Play command implementation.
+ * Represents a command to start the metronome playback.
+ * Inherits from the `Command` class and provides functionality
+ * to execute the play action on the associated metronome core.
  */
 class PlayCommand extends Command {
 
 	/**
-	 * Creates a new PlayCommand.
+	 * Constructor for creating an instance of the class.
 	 *
-	 * @param {Object} core - Core metronome instance.
-	 * @return {void} No return value.
+	 * @param {Object} core - The core object required for initializing the instance.
+	 * @return {Object} A new instance of the class.
 	 */
 	constructor(core) {
+
 		super();
 		this._core = core;
 	}
 
 
 	/**
-	 * Executes the play command.
+	 * Executes the core play functionality.
 	 *
-	 * @param {Array<string>} args - Command arguments (unused).
-	 * @return {void} No return value.
+	 * @param {Object} args - The arguments required to execute the method. Can include additional options or configurations.
+	 * @return {void} This method does not return a value.
 	 */
 	execute(args) {
+
 		this._core.play();
 	}
 
 
 	/**
-	 * Gets usage help text for the play command.
+	 * Retrieves the usage information for a specific functionality.
 	 *
-	 * @return {string} Usage help text.
+	 * @return {string} A string describing the usage options, separated by a pipe ('|') symbol.
 	 */
 	getUsage() {
+
 		return 'play | start';
 	}
 
 
 	/**
-	 * Gets a description of the play command.
+	 * Returns the description of the method's functionality.
 	 *
-	 * @return {string} Command description.
+	 * @return {string} A string describing the action or purpose of the method.
 	 */
 	getDescription() {
+
 		return 'Starts the metronome playback';
 	}
 }
-
-
 
 export default PlayCommand;

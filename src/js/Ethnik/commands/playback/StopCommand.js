@@ -1,49 +1,54 @@
 import Command from "../base/Command.js";
 
 /**
- * Stop command implementation.
+ * Represents the StopCommand class, which stops the playback of a metronome.
+ * Extends the Command class and provides functionality to issue a stop command.
  */
 class StopCommand extends Command {
 
 	/**
-	 * Creates a new StopCommand.
+	 * Constructs an instance of the class with the specified core.
 	 *
-	 * @param {Object} core - Core metronome instance.
-	 * @return {void} No return value.
+	 * @param {Object} core - The core object to initialize the instance with.
+	 * @return {void}
 	 */
 	constructor(core) {
+
 		super();
 		this._core = core;
 	}
 
 
 	/**
-	 * Executes the stop command.
+	 * Executes a specific operation by stopping the core functionality.
 	 *
-	 * @param {Array<string>} args - Command arguments (unused).
-	 * @return {void} No return value.
+	 * @param {Object} args - The arguments provided for execution. It can include required data or configurations.
+	 * @return {void} This method does not return any value.
 	 */
 	execute(args) {
+
 		this._core.stop();
 	}
 
 
 	/**
-	 * Gets usage help text for the stop command.
+	 * Retrieves the current usage status.
 	 *
-	 * @return {string} Usage help text.
+	 * @return {string} The usage status, specifically the string 'stop'.
 	 */
 	getUsage() {
+
 		return 'stop';
 	}
 
 
 	/**
-	 * Gets a description of the stop command.
+	 * Retrieves the description of the method's function or purpose.
 	 *
-	 * @return {string} Command description.
+	 * @return {string} A string describing the method's functionality, which in this case is 'Stops the metronome playback'.
 	 */
 	getDescription() {
+
 		return 'Stops the metronome playback';
 	}
 }

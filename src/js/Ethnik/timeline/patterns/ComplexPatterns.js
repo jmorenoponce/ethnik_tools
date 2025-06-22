@@ -1,15 +1,19 @@
-
 /**
- * Collection of complex patterns for advanced training.
+ * Represents a set of complex rhythm patterns and provides methods
+ * to fetch and filter these patterns based on various criteria.
  */
 class ComplexPatterns {
 
 	/**
-	 * Gets all complex patterns.
+	 * Retrieves a collection of predefined rhythm patterns, each represented by a key-value pair.
+	 * The key is a string identifier for the pattern, and the value is an object containing
+	 * details about the pattern's beats, accents, description, difficulty level, category, and style.
 	 *
-	 * @return {Map} Map of pattern names to pattern objects.
+	 * @return {Map<string, Object>} A map containing rhythm patterns. Each pattern provides
+	 * information about its structure and characteristics.
 	 */
 	static getPatterns() {
+
 		return new Map([
 			['syncopated', {
 				beats: [1, 0, 1, 0, 1],
@@ -76,13 +80,15 @@ class ComplexPatterns {
 		]);
 	}
 
+
 	/**
-	 * Gets patterns filtered by musical style.
+	 * Retrieves a map of patterns filtered by the specified style.
 	 *
-	 * @param {string} style - Musical style filter.
-	 * @return {Map} Filtered patterns.
+	 * @param {string} style - The style used to filter the patterns.
+	 * @return {Map<string, Object>} A map containing pattern names as keys and the corresponding patterns as values, filtered by the given style.
 	 */
 	static getPatternsByStyle(style) {
+
 		const patterns = this.getPatterns();
 		const filtered = new Map();
 
@@ -95,14 +101,17 @@ class ComplexPatterns {
 		return filtered;
 	}
 
+
 	/**
-	 * Gets patterns filtered by difficulty range.
+	 * Retrieves patterns filtered by a specified difficulty range.
 	 *
-	 * @param {number} minDifficulty - Minimum difficulty.
-	 * @param {number} maxDifficulty - Maximum difficulty.
-	 * @return {Map} Filtered patterns.
+	 * @param {number} minDifficulty - The minimum difficulty threshold (inclusive).
+	 * @param {number} maxDifficulty - The maximum difficulty threshold (inclusive).
+	 * @return {Map<string, object>} A map of patterns that fall within the specified difficulty range,
+	 * where the key is the pattern name and the value is the pattern object.
 	 */
 	static getPatternsByDifficultyRange(minDifficulty, maxDifficulty) {
+
 		const patterns = this.getPatterns();
 		const filtered = new Map();
 

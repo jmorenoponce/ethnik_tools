@@ -6,16 +6,22 @@ import SystemAudioStrategy from './strategies/SystemAudioStrategy.js';
 import ToneGeneratorStrategy from './strategies/ToneGeneratorStrategy.js';
 
 
+/**
+ * A class responsible for managing audio playback and configuration.
+ *
+ * The AudioEngine class handles the initialization, strategy selection, latency calibration,
+ * and playback of audio ticks. It provides methods to configure audio properties such as volume
+ * and to retrieve audio-related information.
+ */
 class AudioEngine {
 
 	/**
-	 * Constructs an instance of the AudioEngine and initializes audio system settings.
+	 * Creates an instance of the class and initializes the audio system along with the default settings.
 	 *
-	 * This constructor sets default values for audio methods, sound file paths,
-	 * volume levels, and latency compensation. It also invokes a method to
-	 * initialize the audio system to ensure proper functionality.
+	 * The constructor sets up sound files, volume, latency compensation, and selects the default strategy.
+	 * Additionally, it initializes and registers available audio strategies such as File Audio, System Audio, and Tone Generator strategies.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} This constructor does not return a value.
 	 */
 	constructor() {
 
@@ -41,10 +47,11 @@ class AudioEngine {
 
 
 	/**
-	 * Initializes the audio system by detecting the best audio method
-	 * and calibrating latency if required based on the method selected.
+	 * Initializes the audio system by detecting the best audio strategy for the current environment.
+	 * It sets the detected strategy as the current strategy and logs the selected audio method.
+	 * If the selected strategy is a system audio strategy, it performs latency calibration.
 	 *
-	 * @return {Promise<void>} A promise that resolves when the audio system has been successfully initialized.
+	 * @return {Promise<void>} A promise that resolves once the audio system is initialized and configured.
 	 */
 	async _initAudioSystem() {
 
@@ -59,9 +66,11 @@ class AudioEngine {
 
 
 	/**
-	 * Determines the best audio strategy based on availability.
+	 * Determines and selects the best available audio strategy based on a predefined priority order.
+	 * The priority order is: file -> system -> tone. If no strategy in the priority order is available,
+	 * it defaults to the 'tone' strategy.
 	 *
-	 * @return {Promise<AudioPlaybackStrategy>} A promise that resolves to the best available strategy.
+	 * @return {Object} The detected audio strategy that is available and prioritized.
 	 */
 	async _detectBestAudioStrategy() {
 
@@ -81,10 +90,10 @@ class AudioEngine {
 
 
 	/**
-	 * Get a human-readable name for the current strategy.
+	 * Retrieves the name of the given strategy.
 	 *
-	 * @param {AudioPlaybackStrategy} strategy - The strategy to get name for.
-	 * @return {string} The strategy name.
+	 * @param {object} strategy - The strategy object to evaluate.
+	 * @return {string} The name of the strategy. Possible values are 'file', 'system', 'tone', or 'unknown'.
 	 */
 	_getStrategyName(strategy) {
 
@@ -96,10 +105,9 @@ class AudioEngine {
 
 
 	/**
-	 * Calibrates the system's latency by playing a system beep and measuring the time it takes.
-	 * This method estimates the latency and stores it in the `_latencyCompensation` property.
+	 * Calibrates the latency by measuring the time taken to execute a specific operation and logging the estimated latency.
 	 *
-	 * @return {void} No value is returned as the latency calibration result is stored internally.
+	 * @return {void} This method does not return a value.
 	 */
 	_calibrateLatency() {
 
@@ -111,12 +119,12 @@ class AudioEngine {
 
 
 	/**
-	 * Plays a tick sound with the given type, frequency, and duration, compensating for latency if applicable.
+	 * Plays a tick sound using the current playback strategy, applying a latency compensation if necessary.
 	 *
-	 * @param {string} type - The type of tick sound to play. Default is 'beat'.
-	 * @param {number} frequency - The frequency of the tick sound in Hz. Default is 800.
-	 * @param {number} duration - The duration of the tick sound in milliseconds. Default is 100.
-	 * @return {Promise<void>} A promise that resolves when the tick has been played.
+	 * @param {string} type - The type of sound to play (default is 'beat').
+	 * @param {number} frequency - The frequency of the sound in Hz (default is 800).
+	 * @param {number} duration - The duration of the sound in milliseconds (default is 100).
+	 * @return {Promise<void>} A promise that resolves when the tick sound has been played.
 	 */
 	async playTick(type = 'beat', frequency = 800, duration = 100) {
 
@@ -131,10 +139,13 @@ class AudioEngine {
 
 
 	/**
-	 * Sets the volume level to a specified value. The value is clamped between 0 and 100.
+	 * Sets the volume level for the current instance.
 	 *
-	 * @param {number} volume - The desired volume level. Values below 0 are set to 0, and values above 100 are set to 100.
-	 * @return {void}
+	 * The volume level determines the sound intensity and must be within
+	 * the valid range specified by the application settings.
+	 *
+	 * @param {number} volume The desired volume level to be set. It should be validated using the application's constraints.
+	 * @return {void} Does not return any value.
 	 */
 	setVolume(volume) {
 
@@ -145,13 +156,13 @@ class AudioEngine {
 
 
 	/**
-	 * Retrieves information about the current audio settings and status.
+	 * Retrieves information related to the current audio playback strategy.
 	 *
 	 * @return {Object} An object containing the following properties:
-	 * - method: The audio method being used.
-	 * - latency: The latency compensation value.
-	 * - volume: The current volume level.
-	 * - hasAudioFiles: A boolean indicating whether valid audio files are available.
+	 * - method {string}: The name of the current audio strategy being used.
+	 * - latency {number}: The latency compensation value for audio playback.
+	 * - volume {number}: The current volume level.
+	 * - hasAudioFiles {boolean}: Indicates whether any audio files exist in the configured sound files directory.
 	 */
 	getAudioInfo() {
 

@@ -1,29 +1,30 @@
 /**
- * A class representing the configuration settings for a rhythm helper application.
- * Includes default parameters and predefined tempo names along with helper methods.
+ * The `Settings` class manages and provides default parameters, tempo names,
+ * division names, and validation methods for a rhythm helper application.
+ * It also includes debugging capabilities and utility functions for
+ * handling presets and configurations.
  */
 class Settings {
 
-	/**
-	 * Debug mode flag
-	 */
 	static debug = false;
 
 	/**
-	 * An object representing the default parameters for the rhythm helper application.
-	 * These parameters include settings such as tempo, beat division, volume, and sound file.
+	 * An object containing the default configuration parameters for the application.
 	 *
 	 * Properties:
-	 * - bpmMin: The minimum beats per minute (bpm) value allowed.
-	 * - bpmMax: The maximum beats per minute (bpm) value allowed.
-	 * - bpmInitial: The initial beats per minute (bpm) value when the application starts.
-	 * - division: The beat division multiplier (e.g., quarter note, eighth note, etc.).
-	 * - volume: The default volume level, represented as a percentage (0 to 100).
-	 * - soundFile: The file path to the default sound file used for rhythm playback.
-	 * - lookahead: The lookahead time in milliseconds for precise scheduling.
-	 * - maxHistorySize: Maximum size for performance history arrays.
-	 * - debounceTime: Minimum time between tap tempo detections in milliseconds.
-	 * - tapTimeoutMs: Timeout for tap tempo history cleanup in milliseconds.
+	 * - bpmMin: Minimum beats per minute (BPM) value.
+	 * - bpmMax: Maximum beats per minute (BPM) value.
+	 * - bpmInitial: Initial beats per minute (BPM) value on load.
+	 * - division: The subdivision or multiplier used for setting tempo granularity.
+	 * - volume: Default volume level expressed as a percentage (0-100).
+	 * - soundFile: Path to the default sound file used for feedback or metronome sound.
+	 * - lookahead: Time in milliseconds to look ahead when scheduling audio events.
+	 * - maxHistorySize: Maximum number of entries to maintain in the history log.
+	 * - debounceTime: Debouncing time in milliseconds to handle rapid user interactions.
+	 * - tapTimeoutMs: Time in milliseconds to reset the tap tempo timeout.
+	 *
+	 * This object acts as a configuration preset for initializing application state
+	 * or default behaviors.
 	 */
 	static defaultParams = {
 
@@ -41,24 +42,22 @@ class Settings {
 
 
 	/**
-	 * An object representing various musical tempo names and their corresponding
-	 * beats per minute (BPM) ranges.
-	 *
-	 * Each key in the object is a tempo name, and its value is an array of two numbers:
-	 * the minimum and maximum BPM for that tempo.
+	 * Represents a mapping of tempo names to their corresponding BPM (Beats Per Minute) ranges.
+	 * Each property of the object corresponds to a tempo name, with the value being an array
+	 * representing the minimum and maximum BPM for that tempo.
 	 *
 	 * Properties:
-	 * - `larghissimo`: Very, very slow tempo with BPM ranging from 20 to 39.
-	 * - `largo`: Slow and dignified tempo with BPM ranging from 40 to 59.
-	 * - `lento`: Slow tempo with BPM ranging from 60 to 67.
-	 * - `adagio`: Leisurely tempo with BPM ranging from 68 to 79.
-	 * - `andante`: Walking pace tempo with BPM ranging from 80 to 99.
-	 * - `moderato`: Moderate tempo with BPM ranging from 100 to 111.
-	 * - `allegretto`: Moderately fast tempo with BPM ranging from 112 to 127.
-	 * - `allegro`: Fast, quickly, and bright tempo with BPM ranging from 128 to 159.
-	 * - `vivace`: Lively and fast tempo with BPM ranging from 160 to 169.
-	 * - `presto`: Very fast tempo with BPM ranging from 170 to 199.
-	 * - `prestissimo`: Extremely fast tempo with BPM ranging from 200 to 218.
+	 * - larghissimo: [20, 39] - Extremely slow tempo.
+	 * - largo: [40, 59] - Very slow, broad tempo.
+	 * - lento: [60, 67] - Slowly, sustained tempo.
+	 * - adagio: [68, 79] - Slow and stately tempo.
+	 * - andante: [80, 99] - Walking pace, moderate tempo.
+	 * - moderato: [100, 111] - Moderately paced tempo.
+	 * - allegretto: [112, 127] - Moderately fast tempo.
+	 * - allegro: [128, 159] - Fast, lively tempo.
+	 * - vivace: [160, 169] - Lively and brisk tempo.
+	 * - presto: [170, 199] - Very fast tempo.
+	 * - prestissimo: [200, 218] - Extremely fast tempo.
 	 */
 	static tempoNames = {
 
@@ -77,9 +76,21 @@ class Settings {
 
 
 	/**
-	 * Division names mapping for better user experience
+	 * An object that maps numerical division keys to their corresponding musical note division names.
+	 * The keys represent division factors, and the values are the names of the respective musical note divisions.
+	 *
+	 * Properties:
+	 * - 1: Represents "Negras (1/4)"
+	 * - 2: Represents "Corcheas (1/8)"
+	 * - 3: Represents "Tresillos"
+	 * - 4: Represents "Semicorcheas (1/16)"
+	 * - 6: Represents "Seisillos"
+	 * - 8: Represents "Fusas (1/32)"
+	 * - 12: Represents "Docesillos"
+	 * - 16: Represents "Semicorcheas cuádruples"
 	 */
 	static divisionNames = {
+
 		1: "Negras (1/4)",
 		2: "Corcheas (1/8)",
 		3: "Tresillos",
@@ -92,12 +103,13 @@ class Settings {
 
 
 	/**
-	 * Logs debug messages if debug mode is enabled.
+	 * Logs a debug message to the console if debugging is enabled.
 	 *
-	 * @param {...any} args - Arguments to log.
-	 * @return {void} No return value.
+	 * @param {...any} args - The arguments to be logged. These can be any type and are passed to `console.log`.
+	 * @return {void} This method does not return a value.
 	 */
 	static log(...args) {
+
 		if (this.debug) {
 			console.log('[DEBUG]', new Date().toISOString(), ...args);
 		}
@@ -105,9 +117,9 @@ class Settings {
 
 
 	/**
-	 * Retrieves the list of tempo names from the settings.
+	 * Retrieves the list of tempo names from the application settings.
 	 *
-	 * @return {Object} The object containing the tempo names and their BPM ranges.
+	 * @return {Array} An array containing the names of tempos available in the settings.
 	 */
 	static getTempoList() {
 
@@ -116,10 +128,10 @@ class Settings {
 
 
 	/**
-	 * Determines the tempo name corresponding to the given beats per minute (bpm) value.
+	 * Retrieves the tempo name corresponding to a given beats per minute (BPM) value.
 	 *
-	 * @param {number} bpm - The beats per minute value to determine the tempo name for.
-	 * @return {string} The tempo name that corresponds to the provided bpm, or 'unknown' if no match is found.
+	 * @param {number} bpm - The beats per minute value to evaluate.
+	 * @return {string} The tempo name corresponding to the BPM value, or 'unknown' if no match is found.
 	 */
 	static getTempoName(bpm) {
 
@@ -136,10 +148,10 @@ class Settings {
 
 
 	/**
-	 * Gets the name of a division based on its numeric value.
+	 * Retrieves the name of the division based on the given division identifier.
 	 *
-	 * @param {number} division - The numeric representation of the division.
-	 * @return {string} The name of the division, or a default string if the division is not found.
+	 * @param {string|number} division - The identifier for the division.
+	 * @return {string} The name of the division associated with the given identifier, or a default formatted name if not found.
 	 */
 	static getDivisionName(division) {
 
@@ -148,10 +160,13 @@ class Settings {
 
 
 	/**
-	 * Validates if a BPM value is within the acceptable range.
+	 * Checks if the provided BPM (beats per minute) value is valid.
 	 *
-	 * @param {number} bpm - The BPM value to validate.
-	 * @return {boolean} True if the BPM is valid, false otherwise.
+	 * A BPM value is considered valid if it is a number and falls within
+	 * the predefined minimum and maximum BPM range defined in the Settings.
+	 *
+	 * @param {number} bpm - The BPM value to be validated.
+	 * @return {boolean} True if the bpm is valid, otherwise false.
 	 */
 	static isValidBpm(bpm) {
 
@@ -160,10 +175,12 @@ class Settings {
 
 
 	/**
-	 * Validates if a division value is within the acceptable range.
+	 * Checks if the provided division value is valid.
+	 *
+	 * A valid division is a number between 1 and 16 (inclusive).
 	 *
 	 * @param {number} division - The division value to validate.
-	 * @return {boolean} True if the division is valid, false otherwise.
+	 * @return {boolean} Returns true if the division is valid, otherwise false.
 	 */
 	static isValidDivision(division) {
 
@@ -172,10 +189,10 @@ class Settings {
 
 
 	/**
-	 * Validates if a volume value is within the acceptable range.
+	 * Validates if the given volume is within the acceptable range.
 	 *
-	 * @param {number} volume - The volume value to validate.
-	 * @return {boolean} True if the volume is valid, false otherwise.
+	 * @param {number} volume - The volume value to be validated.
+	 * @return {boolean} Returns true if the volume is a number between 0 and 100 (inclusive), otherwise false.
 	 */
 	static isValidVolume(volume) {
 
@@ -184,10 +201,13 @@ class Settings {
 
 
 	/**
-	 * Validates a complete preset configuration.
+	 * Validates a given preset object to ensure it meets specific configuration requirements.
 	 *
-	 * @param {Object} preset - The preset object to validate.
-	 * @return {boolean} True if the preset is valid, false otherwise.
+	 * @param {Object} preset - The preset object to be validated.
+	 * @param {number} preset.bpm - The beats per minute (bpm) value of the preset.
+	 * @param {string} preset.division - The division value of the preset.
+	 * @param {boolean} preset.accent - The accent flag indicating specific configuration.
+	 * @return {boolean} Returns true if the preset is valid; otherwise, returns false.
 	 */
 	static validatePreset(preset) {
 
@@ -209,22 +229,25 @@ class Settings {
 
 
 	/**
-	 * Enables debug mode.
+	 * Enables debug mode for the application, allowing more detailed logging information.
+	 * This method sets the internal 'debug' state to true and logs a confirmation message.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} Does not return a value.
 	 */
 	static enableDebug() {
+
 		this.debug = true;
 		this.log('Debug mode enabled');
 	}
 
 
 	/**
-	 * Disables debug mode.
+	 * Disables the debug mode for the application. Once called, debug logs and related functionality will be turned off.
 	 *
-	 * @return {void} No return value.
+	 * @return {void} This method does not return any value.
 	 */
 	static disableDebug() {
+
 		this.log('Debug mode disabled');
 		this.debug = false;
 	}

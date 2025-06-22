@@ -1,16 +1,20 @@
-
-
 /**
- * Collection of basic rhythm patterns for fundamental training.
+ * Class representing a collection of basic rhythmic patterns.
  */
 class BasicPatterns {
 
 	/**
-	 * Gets all basic patterns.
+	 * Retrieves a collection of predefined rhythm patterns with their associated attributes.
 	 *
-	 * @return {Map} Map of pattern names to pattern objects.
+	 * @return {Map<string, Object>} A map where each key is the name of the rhythm pattern and the value is an object containing:
+	 * - beats: An array denoting the rhythm structure in terms of beat or silence.
+	 * - accents: An array specifying the emphasis or accentuation on beats.
+	 * - description: A brief description of the rhythm pattern.
+	 * - difficulty: The difficulty level of the rhythm pattern.
+	 * - category: The classification or type of the rhythm pattern.
 	 */
 	static getPatterns() {
+
 		return new Map([
 			['straight', {
 				beats: [1, 1, 1, 1],
@@ -46,13 +50,15 @@ class BasicPatterns {
 		]);
 	}
 
+
 	/**
-	 * Gets patterns filtered by difficulty.
+	 * Retrieves patterns filtered by a specified maximum difficulty level.
 	 *
-	 * @param {number} maxDifficulty - Maximum difficulty level.
-	 * @return {Map} Filtered patterns.
+	 * @param {number} maxDifficulty - The maximum allowable difficulty for patterns to be included.
+	 * @return {Map<string, Object>} A map containing patterns whose difficulty is less than or equal to the specified maximum difficulty.
 	 */
 	static getPatternsByDifficulty(maxDifficulty) {
+
 		const patterns = this.getPatterns();
 		const filtered = new Map();
 
@@ -67,5 +73,3 @@ class BasicPatterns {
 }
 
 export default BasicPatterns;
-
-

@@ -1,18 +1,20 @@
-import { performance } from 'perf_hooks';
+import {performance} from 'perf_hooks';
 import Settings from './Settings.js';
 
 /**
- * MetronomeEngine - Responsible solely for timing, scheduling, and playback.
- * Extracted from Core.js to follow Single Responsibility Principle.
+ * MetronomeEngine is responsible for handling the logic of a metronome, including playback control, configuration settings, and timing functionality.
+ * It integrates with an audio engine and a performance monitor to support precise and configurable playback features.
  */
 class MetronomeEngine {
 
 	/**
-	 * Creates a MetronomeEngine instance.
+	 * Constructs a new instance of the class, initializing it with the required dependencies and configurations.
 	 *
-	 * @param {AudioEngine} audioEngine - Audio engine for sound playback.
-	 * @param {PerformanceMonitor} performanceMonitor - Performance monitoring.
-	 * @param {Object} eventBus - Event bus for notifications (optional).
+	 * @param {Object} audioEngine - The audio engine responsible for handling audio playback.
+	 * @param {Object} performanceMonitor - The performance monitor to track and monitor the system's performance.
+	 * @param {Object|null} [eventBus=null] - An optional event bus for managing and emitting events.
+	 *
+	 * @return {void}
 	 */
 	constructor(audioEngine, performanceMonitor, eventBus = null) {
 
@@ -40,14 +42,13 @@ class MetronomeEngine {
 		this._lastConfigChange = 0;
 	}
 
-	// =====================================================
-	// PUBLIC API - Playback Control
-	// =====================================================
 
 	/**
-	 * Starts metronome playback.
+	 * Starts the metronome playback if it is not already running.
+	 * Emits appropriate events for playback start or errors encountered during the process.
 	 *
-	 * @return {Promise<boolean>} True if playback started successfully.
+	 * @return {Promise<boolean>} A promise that resolves to `true` if playback started successfully,
+	 * or `false` if playback is already running or an error occurred.
 	 */
 	async play() {
 
@@ -77,10 +78,13 @@ class MetronomeEngine {
 		}
 	}
 
+
 	/**
-	 * Stops metronome playback.
+	 * Stops the metronome if it is currently running. Emits events indicating
+	 * the status of the playback and provides performance statistics upon stopping.
 	 *
-	 * @return {boolean} True if playback stopped successfully.
+	 * @return {boolean} Returns true if the metronome was successfully stopped,
+	 *                   otherwise false if it was not running.
 	 */
 	stop() {
 
@@ -104,10 +108,12 @@ class MetronomeEngine {
 		return true;
 	}
 
+
 	/**
-	 * Pauses playback temporarily.
+	 * Pauses the current playback if it is active. Clears any active interval associated with playback
+	 * and emits a `playbackPaused` event if the operation is successful.
 	 *
-	 * @return {boolean} True if paused successfully.
+	 * @return {boolean} Returns `true` if playback was paused successfully, or `false` if playback was not active.
 	 */
 	pause() {
 
@@ -122,10 +128,12 @@ class MetronomeEngine {
 		return true;
 	}
 
+
 	/**
-	 * Resumes paused playback.
+	 * Resumes playback if it is currently paused and not already running.
+	 * Updates the scheduler and emits a playback resumed event.
 	 *
-	 * @return {boolean} True if resumed successfully.
+	 * @return {boolean} Returns true if playback successfully resumed, otherwise false.
 	 */
 	resume() {
 
@@ -138,15 +146,12 @@ class MetronomeEngine {
 		return true;
 	}
 
-	// =====================================================
-	// PUBLIC API - Configuration
-	// =====================================================
 
 	/**
-	 * Sets the tempo (BPM).
+	 * Sets the tempo of the application by updating the Beats Per Minute (BPM) value.
 	 *
-	 * @param {number} bpm - New tempo value.
-	 * @return {boolean} True if tempo was set successfully.
+	 * @param {number} bpm - The desired BPM value to set. Must be within the valid range defined by Settings.
+	 * @return {boolean} Returns true if the BPM is successfully set, or false if the provided BPM is invalid.
 	 */
 	setTempo(bpm) {
 
@@ -168,11 +173,14 @@ class MetronomeEngine {
 		return true;
 	}
 
+
 	/**
-	 * Sets the beat division.
+	 * Sets the division value for the current configuration.
+	 * Validates the given division before updating the division property.
+	 * Emits relevant events if the configuration is updated successfully or an error occurs.
 	 *
-	 * @param {number} division - New division value.
-	 * @return {boolean} True if division was set successfully.
+	 * @param {number} division The new division value to be set. Must be within the valid range.
+	 * @return {boolean} Returns true if the division is set successfully; otherwise, returns false if the division is invalid.
 	 */
 	setDivision(division) {
 
@@ -194,11 +202,12 @@ class MetronomeEngine {
 		return true;
 	}
 
+
 	/**
-	 * Sets accent state.
+	 * Sets the accent status for the configuration.
 	 *
-	 * @param {boolean} enabled - Whether accents are enabled.
-	 * @return {boolean} True always (can't fail).
+	 * @param {boolean} enabled - A boolean indicating whether the accent is enabled or not.
+	 * @return {boolean} Returns true to indicate the accent was successfully updated.
 	 */
 	setAccent(enabled) {
 
@@ -214,11 +223,14 @@ class MetronomeEngine {
 		return true;
 	}
 
+
 	/**
-	 * Sets rhythmic pattern.
+	 * Updates the current pattern to the specified value, if it is valid.
+	 * Valid patterns are 'straight', 'swing', and 'custom'.
+	 * Emits events for errors or configuration changes as necessary.
 	 *
-	 * @param {string} pattern - Pattern name.
-	 * @return {boolean} True if pattern was set successfully.
+	 * @param {string} pattern - The new pattern to set. Must be one of the valid patterns: 'straight', 'swing', 'custom'.
+	 * @return {boolean} Returns true if the pattern was successfully updated, otherwise false.
 	 */
 	setPattern(pattern) {
 
@@ -242,20 +254,45 @@ class MetronomeEngine {
 		return true;
 	}
 
-	// =====================================================
-	// PUBLIC API - Getters
-	// =====================================================
 
-	get isPlaying() { return this._isPlaying; }
-	get bpm() { return this._bpm; }
-	get division() { return this._division; }
-	get accent() { return this._accent; }
-	get currentPattern() { return this._currentPattern; }
+	get isPlaying() {
+
+		return this._isPlaying;
+	}
+
+	get bpm() {
+
+		return this._bpm;
+	}
+
+	get division() {
+
+		return this._division;
+	}
+
+	get accent() {
+
+		return this._accent;
+	}
+
+	get currentPattern() {
+
+		return this._currentPattern;
+	}
+
 
 	/**
-	 * Gets current engine status.
+	 * Retrieves the current status of the playback and performance monitoring.
+	 * This includes information about whether the playback is active, the beats per minute (BPM),
+	 * the division settings, accents, the current pattern, and performance statistics if playing.
 	 *
-	 * @return {Object} Status information.
+	 * @return {Object} An object containing the following properties:
+	 * - isPlaying: {boolean} Indicates whether playback is currently active.
+	 * - bpm: {number} The current beats per minute setting.
+	 * - division: {number} The division of beats being used.
+	 * - accent: {boolean} Indicates whether the accent feature is enabled.
+	 * - pattern: {Array|Object} The currently active pattern.
+	 * - stats: {Object|null} The performance statistics if playback is active, or null otherwise.
 	 */
 	getStatus() {
 
@@ -272,14 +309,14 @@ class MetronomeEngine {
 		};
 	}
 
-	// =====================================================
-	// PRIVATE METHODS - Scheduling System
-	// =====================================================
 
 	/**
-	 * Starts the tick scheduler.
+	 * Starts the scheduler which repeatedly executes the `_scheduler` method
+	 * at intervals defined by the `_lookahead` property. If an error occurs
+	 * during the scheduler execution, it emits an 'error' event and stops
+	 * the scheduler.
 	 *
-	 * @return {void}
+	 * @return {void} Does not return a value.
 	 */
 	_startScheduler() {
 
@@ -293,10 +330,13 @@ class MetronomeEngine {
 		}, this._lookahead);
 	}
 
+
 	/**
-	 * Main scheduler that manages future ticks.
+	 * Internal method that manages the scheduling of tasks based on the current time
+	 * and a predefined lookahead window. It continuously schedules tasks until the
+	 * next tick time exceeds the current time plus the lookahead.
 	 *
-	 * @return {void}
+	 * @return {void} This method does not return any value.
 	 */
 	_scheduler() {
 
@@ -308,10 +348,12 @@ class MetronomeEngine {
 		}
 	}
 
+
 	/**
-	 * Schedules a single tick.
+	 * Schedules a tick to occur after a specified delay based on the provided time.
+	 * The delay is calculated relative to the current performance time.
 	 *
-	 * @param {number} time - Target time for the tick.
+	 * @param {number} time The target time in milliseconds at which the tick should be executed.
 	 * @return {void}
 	 */
 	_scheduleTick(time) {
@@ -325,10 +367,13 @@ class MetronomeEngine {
 		}, delay);
 	}
 
+
 	/**
-	 * Plays a single tick with sound and visual feedback.
+	 * Executes the playback of a single tick in the metronome, including sound playback, visual feedback,
+	 * performance monitoring, and event emission. It also handles drift warnings and errors during execution.
 	 *
-	 * @return {Promise<void>}
+	 * @return {Promise<void>} A promise that resolves when the tick execution is complete and all associated processes
+	 * (sound playback, rendering, monitoring, etc.) have finished.
 	 */
 	async _playTick() {
 
@@ -360,10 +405,20 @@ class MetronomeEngine {
 		}
 	}
 
+
 	/**
-	 * Calculates tick information for current beat.
+	 * Calculates and returns the tick information for the current state of the beat or rhythm.
+	 * This includes properties like type of beat (downbeat, beat, subdivision), frequency,
+	 * duration, and whether the current tick is a downbeat or a strong beat.
 	 *
-	 * @return {Object} Tick information.
+	 * @return {Object} The calculated tick info containing:
+	 * - type {string}: The type of beat (e.g., 'subdivision', 'downbeat', 'beat').
+	 * - frequency {number}: The frequency of the tick sound in Hz.
+	 * - duration {number}: The duration of the tick sound in milliseconds.
+	 * - isDownbeat {boolean}: Whether the current tick is a downbeat.
+	 * - isStrongBeat {boolean}: Whether the current tick is a strong beat.
+	 * - beatInMeasure {number}: The current beat position in the measure.
+	 * - tickCount {number}: The cumulative count of ticks.
 	 */
 	_calculateTickInfo() {
 
@@ -398,10 +453,14 @@ class MetronomeEngine {
 		};
 	}
 
+
 	/**
-	 * Calculates interval between ticks based on current configuration.
+	 * Calculates the interval between beats based on the current configuration.
+	 * If the configuration has not changed recently, a cached value is used.
+	 * The interval is calculated using the beats per minute (BPM) and a division factor.
+	 * For "swing" patterns, the interval alternates between long and short durations to create a swing effect.
 	 *
-	 * @return {number} Interval in milliseconds.
+	 * @return {number} The calculated interval in milliseconds.
 	 */
 	_calculateInterval() {
 
@@ -426,17 +485,16 @@ class MetronomeEngine {
 		return interval;
 	}
 
-	// =====================================================
-	// PRIVATE METHODS - Visual Feedback
-	// =====================================================
 
 	/**
-	 * Renders visual feedback for the current tick.
+	 * Renders the visual representation of a musical tick based on its properties,
+	 * such as being a downbeat, strong beat, or a subdivision, and displays specific
+	 * counters or messages at intervals.
 	 *
-	 * @param {boolean} isDownbeat - Whether this tick is a downbeat.
-	 * @param {boolean} isStrongBeat - Whether this tick is a strong beat.
-	 * @param {number} tickCount - Current tick count.
-	 * @return {void} No return value.
+	 * @param {boolean} isDownbeat - Indicates if the current tick is a downbeat.
+	 * @param {boolean} isStrongBeat - Indicates if the current tick is a strong beat.
+	 * @param {number} tickCount - The current tick count.
+	 * @return {void}
 	 */
 	_renderTick(isDownbeat, isStrongBeat, tickCount) {
 
@@ -460,14 +518,12 @@ class MetronomeEngine {
 		}
 	}
 
-	// =====================================================
-	// PRIVATE METHODS - Utilities
-	// =====================================================
 
 	/**
-	 * Invalidates cached calculations when configuration changes.
+	 * Invalidates the cache by resetting the cached interval
+	 * and recording the timestamp of the last configuration change.
 	 *
-	 * @return {void}
+	 * @return {void} This method does not return a value.
 	 */
 	_invalidateCache() {
 
@@ -475,12 +531,13 @@ class MetronomeEngine {
 		this._lastConfigChange = performance.now();
 	}
 
+
 	/**
-	 * Emits events through the event bus if available.
+	 * Emits an event through the associated event bus with a prefixed event name.
 	 *
-	 * @param {string} event - Event name.
-	 * @param {*} data - Event data.
-	 * @return {void}
+	 * @param {string} event The name of the event to be emitted.
+	 * @param {*} data The data to be passed along with the event.
+	 * @return {void} No value is returned by this method.
 	 */
 	_emit(event, data) {
 
@@ -489,14 +546,12 @@ class MetronomeEngine {
 		}
 	}
 
-	// =====================================================
-	// PUBLIC METHODS - Lifecycle
-	// =====================================================
 
 	/**
-	 * Cleanup method for proper disposal.
+	 * Cleans up and releases resources allocated by the instance.
+	 * Stops any ongoing processes if necessary and resets related properties to null.
 	 *
-	 * @return {void}
+	 * @return {void} Does not return any value.
 	 */
 	destroy() {
 

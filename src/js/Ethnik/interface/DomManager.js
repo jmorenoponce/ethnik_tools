@@ -2,7 +2,6 @@
 
 class DomManager {
 
-
 	constructor() {
 
 		this._$elements = {
@@ -25,7 +24,6 @@ class DomManager {
 
 
 	_getElements() {
-
 
 	}
 

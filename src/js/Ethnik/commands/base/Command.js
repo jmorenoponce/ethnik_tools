@@ -1,51 +1,52 @@
 /**
- * Base Command class for the Command pattern implementation.
- * All command classes should extend this base class.
+ * Represents an abstract command that can be executed with arguments.
+ * Concrete implementations should extend this class to define specific behaviors.
  */
 class Command {
 
 	/**
-	 * Execute the command with given arguments.
-	 * This method must be implemented by all concrete command classes.
+	 * Executes a specific command. This method should be implemented by concrete command classes.
 	 *
-	 * @param {Array<string>} args - Command arguments.
-	 * @return {void} No return value.
+	 * @param {Array} args - An array of arguments required for executing the command. The content and structure of the array depend on the specific implementation.
+	 * @return {any} The result of the command execution. The return type and value depend on the specific implementation.
+	 * @throws {Error} If the method is not implemented in the concrete class.
 	 */
 	execute(args) {
+
 		throw new Error('execute method must be implemented by concrete command classes');
 	}
 
 
 	/**
-	 * Validates command arguments.
-	 * Override this method in concrete classes if argument validation is needed.
+	 * Validates the arguments provided to a function.
 	 *
-	 * @param {Array<string>} args - Command arguments to validate.
-	 * @return {boolean} True if arguments are valid, false otherwise.
+	 * @param {Array|Object} args - The arguments to validate. Can be an array or an object containing parameters.
+	 * @return {boolean} Returns true if the arguments are valid, otherwise false.
 	 */
 	validateArgs(args) {
+
 		return true;
 	}
 
 
 	/**
-	 * Gets usage help text for the command.
-	 * Override this method in concrete classes to provide usage information.
+	 * Provides usage information for the current function or program.
 	 *
-	 * @return {string} Usage help text.
+	 * @return {string} A string message indicating that no usage information is available.
 	 */
 	getUsage() {
+
 		return 'No usage information available';
 	}
 
 
 	/**
-	 * Gets a description of what the command does.
-	 * Override this method in concrete classes to provide command description.
+	 * Retrieves the description associated with the method.
 	 *
-	 * @return {string} Command description.
+	 * @return {string} The description as a string. If no description is available, it returns 'No description available'.
 	 */
 	getDescription() {
+
 		return 'No description available';
 	}
 }

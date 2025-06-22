@@ -1,15 +1,18 @@
 import Command from "../base/Command.js";
 
 /**
- * Exit command implementation.
+ * Represents a command to exit the application gracefully.
+ * This command stops playback if running, performs cleanup operations, and exits the process.
+ *
+ * Extends the `Command` class.
  */
 class ExitCommand extends Command {
 
 	/**
-	 * Creates a new ExitCommand.
+	 * Initializes a new instance of the class.
 	 *
-	 * @param {Object} core - Core metronome instance.
-	 * @return {void} No return value.
+	 * @param {Object} core - The core instance or configuration required for initialization.
+	 * @return {void}
 	 */
 	constructor(core) {
 
@@ -19,10 +22,10 @@ class ExitCommand extends Command {
 
 
 	/**
-	 * Executes the exit command.
+	 * Executes the shutdown routine and handles graceful application termination.
 	 *
-	 * @param {Array<string>} args - Command arguments (unused).
-	 * @return {void} No return value.
+	 * @param {Object} args - Arguments or parameters required to process the execution.
+	 * @return {void} Does not return a value.
 	 */
 	execute(args) {
 
@@ -34,9 +37,11 @@ class ExitCommand extends Command {
 
 
 	/**
-	 * Handles graceful application exit.
+	 * Handles the graceful shutdown of the application by stopping any ongoing processes, performing cleanup,
+	 * and exiting the Node.js process. Stops playback if running, attempts cleanup using the destroy method
+	 * (if available), and exits the process with an appropriate exit code.
 	 *
-	 * @return {Promise<void>} Resolves when exit is complete.
+	 * @return {Promise<void>} A promise that resolves when the shutdown process has completed successfully.
 	 */
 	async _gracefulExit() {
 
@@ -77,9 +82,9 @@ class ExitCommand extends Command {
 
 
 	/**
-	 * Gets usage help text for the exit command.
+	 * Retrieves the usage instructions for the command.
 	 *
-	 * @return {string} Usage help text.
+	 * @return {string} A string representing the usage instructions.
 	 */
 	getUsage() {
 
@@ -88,9 +93,9 @@ class ExitCommand extends Command {
 
 
 	/**
-	 * Gets a description of the exit command.
+	 * Provides a description of the action performed by the method.
 	 *
-	 * @return {string} Command description.
+	 * @return {string} A brief explanation of what this method does.
 	 */
 	getDescription() {
 

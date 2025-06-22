@@ -1,11 +1,16 @@
+
 /**
- * EventBus - Centralized event system for loose coupling between components.
- * Implements Observer pattern with namespaced events and wildcard support.
+ * A comprehensive EventBus implementation for managing custom events with support for namespaces,
+ * wildcard listeners, one-time listeners, and event priorities. The EventBus is designed to provide
+ * flexibility and control over event-driven communication between different parts of an application.
  */
 class EventBus {
 
 	/**
-	 * Creates an EventBus instance.
+	 * Constructs an instance of the class.
+	 * Initializes the listeners collections, sets the maximum allowed listeners, and provides memory protection.
+	 * Also prepares the internal structures for debugging, including event history tracking with a defined maximum history size.
+	 * @return {Object} An instance of the class with initialized properties for event handling and debugging.
 	 */
 	constructor() {
 
@@ -19,17 +24,17 @@ class EventBus {
 		this._maxHistorySize = 100;
 	}
 
-	// =====================================================
-	// PUBLIC API - Event Registration
-	// =====================================================
 
 	/**
-	 * Registers a listener for an event.
+	 * Registers an event listener for the specified event. The listener can include additional options such as priority,
+	 * and the method returns an unsubscribe function to remove the listener.
 	 *
-	 * @param {string} event - Event name (supports wildcards like 'config.*').
-	 * @param {Function} callback - Callback function.
-	 * @param {Object} options - Options object.
-	 * @return {Function} Unsubscribe function.
+	 * @param {string} event - The name of the event to listen for.
+	 * @param {Function} callback - The function to be executed when the event is triggered.
+	 * @param {Object} [options={}] - Additional options for the listener.
+	 * @param {Object} [options.context=null] - The context to bind the callback function to.
+	 * @param {number} [options.priority=0] - The priority of the listener, higher values are called earlier.
+	 * @return {Function} A function to unsubscribe the listener from the event.
 	 */
 	on(event, callback, options = {}) {
 
@@ -46,7 +51,8 @@ class EventBus {
 		// Check listener limit
 		if (listeners.length >= this._maxListeners) {
 			console.warn(`EventBus: Maximum listeners (${this._maxListeners}) reached for event '${event}'`);
-			return () => {}; // No-op unsubscribe
+			return () => {
+			}; // No-op unsubscribe
 		}
 
 		const listenerInfo = {
@@ -68,13 +74,14 @@ class EventBus {
 		return () => this.off(event, callback);
 	}
 
+
 	/**
-	 * Registers a one-time listener for an event.
+	 * Registers a one-time listener for the specified event. The listener will be invoked only once and then automatically removed.
 	 *
-	 * @param {string} event - Event name.
-	 * @param {Function} callback - Callback function.
-	 * @param {Object} options - Options object.
-	 * @return {Function} Unsubscribe function.
+	 * @param {string} event - The name of the event to listen for.
+	 * @param {Function} callback - The function to execute when the event is triggered.
+	 * @param {Object} [options={}] - Optional settings for the listener such as `context`.
+	 * @return {*} Returns the result of the registration process, typically for chaining or confirmation.
 	 */
 	once(event, callback, options = {}) {
 
@@ -86,12 +93,13 @@ class EventBus {
 		return this.on(event, onceWrapper, options);
 	}
 
+
 	/**
-	 * Removes a listener from an event.
+	 * Removes a previously registered event listener for the specified event.
 	 *
-	 * @param {string} event - Event name.
-	 * @param {Function} callback - Callback function to remove.
-	 * @return {boolean} True if listener was removed.
+	 * @param {string} event - The name of the event from which the listener should be removed.
+	 * @param {Function} callback - The callback function of the listener to be removed.
+	 * @return {boolean} Returns `true` if the listener was successfully removed; otherwise, `false`.
 	 */
 	off(event, callback) {
 
@@ -117,11 +125,12 @@ class EventBus {
 		return false;
 	}
 
+
 	/**
-	 * Removes all listeners from an event or all events.
+	 * Removes all listeners for a specific event or all events if no event is specified.
 	 *
-	 * @param {string} event - Event name (optional).
-	 * @return {number} Number of listeners removed.
+	 * @param {string|null} [event=null] The name of the event to remove listeners for. If null, removes all listeners for all events.
+	 * @return {number} The number of listeners that were removed.
 	 */
 	removeAllListeners(event = null) {
 
@@ -144,17 +153,20 @@ class EventBus {
 		}
 	}
 
-	// =====================================================
-	// PUBLIC API - Event Emission
-	// =====================================================
 
 	/**
-	 * Emits an event to all registered listeners.
+	 * Emits an event to all registered listeners, supporting specific, wildcard, and global event listeners.
 	 *
-	 * @param {string} event - Event name.
-	 * @param {*} data - Event data.
-	 * @param {Object} options - Emission options.
-	 * @return {Object} Emission result.
+	 * @param {string} event - The name of the event to emit.
+	 * @param {*} [data=null] - The optional data payload associated with the event.
+	 * @param {Object} [options={}] - Additional options used during event emission.
+	 * @return {Object} Returns the result of the emission containing the following properties:
+	 *                  - `event` {string}: The name of the event emitted.
+	 *                  - `listenersNotified` {number}: The count of listeners that were notified.
+	 *                  - `errors` {Array}: An array of errors encountered during listener notification.
+	 *                  - `timestamp` {number}: The timestamp of when the event was emitted.
+	 *                  - `emissionId` {string}: A unique identifier for the emitted event.
+	 *                  - `success` {boolean}: Indicates whether the event emission completed without errors.
 	 */
 	emit(event, data = null, options = {}) {
 
@@ -202,13 +214,15 @@ class EventBus {
 		return result;
 	}
 
+
 	/**
-	 * Emits an event asynchronously.
+	 * Asynchronously emits an event with optional data and options.
+	 * The method returns a promise that resolves after the event is emitted.
 	 *
-	 * @param {string} event - Event name.
-	 * @param {*} data - Event data.
-	 * @param {Object} options - Emission options.
-	 * @return {Promise<Object>} Emission result.
+	 * @param {string} event - The name of the event to emit.
+	 * @param {*} [data=null] - Optional data to pass along with the event.
+	 * @param {Object} [options={}] - Additional options for the event emit operation.
+	 * @return {Promise<*>} A promise that resolves with the result of the event emission.
 	 */
 	async emitAsync(event, data = null, options = {}) {
 
@@ -220,15 +234,39 @@ class EventBus {
 		});
 	}
 
-	// =====================================================
-	// PUBLIC API - Namespaced Events
-	// =====================================================
 
 	/**
-	 * Creates a namespaced event emitter.
+	 * Creates a scoped namespace for event-based operations such as emitting, listening, and removing event listeners.
 	 *
-	 * @param {string} namespace - Namespace prefix.
-	 * @return {Object} Namespaced emitter.
+	 * @param {string} namespace - The namespace identifier to prepend to all event names within the created scope.
+	 * @return {object} An object with methods to emit, listen, and manage events within the given namespace.
+	 *
+	 * @property {Function} emit - Emits an event within the namespace.
+	 * @param {string} event - The name of the event to emit (without the namespace prefix).
+	 * @param {*} data - The data to send with the event.
+	 * @param {object} [options] - Additional options for the emit operation.
+	 * @return {boolean} Returns `true` if the event had listeners; otherwise, `false`.
+	 *
+	 * @property {Function} on - Adds an event listener for an event in the namespace.
+	 * @param {string} event - The name of the event to listen for (without the namespace prefix).
+	 * @param {Function} callback - The callback function to execute when the event is triggered.
+	 * @param {object} [options] - Additional options for registering the listener.
+	 * @return {void}
+	 *
+	 * @property {Function} once - Adds a one-time event listener for an event in the namespace.
+	 * @param {string} event - The name of the event to listen for (without the namespace prefix).
+	 * @param {Function} callback - The callback function to execute when the event is triggered.
+	 * @param {object} [options] - Additional options for registering the listener.
+	 * @return {void}
+	 *
+	 * @property {Function} off - Removes an event listener for an event in the namespace.
+	 * @param {string} event - The name of the event to stop listening for (without the namespace prefix).
+	 * @param {Function} callback - The callback function to remove.
+	 * @return {void}
+	 *
+	 * @property {Function} removeAllListeners - Removes all event listeners for a specific event or all events in the namespace.
+	 * @param {string} [event] - If provided, removes listeners for this specific event (without the namespace prefix). If not provided, removes all listeners within the namespace.
+	 * @return {number} The total number of removed listeners.
 	 */
 	namespace(namespace) {
 
@@ -266,14 +304,13 @@ class EventBus {
 		};
 	}
 
-	// =====================================================
-	// PUBLIC API - Utilities
-	// =====================================================
 
 	/**
-	 * Gets statistics about the event bus.
+	 * Retrieves statistics about the current state of the event listeners and history.
 	 *
-	 * @return {Object} Statistics object.
+	 * @return {Object} An object containing statistics including total number of events, total listeners,
+	 *                  a breakdown of listener count per event, the size of the event history,
+	 *                  maximum number of allowed listeners, and the debug mode status.
 	 */
 	getStats() {
 
@@ -296,22 +333,24 @@ class EventBus {
 		};
 	}
 
+
 	/**
-	 * Gets recent event history.
+	 * Retrieves a subset of the event history.
 	 *
-	 * @param {number} limit - Maximum number of events to return.
-	 * @return {Array} Array of recent events.
+	 * @param {number} [limit=10] - The maximum number of most recent events to retrieve. Optional, defaults to 10.
+	 * @return {Array} - An array containing the most recent events up to the specified limit.
 	 */
 	getHistory(limit = 10) {
 
 		return this._eventHistory.slice(-limit);
 	}
 
+
 	/**
-	 * Enables or disables debug logging.
+	 * Enables or disables debug logging for the application.
 	 *
-	 * @param {boolean} enabled - Whether debug logging is enabled.
-	 * @return {void}
+	 * @param {boolean} enabled - A boolean flag indicating whether debug logging should be enabled.
+	 * @return {void} No return value.
 	 */
 	setDebug(enabled) {
 
@@ -319,12 +358,13 @@ class EventBus {
 		this._debugLog(`Debug logging ${enabled ? 'enabled' : 'disabled'}`);
 	}
 
+
 	/**
-	 * Waits for a specific event to be emitted.
+	 * Waits for a specific event to occur within a given timeout period.
 	 *
-	 * @param {string} event - Event name.
-	 * @param {number} timeout - Timeout in milliseconds.
-	 * @return {Promise<*>} Promise that resolves with event data.
+	 * @param {string} event - The name of the event to wait for.
+	 * @param {number} [timeout=5000] - The maximum time to wait for the event in milliseconds. Defaults to 5000ms.
+	 * @return {Promise<any>} A promise that resolves with the data emitted by the event, or rejects with an error if the timeout is reached before the event occurs.
 	 */
 	waitFor(event, timeout = 5000) {
 
@@ -343,18 +383,26 @@ class EventBus {
 		});
 	}
 
-	// =====================================================
-	// PRIVATE METHODS
-	// =====================================================
 
 	/**
-	 * Notifies a list of listeners about an event.
+	 * Notifies a set of listeners with the provided event and data.
 	 *
-	 * @param {Array} listeners - Array of listener objects.
-	 * @param {string} event - Event name.
-	 * @param {*} data - Event data.
-	 * @param {Object} options - Emission options.
-	 * @return {Object} Notification result.
+	 * This method iterates through the list of listeners and invokes their callback functions
+	 * to handle a specified event. Listeners can be notified either synchronously or asynchronously.
+	 * Errors during notification can be logged or suppressed based on the provided options.
+	 *
+	 * @param {Array} listeners - An array of listener objects, each containing `id`, `callback`,
+	 *                            and `context` properties.
+	 * @param {string} event - Name of the event to be dispatched to all listeners.
+	 * @param {*} data - Data to be provided to each listener's callback function during notification.
+	 * @param {Object} options - Configuration options for notifications. May include:
+	 *                           `async` (boolean): Whether listeners should be notified asynchronously.
+	 *                           `suppressErrors` (boolean): Whether to suppress error logging for listener failures.
+	 *
+	 * @return {Object} Returns an object containing:
+	 *                  `count` (number): The number of successfully notified listeners.
+	 *                  `errors` (Array): A list of errors encountered during listener notifications. Each error object
+	 *                                   contains `listenerId` (ID of the listener), `error` (error message), and `stack` (stack trace).
 	 */
 	_notifyListeners(listeners, event, data, options) {
 
@@ -386,14 +434,15 @@ class EventBus {
 			}
 		}
 
-		return { count, errors };
+		return {count, errors};
 	}
 
+
 	/**
-	 * Gets listeners that match wildcard patterns.
+	 * Retrieves listeners that match a given event using wildcard patterns.
 	 *
-	 * @param {string} event - Event name.
-	 * @return {Array} Array of matching listeners.
+	 * @param {string} event - The event name to match against wildcard patterns.
+	 * @return {Array<Function>} An array of listener functions that match the given event.
 	 */
 	_getWildcardListeners(event) {
 
@@ -408,12 +457,13 @@ class EventBus {
 		return matchingListeners;
 	}
 
+
 	/**
-	 * Checks if an event name matches a wildcard pattern.
+	 * Checks whether a given event string matches a specified wildcard pattern.
 	 *
-	 * @param {string} event - Event name.
-	 * @param {string} pattern - Wildcard pattern.
-	 * @return {boolean} True if event matches pattern.
+	 * @param {string} event - The event string to be tested against the pattern.
+	 * @param {string} pattern - The wildcard pattern to test the event against. A '*' matches any sequence of characters.
+	 * @return {boolean} Returns true if the event matches the pattern, otherwise false.
 	 */
 	_matchesPattern(event, pattern) {
 
@@ -428,14 +478,15 @@ class EventBus {
 		return regex.test(event);
 	}
 
+
 	/**
-	 * Adds an event to the history.
+	 * Adds an event to the event history while maintaining the maximum history size.
 	 *
-	 * @param {string} event - Event name.
-	 * @param {*} data - Event data.
-	 * @param {number} timestamp - Timestamp.
-	 * @param {string} emissionId - Emission ID.
-	 * @return {void}
+	 * @param {string} event - The name of the event being added to the history.
+	 * @param {Object} data - The data associated with the event.
+	 * @param {number} timestamp - The timestamp indicating when the event occurred.
+	 * @param {string} emissionId - A unique identifier for the event emission.
+	 * @return {void} This method does not return a value.
 	 */
 	_addToHistory(event, data, timestamp, emissionId) {
 
@@ -452,31 +503,37 @@ class EventBus {
 		}
 	}
 
+
 	/**
-	 * Generates a unique listener ID.
+	 * Generates a unique identifier for a listener.
 	 *
-	 * @return {string} Unique listener ID.
+	 * The identifier is composed of the current timestamp and a random alphanumeric string.
+	 *
+	 * @return {string} A unique listener ID in the format `listener_<timestamp>_<randomString>`.
 	 */
 	_generateListenerId() {
 
 		return `listener_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 	}
 
+
 	/**
-	 * Generates a unique emission ID.
+	 * Generates a unique identifier for an emission by combining a timestamp and a random string.
+	 * The identifier is prefixed with 'emission_'.
 	 *
-	 * @return {string} Unique emission ID.
+	 * @return {string} A unique emission identifier.
 	 */
 	_generateEmissionId() {
 
 		return `emission_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 	}
 
+
 	/**
-	 * Logs debug messages if debug mode is enabled.
+	 * Logs a debug message to the console if debugging is enabled.
 	 *
-	 * @param {string} message - Debug message.
-	 * @param {...*} args - Additional arguments.
+	 * @param {string} message - The main message to log.
+	 * @param {...any} args - Additional arguments to be interpolated into the log.
 	 * @return {void}
 	 */
 	_debugLog(message, ...args) {
@@ -486,14 +543,12 @@ class EventBus {
 		}
 	}
 
-	// =====================================================
-	// PUBLIC METHODS - Lifecycle
-	// =====================================================
 
 	/**
-	 * Cleanup method for proper disposal.
+	 * Destroys the EventBus by removing all listeners and clearing the event history.
+	 * Logs the total number of listeners and events before destruction.
 	 *
-	 * @return {void}
+	 * @return {void} No value is returned.
 	 */
 	destroy() {
 

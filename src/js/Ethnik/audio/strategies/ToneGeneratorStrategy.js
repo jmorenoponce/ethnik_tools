@@ -2,17 +2,20 @@
 import AudioPlaybackStrategy from './AudioPlaybackStrategy.js';
 
 /**
- * Fallback tone generator strategy using visual feedback
+ * Represents a strategy for generating and displaying a visual tone
+ * representation using ANSI characters. This class is a fallback
+ * implementation of the `AudioPlaybackStrategy` that does not produce
+ * actual audio but instead outputs visual symbols to indicate tones.
  */
 class ToneGeneratorStrategy extends AudioPlaybackStrategy {
 
 	/**
-	 * Generate a visual tone representation using ANSI characters.
+	 * Plays a sound character based on the given type, frequency, and duration.
 	 *
-	 * @param {string} type - Not used but kept for interface consistency.
-	 * @param {number} frequency - The frequency determines the visual intensity.
-	 * @param {number} duration - Not used but kept for interface consistency.
-	 * @return {Promise<void>} A promise that resolves immediately.
+	 * @param {string} type - The type of sound or tick to be played.
+	 * @param {number} frequency - The frequency of the sound in Hertz, which determines its intensity.
+	 * @param {number} duration - The duration of the sound in milliseconds.
+	 * @return {Promise<void>} A promise that resolves when the tick playback is complete.
 	 */
 	async playTick(type, frequency, duration) {
 
@@ -23,9 +26,9 @@ class ToneGeneratorStrategy extends AudioPlaybackStrategy {
 
 
 	/**
-	 * Tone generator is always available as a fallback.
+	 * Checks if the required condition or resource is available.
 	 *
-	 * @return {Promise<boolean>} A promise that resolves to true.
+	 * @return {Promise<boolean>} A promise that resolves to true if the condition or resource is available, otherwise false.
 	 */
 	async isAvailable() {
 

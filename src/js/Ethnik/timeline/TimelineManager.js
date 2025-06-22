@@ -1,20 +1,18 @@
-import { performance } from 'perf_hooks';
+import {performance} from 'perf_hooks';
 import PatternLibrary from './patterns/PatternLibrary.js';
 import BasicTrainingFactory from "./factories/BasicTrainingFactory.js";
 import RhythmChallengeFactory from "./factories/RhythmChallengeFactory.js";
 import TempoCrescendoFactory from "./factories/TempoCrescendoFactory.js";
 
 
-/**
- * Manages timeline-based training sessions with multiple sections and patterns.
- * Refactored to use separate Factory and Pattern classes.
- */
 class TimelineManager {
 
 	/**
-	 * Constructor for initializing the timeline manager with core functionalities and factories.
+	 * Creates an instance of the class with the provided core and initializes
+	 * the necessary properties and components for managing timelines, sections,
+	 * and schedules.
 	 *
-	 * @param {Object} core - The core instance providing essential dependencies.
+	 * @param {Object} core - The core dependency required for initializing the class functionality.
 	 * @return {void}
 	 */
 	constructor(core) {
@@ -37,9 +35,9 @@ class TimelineManager {
 
 
 	/**
-	 * Creates and configures timeline factory instances.
+	 * Creates and initializes a collection of timeline factories with their respective pattern libraries.
 	 *
-	 * @return {Map} Map of factory names to factory instances.
+	 * @return {Map<string, Object>} A map where the keys represent factory types and the values are the corresponding factory instances.
 	 */
 	_createTimelineFactories() {
 
@@ -63,11 +61,12 @@ class TimelineManager {
 		return factories;
 	}
 
+
 	/**
-	 * Loads a preset timeline using the appropriate factory.
+	 * Loads a preset timeline based on the provided type.
 	 *
-	 * @param {string} type - The type of preset timeline to load.
-	 * @return {boolean} Returns true if the preset timeline was successfully loaded.
+	 * @param {string} type The type of timeline preset to load.
+	 * @return {boolean} Returns true if the timeline was successfully loaded, false if the preset was not found or an error occurred.
 	 */
 	loadPresetTimeline(type) {
 
@@ -94,9 +93,12 @@ class TimelineManager {
 
 
 	/**
-	 * Starts the timeline if a timeline is loaded.
+	 * Starts the currently loaded timeline, if available. Ensures that the timeline runs under specific conditions,
+	 * such as not playing concurrently with an active metronome. Logs status messages and initializes timeline settings
+	 * before starting the next section.
 	 *
-	 * @return {Promise<boolean>} A promise that resolves to true if the timeline successfully starts.
+	 * @return {Promise<boolean>} A promise that resolves to true if the timeline is successfully started,
+	 * or false if no timeline is loaded or if the metronome is currently playing.
 	 */
 	async startTimeline() {
 
@@ -123,9 +125,16 @@ class TimelineManager {
 
 
 	/**
-	 * Starts the next section of the timeline.
+	 * Initiates and transitions to the next section in the current timeline. Cleans up the previous section,
+	 * processes the current section data, and schedules the transition to the next section.
 	 *
-	 * @return {Promise<void>} Resolves when the section setup is complete.
+	 * The method checks if the end of the timeline is reached and, if so, finishes the timeline. Otherwise,
+	 * it retrieves the current section information, logs details such as duration, BPM, pattern, and optional
+	 * description, and determines whether the section is silent or requires pattern playback. Schedules
+	 * the next section accordingly.
+	 *
+	 * @return {Promise<void>} Resolves when the method completes processing the current section and
+	 * schedules the transition to the next section.
 	 */
 	async _startNextSection() {
 
@@ -162,10 +171,16 @@ class TimelineManager {
 
 
 	/**
-	 * Initiates the playback of a specific pattern based on the provided section.
+	 * Starts the playback of a specified pattern within a section.
 	 *
-	 * @param {Object} section - The section object containing pattern information.
-	 * @return {Promise<void>} A promise that resolves when the pattern playback setup is complete.
+	 * The method retrieves the required pattern from the pattern library based on the provided section's pattern name.
+	 * If the pattern is not found, it falls back to a default pattern and logs a warning.
+	 * Once a pattern is determined, the method applies the section's configuration to the core
+	 * and initiates the pattern scheduler for playback.
+	 *
+	 * @param {Object} section - The section object containing configuration and pattern information.
+	 * @param {string} section.pattern - The name of the pattern to be played.
+	 * @return {Promise<void>} A promise indicating the completion of the playback start process.
 	 */
 	async _startPatternPlayback(section) {
 
@@ -185,10 +200,14 @@ class TimelineManager {
 
 
 	/**
-	 * Applies section configuration to the core metronome.
+	 * Applies the properties of the given section to the core object.
 	 *
-	 * @param {Object} section - Section configuration to apply.
-	 * @return {void} No return value.
+	 * @param {Object} section - The section object containing BPM, division, accent, and pattern information.
+	 * @param {number} section.bpm - The beats per minute value to apply to the core.
+	 * @param {string} section.division - The rhythmic division value to apply to the core.
+	 * @param {string} section.accent - The accent pattern to apply to the core.
+	 * @param {Array} section.pattern - The pattern data to apply to the core.
+	 * @return {void} This method does not return any value.
 	 */
 	_applySectionToCore(section) {
 
@@ -200,11 +219,14 @@ class TimelineManager {
 
 
 	/**
-	 * Starts a pattern scheduler for the given section and pattern.
+	 * Starts a scheduler to play a given musical pattern based on the specified section properties.
 	 *
-	 * @param {Object} section - The section object containing BPM and division information.
-	 * @param {Object} pattern - The pattern object containing beats and accents.
-	 * @return {void} No return value.
+	 * @param {Object} section - The section object containing tempo and structure information.
+	 * @param {number} section.bpm - Beats per minute for the section.
+	 * @param {number} section.division - The number of divisions for the section's timing.
+	 * @param {Object} pattern - The pattern object containing beat sequence and arrangement details.
+	 * @param {Array} pattern.beats - Array representing the sequence of beats in the pattern.
+	 * @return {void} This method does not return a value but schedules the pattern playback at intervals.
 	 */
 	_startPatternScheduler(section, pattern) {
 
@@ -235,11 +257,11 @@ class TimelineManager {
 
 
 	/**
-	 * Plays a single beat in the pattern.
+	 * Plays a specific beat from the given pattern at the specified index, providing both audio and visual feedback.
 	 *
 	 * @param {Object} pattern - The pattern object containing beats and accents.
-	 * @param {number} patternIndex - Current index in the pattern.
-	 * @return {void} No return value.
+	 * @param {number} patternIndex - The index of the beat within the pattern to play.
+	 * @return {void}
 	 */
 	_playPatternBeat(pattern, patternIndex) {
 
@@ -263,62 +285,91 @@ class TimelineManager {
 
 
 	/**
-	 * Gets the appropriate frequency for an accent level.
+	 * Determines the frequency value corresponding to a given accent level.
+	 *
+	 * @param {number} accent - The accent level where:
+	 *                          2 represents a downbeat,
+	 *                          1 represents a beat,
+	 *                          other values represent a subdivision.
+	 * @return {number} The frequency value associated with the provided accent.
 	 */
 	_getFrequencyForAccent(accent) {
 
 		switch (accent) {
-			case 2: return 1000; // Downbeat
-			case 1: return 800;  // Beat
-			default: return 600; // Subdivision
+			case 2:
+				return 1000; // Downbeat
+			case 1:
+				return 800;  // Beat
+			default:
+				return 600; // Subdivision
 		}
 	}
 
 
 	/**
-	 * Gets the appropriate duration for an accent level.
+	 * Determines the duration corresponding to the given accent level.
+	 *
+	 * @param {number} accent - The accent level. Accepts 2 for downbeat, 1 for beat, or other values for subdivision.
+	 * @return {number} The duration in milliseconds corresponding to the specified accent level.
 	 */
 	_getDurationForAccent(accent) {
 
 		switch (accent) {
-			case 2: return 120; // Downbeat
-			case 1: return 100; // Beat
-			default: return 80; // Subdivision
+			case 2:
+				return 120; // Downbeat
+			case 1:
+				return 100; // Beat
+			default:
+				return 80; // Subdivision
 		}
 	}
 
 
 	/**
-	 * Gets the appropriate tick type for an accent level.
+	 * Determines the tick type based on the accent value provided.
+	 *
+	 * @param {number} accent - The accent level that defines the tick type. Valid values are 2 for 'downbeat', 1 for 'beat', or any other for 'subdivision'.
+	 * @return {string} Returns the tick type as a string: 'downbeat', 'beat', or 'subdivision'.
 	 */
 	_getTickTypeForAccent(accent) {
 
 		switch (accent) {
-			case 2: return 'downbeat';
-			case 1: return 'beat';
-			default: return 'subdivision';
+			case 2:
+				return 'downbeat';
+			case 1:
+				return 'beat';
+			default:
+				return 'subdivision';
 		}
 	}
 
 
 	/**
-	 * Gets the appropriate visual symbol for an accent level.
+	 * Determines and returns the appropriate symbol based on the given accent value.
+	 *
+	 * @param {number} accent - The accent level, typically 0, 1, or 2, representing different types of beats.
+	 * @return {string} The corresponding symbol for the given accent. Returns '🔴' for downbeat (2), '🔵' for beat (1), and '⚪' for subdivision (default case).
 	 */
 	_getSymbolForAccent(accent) {
 
 		switch (accent) {
-			case 2: return '🔴'; // Downbeat
-			case 1: return '🔵'; // Beat
-			default: return '⚪'; // Subdivision
+			case 2:
+				return '🔴'; // Downbeat
+			case 1:
+				return '🔵'; // Beat
+			default:
+				return '⚪'; // Subdivision
 		}
 	}
 
 
 	/**
-	 * Schedules a silent section.
+	 * Schedules a silent section for a specified duration and provides visual feedback for each beat.
 	 *
-	 * @param {Object} section - The section configuration object.
-	 * @return {void} No return value.
+	 * @param {Object} section - The section object containing duration and BPM (beats per minute) information.
+	 * @param {number} section.duration - The duration of the silent section in measures.
+	 * @param {number} section.bpm - The tempo in beats per minute.
+	 * @return {void} This method does not return a value.
 	 */
 	_scheduleSilentSection(section) {
 
@@ -346,7 +397,9 @@ class TimelineManager {
 
 
 	/**
-	 * Cleans up resources from the current section.
+	 * Cleans up the current section by clearing the existing scheduler, if any, and setting it to null.
+	 *
+	 * @return {void} Does not return any value.
 	 */
 	_cleanupCurrentSection() {
 
@@ -358,7 +411,13 @@ class TimelineManager {
 
 
 	/**
-	 * Schedules the transition to the next section.
+	 * Schedules the next section to be played by calculating the duration of the current section
+	 * and setting a timeout to start the next section.
+	 *
+	 * @param {Object} section - The section object containing information about the current section.
+	 * @param {number} section.duration - The duration of the section in beats.
+	 * @param {number} section.bpm - The beats per minute (tempo) of the section.
+	 * @return {void} This method does not return a value.
 	 */
 	_scheduleNextSection(section) {
 
@@ -372,7 +431,10 @@ class TimelineManager {
 
 
 	/**
-	 * Finalizes the timeline.
+	 * Finalizes the current timeline by stopping the timeline tracking process,
+	 * calculating the total elapsed time, and logging a summary of the timeline details.
+	 *
+	 * @return {void} This method does not return a value.
 	 */
 	_finishTimeline() {
 
@@ -389,7 +451,10 @@ class TimelineManager {
 
 
 	/**
-	 * Stops the timeline if it is currently active.
+	 * Stops the timeline playback if it is currently active.
+	 *
+	 * @return {boolean} Returns true if the timeline was successfully stopped.
+	 * Returns false if the timeline was not active.
 	 */
 	stopTimeline() {
 
@@ -405,7 +470,12 @@ class TimelineManager {
 
 
 	/**
-	 * Internal method to stop timeline and clean up resources.
+	 * Stops the timeline mode and performs necessary cleanup operations.
+	 *
+	 * This method disables the timeline mode by resetting the internal state,
+	 * cleans up the current section, and clears any active section timer.
+	 *
+	 * @return {void} No return value.
 	 */
 	_stopTimeline() {
 
@@ -420,7 +490,10 @@ class TimelineManager {
 
 
 	/**
-	 * Retrieves and logs the current status of the timeline.
+	 * Retrieves and logs the current status of the timeline, including timeline details,
+	 * current section information, elapsed time, and progress percentage.
+	 *
+	 * @return {void} This method does not return any value. It logs the timeline status to the console.
 	 */
 	getTimelineStatus() {
 
@@ -449,7 +522,11 @@ class TimelineManager {
 
 
 	/**
-	 * Skips to the next section in the timeline.
+	 * Skips the current section and proceeds to the next section in timeline mode.
+	 * If the timeline mode is not active, the method will log a message and return false.
+	 * The current section timer is cleared before moving to the next section.
+	 *
+	 * @return {boolean} Returns true if the operation is successful and the next section is initiated, otherwise returns false.
 	 */
 	skipToNextSection() {
 
@@ -473,7 +550,9 @@ class TimelineManager {
 
 
 	/**
-	 * Gets available timeline types.
+	 * Retrieves the available timeline types from the internal timeline factories.
+	 *
+	 * @return {Array} An array of strings representing the available timeline types.
 	 */
 	getAvailableTimelineTypes() {
 
@@ -482,9 +561,9 @@ class TimelineManager {
 
 
 	/**
-	 * Gets the pattern library instance.
+	 * Retrieves the pattern library associated with the current instance.
 	 *
-	 * @return {PatternLibrary} The pattern library.
+	 * @return {Object} The pattern library object.
 	 */
 	getPatternLibrary() {
 
@@ -493,11 +572,12 @@ class TimelineManager {
 
 
 	/**
-	 * Adds a new timeline factory.
+	 * Adds a timeline factory to the internal collection and associates it with a given name.
+	 * If the factory supports setting a pattern library, it is configured with the current pattern library.
 	 *
-	 * @param {string} name - Factory name.
-	 * @param {TimelineFactory} factory - Factory instance.
-	 * @return {boolean} True if added successfully.
+	 * @param {string} name - The unique identifier for the timeline factory.
+	 * @param {Object} factory - The factory object to be added, which may have a `setPatternLibrary` method.
+	 * @return {boolean} Returns true if the factory was successfully added.
 	 */
 	addTimelineFactory(name, factory) {
 
@@ -510,9 +590,9 @@ class TimelineManager {
 
 
 	/**
-	 * Gets timeline information.
+	 * Retrieves the information of the current timeline.
 	 *
-	 * @return {Object|null} Current timeline info or null.
+	 * @return {Object|null} An object containing the current timeline's details such as name, type, total sections, total duration, current section index, active status, and creation date, or null if no timeline is active.
 	 */
 	getCurrentTimelineInfo() {
 
@@ -531,9 +611,9 @@ class TimelineManager {
 
 
 	/**
-	 * Determines whether the application is currently in timeline mode.
+	 * Determines if the current mode is set to timeline mode.
 	 *
-	 * @return {boolean} True if the application is in timeline mode.
+	 * @return {boolean} Returns true if the current mode is timeline mode, otherwise false.
 	 */
 	get isTimelineMode() {
 
@@ -542,8 +622,7 @@ class TimelineManager {
 
 
 	/**
-	 * Cleanup method to be called when the manager is no longer needed.
-	 *
+	 * Cleans up and releases resources used by the instance. This method stops any active timelines, resets the current timeline, and clears all tracks and timeline factories associated with the instance.
 	 * @return {void} No return value.
 	 */
 	destroy() {
