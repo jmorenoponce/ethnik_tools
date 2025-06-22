@@ -550,6 +550,32 @@ class Settings {
 	}
 
 
+	static tapTempoConstants = {
+		// Configuración básica
+		maxTapHistory: 8,           // Máximo número de taps almacenados
+		minTapsForCalculation: 2,   // Mínimo taps necesarios para BPM
+
+		// Configuración de precisión
+		accuracyWindow: 0.5,        // Ventana de precisión para filtrar outliers (50%)
+		outlierDetection: true,     // Activar detección de outliers
+
+		// Configuración de validación
+		minValidBpm: 30,           // BPM mínimo considerado válido para tap tempo
+		maxValidBpm: 300,          // BPM máximo considerado válido para tap tempo
+
+		// Configuración de estadísticas
+		useMedian: true,           // Usar mediana en lugar de promedio para mejor precisión
+		smoothingFactor: 0.1,      // Factor de suavizado para cambios de BPM
+
+		// Configuración de confianza
+		confidenceFactors: {
+			tapWeight: 15,         // Peso por tap en cálculo de confianza
+			maxTapConfidence: 100, // Máxima confianza por número de taps
+			consistencyWeight: 1   // Peso de la consistencia en confianza
+		}
+	};
+
+
 	/**
 	 * Represents a mapping of tempo names to their corresponding BPM (Beats Per Minute) ranges.
 	 * Each property of the object corresponds to a tempo name, with the value being an array
