@@ -8,6 +8,28 @@ class Settings {
 
 	static debug = false;
 
+	static audioConstants = {
+
+		frequencies: {
+			downbeat: 1000,
+			beat: 800,
+			subdivision: 600
+		},
+		durations: {
+			downbeat: 120,
+			beat: 100,
+			subdivision: 80
+		}
+	};
+
+	static performanceConstants = {
+
+		driftWarningThreshold: 10,
+		highSeverityThreshold: 20,
+		debounceTime: 50
+	};
+
+
 	/**
 	 * An object containing the default configuration parameters for the application.
 	 *

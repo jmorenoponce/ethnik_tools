@@ -3,6 +3,8 @@ import PatternLibrary from './patterns/PatternLibrary.js';
 import BasicTrainingFactory from "./factories/BasicTrainingFactory.js";
 import RhythmChallengeFactory from "./factories/RhythmChallengeFactory.js";
 import TempoCrescendoFactory from "./factories/TempoCrescendoFactory.js";
+import Settings from "../core/Settings.js";
+import TickConfiguration from '../audio/TickConfiguration.js';
 
 
 class TimelineManager {
@@ -257,11 +259,13 @@ class TimelineManager {
 
 
 	/**
-	 * Plays a specific beat from the given pattern at the specified index, providing both audio and visual feedback.
+	 * Plays a specific beat from the given rhythm pattern using the specified pattern index.
 	 *
-	 * @param {Object} pattern - The pattern object containing beats and accents.
-	 * @param {number} patternIndex - The index of the beat within the pattern to play.
-	 * @return {void}
+	 * @param {Object} pattern - The rhythm pattern containing beats and accents.
+	 * @param {number[]} pattern.beats - An array of beats, where a positive value indicates a beat to be played.
+	 * @param {number[]} pattern.accents - An array of accents corresponding to the beats, defining their characteristics.
+	 * @param {number} patternIndex - The index of the beat in the pattern to be played.
+	 * @return {void} This method does not return a value.
 	 */
 	_playPatternBeat(pattern, patternIndex) {
 
@@ -269,96 +273,17 @@ class TimelineManager {
 		const accent = pattern.accents[patternIndex];
 
 		if (beat > 0) {
-			const frequency = this._getFrequencyForAccent(accent);
-			const duration = this._getDurationForAccent(accent);
-			const tickType = this._getTickTypeForAccent(accent);
+			const frequency = TickConfiguration.getFrequency(accent);
+			const duration = TickConfiguration.getDuration(accent);
+			const tickType = TickConfiguration.getTickType(accent);
 
 			this._core._audioEngine.playTick(tickType, frequency, duration);
 
 			// Visual feedback
-			const symbol = this._getSymbolForAccent(accent);
+			const symbol = TickConfiguration.getSymbol(accent);
 			process.stdout.write(symbol + ' ');
 		} else {
 			process.stdout.write('⚫ '); // Silence in pattern
-		}
-	}
-
-
-	/**
-	 * Determines the frequency value corresponding to a given accent level.
-	 *
-	 * @param {number} accent - The accent level where:
-	 *                          2 represents a downbeat,
-	 *                          1 represents a beat,
-	 *                          other values represent a subdivision.
-	 * @return {number} The frequency value associated with the provided accent.
-	 */
-	_getFrequencyForAccent(accent) {
-
-		switch (accent) {
-			case 2:
-				return 1000; // Downbeat
-			case 1:
-				return 800;  // Beat
-			default:
-				return 600; // Subdivision
-		}
-	}
-
-
-	/**
-	 * Determines the duration corresponding to the given accent level.
-	 *
-	 * @param {number} accent - The accent level. Accepts 2 for downbeat, 1 for beat, or other values for subdivision.
-	 * @return {number} The duration in milliseconds corresponding to the specified accent level.
-	 */
-	_getDurationForAccent(accent) {
-
-		switch (accent) {
-			case 2:
-				return 120; // Downbeat
-			case 1:
-				return 100; // Beat
-			default:
-				return 80; // Subdivision
-		}
-	}
-
-
-	/**
-	 * Determines the tick type based on the accent value provided.
-	 *
-	 * @param {number} accent - The accent level that defines the tick type. Valid values are 2 for 'downbeat', 1 for 'beat', or any other for 'subdivision'.
-	 * @return {string} Returns the tick type as a string: 'downbeat', 'beat', or 'subdivision'.
-	 */
-	_getTickTypeForAccent(accent) {
-
-		switch (accent) {
-			case 2:
-				return 'downbeat';
-			case 1:
-				return 'beat';
-			default:
-				return 'subdivision';
-		}
-	}
-
-
-	/**
-	 * Determines and returns the appropriate symbol based on the given accent value.
-	 *
-	 * @param {number} accent - The accent level, typically 0, 1, or 2, representing different types of beats.
-	 * @return {string} The corresponding symbol for the given accent. Returns '🔴' for downbeat (2), '🔵' for beat (1), and '⚪' for subdivision (default case).
-	 */
-	_getSymbolForAccent(accent) {
-
-		switch (accent) {
-			case 2:
-				return '🔴'; // Downbeat
-			case 1:
-				return '🔵'; // Beat
-			default:
-				return '⚪'; // Subdivision
 		}
 	}
 

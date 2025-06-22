@@ -105,14 +105,18 @@ class AudioEngine {
 
 
 	/**
-	 * Calibrates the latency by measuring the time taken to execute a specific operation and logging the estimated latency.
+	 * Calibrates the audio playback latency by measuring the time difference
+	 * between initiating a playback tick and the recorded performance time.
 	 *
-	 * @return {void} This method does not return a value.
+	 * @return {void} This method does not return a value. It sets the `_latencyCompensation`
+	 * property with the estimated latency in milliseconds.
 	 */
 	_calibrateLatency() {
 
 		const calibrationStart = performance.now();
-		this._currentStrategy.playTick('calibration', 440, 50);
+		const calibrationFreq = Settings.audioConstants.frequencies.beat;
+		const calibrationDuration = Settings.audioConstants.durations.subdivision;
+		this._currentStrategy.playTick('calibration', calibrationFreq, calibrationDuration);
 		this._latencyCompensation = performance.now() - calibrationStart;
 		console.log(`🎛️  Estimated latency: ${this._latencyCompensation.toFixed(2)}ms`);
 	}

@@ -1,5 +1,6 @@
 
 import AudioPlaybackStrategy from './AudioPlaybackStrategy.js';
+import Settings from "../../core/Settings.js";
 
 /**
  * Represents a strategy for generating and displaying a visual tone
@@ -19,8 +20,12 @@ class ToneGeneratorStrategy extends AudioPlaybackStrategy {
 	 */
 	async playTick(type, frequency, duration) {
 
-		const intensity = Math.floor((frequency / 1000) * 10);
-		const char = '♪♫♬'[Math.min(intensity, 2)];
+		const maxFrequency = Settings.audioConstants.frequencies.downbeat; // 1000
+		const intensityLevels = 10;
+		const maxCharIndex = 2;
+
+		const intensity = Math.floor((frequency / maxFrequency) * intensityLevels);
+		const char = '♪♫♬'[Math.min(intensity, maxCharIndex)];
 		process.stdout.write(char);
 	}
 

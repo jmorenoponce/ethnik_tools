@@ -1,5 +1,6 @@
 import {performance} from 'perf_hooks';
 import Settings from './Settings.js';
+import TickConfiguration from '../audio/TickConfiguration.js';
 
 /**
  * MetronomeEngine is responsible for handling the logic of a metronome, including playback control, configuration settings, and timing functionality.
@@ -407,18 +408,18 @@ class MetronomeEngine {
 
 
 	/**
-	 * Calculates and returns the tick information for the current state of the beat or rhythm.
-	 * This includes properties like type of beat (downbeat, beat, subdivision), frequency,
-	 * duration, and whether the current tick is a downbeat or a strong beat.
+	 * Calculates and returns information about the current tick based on the beats per minute (BPM),
+	 * musical division, and performance monitoring statistics. It determines properties such as
+	 * the tick type, frequency, duration, and whether the tick is a downbeat or a strong beat.
 	 *
-	 * @return {Object} The calculated tick info containing:
-	 * - type {string}: The type of beat (e.g., 'subdivision', 'downbeat', 'beat').
-	 * - frequency {number}: The frequency of the tick sound in Hz.
-	 * - duration {number}: The duration of the tick sound in milliseconds.
-	 * - isDownbeat {boolean}: Whether the current tick is a downbeat.
-	 * - isStrongBeat {boolean}: Whether the current tick is a strong beat.
-	 * - beatInMeasure {number}: The current beat position in the measure.
-	 * - tickCount {number}: The cumulative count of ticks.
+	 * @return {Object} An object containing the following properties:
+	 *  - {string} type: The type of the tick, determined by its accent level.
+	 *  - {number} frequency: The associated frequency for the tick.
+	 *  - {number} duration: The duration of the tick.
+	 *  - {boolean} isDownbeat: Whether the tick is a downbeat.
+	 *  - {boolean} isStrongBeat: Whether the tick is a strong beat.
+	 *  - {number} beatInMeasure: The position of the beat within the current measure.
+	 *  - {number} tickCount: The total number of ticks processed.
 	 */
 	_calculateTickInfo() {
 
@@ -428,24 +429,18 @@ class MetronomeEngine {
 		const isDownbeat = beatInMeasure === 1;
 		const isStrongBeat = beatInMeasure % this._division === 1;
 
-		let type = 'subdivision';
-		let frequency = 600;
-		let duration = 80;
-
+		// Determine accent level
+		let accent = 0; // subdivision
 		if (isDownbeat && this._accent) {
-			type = 'downbeat';
-			frequency = 1000;
-			duration = 120;
+			accent = 2; // downbeat
 		} else if (isStrongBeat && this._accent) {
-			type = 'beat';
-			frequency = 800;
-			duration = 100;
+			accent = 1; // beat
 		}
 
 		return {
-			type,
-			frequency,
-			duration,
+			type: TickConfiguration.getTickType(accent),
+			frequency: TickConfiguration.getFrequency(accent),
+			duration: TickConfiguration.getDuration(accent),
 			isDownbeat,
 			isStrongBeat,
 			beatInMeasure,
@@ -487,24 +482,29 @@ class MetronomeEngine {
 
 
 	/**
-	 * Renders the visual representation of a musical tick based on its properties,
-	 * such as being a downbeat, strong beat, or a subdivision, and displays specific
-	 * counters or messages at intervals.
+	 * Renders a tick based on its position in the rhythm, determining the appropriate symbol and outputting it.
 	 *
-	 * @param {boolean} isDownbeat - Indicates if the current tick is a downbeat.
+	 * @param {boolean} isDownbeat - Determines if the current tick is a downbeat.
 	 * @param {boolean} isStrongBeat - Indicates if the current tick is a strong beat.
-	 * @param {number} tickCount - The current tick count.
+	 * @param {number} tickCount - The count of the current tick within the rhythm.
 	 * @return {void}
 	 */
 	_renderTick(isDownbeat, isStrongBeat, tickCount) {
 
+		// Determine accent level for symbol
+		let accent = 0; // subdivision
 		if (isDownbeat) {
-			process.stdout.write('\n🔴 '); // Downbeat
+			accent = 2; // downbeat
 		} else if (isStrongBeat) {
-			process.stdout.write('🔵 '); // Strong beat
-		} else {
-			process.stdout.write('⚪ '); // Subdivision
+			accent = 1; // beat
 		}
+
+		if (isDownbeat) {
+			process.stdout.write('\n');
+		}
+
+		const symbol = TickConfiguration.getSymbol(accent);
+		process.stdout.write(symbol + ' ');
 
 		// Display counter every 16 ticks
 		if (tickCount % 16 === 0) {

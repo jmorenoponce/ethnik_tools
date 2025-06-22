@@ -2,7 +2,7 @@ import {performance} from 'perf_hooks';
 import Settings from "./Settings.js";
 import ConsoleManager from "../interface/ConsoleManager.js";
 import TimelineManager from "../timeline/TimelineManager.js";
-import PerformanceMonitor from "../managers/PerformanceMonitor.js";
+import PerformanceMonitor from "../audio/PerformanceMonitor.js";
 import TapTempoManager from "../managers/TapTempoManager.js";
 import PresetFactory from "../factories/PresetFactory.js";
 import {AudioEngine} from "../audio/AudioEngine.js";

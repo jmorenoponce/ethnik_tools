@@ -1,5 +1,6 @@
 import { spawn } from 'child_process';
 import AudioPlaybackStrategy from './AudioPlaybackStrategy.js';
+import Settings from "../../core/Settings.js";
 
 /**
  * Represents a strategy for playing system-level audio feedback like beeps.
@@ -47,11 +48,11 @@ class SystemAudioStrategy extends AudioPlaybackStrategy {
 	 * @return {Promise<boolean>} A promise that resolves to `true` if the platform command is successfully executed, indicating audio output is available; otherwise `false`.
 	 */
 	async isAvailable() {
-
 		try {
-
 			if (process.platform === 'win32') {
-				await this._testCommand('powershell', ['-c', '[Console]::Beep(440, 50)']);
+				const testFreq = Settings.audioConstants.frequencies.beat;
+				const testDuration = Settings.audioConstants.durations.subdivision;
+				await this._testCommand('powershell', ['-c', `[Console]::Beep(${testFreq}, ${testDuration})`]);
 				return true;
 			} else if (process.platform === 'darwin') {
 				await this._testCommand('osascript', ['-e', 'beep 1']);
@@ -60,7 +61,6 @@ class SystemAudioStrategy extends AudioPlaybackStrategy {
 				await this._testCommand('speaker-test', ['--help']);
 				return true;
 			}
-
 		} catch {
 			return false;
 		}

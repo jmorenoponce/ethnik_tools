@@ -102,13 +102,12 @@ class PerformanceMonitor {
 
 
 	/**
-	 * Analyzes the drift history and determines if there is a warning based on the current drift value relative to a threshold.
-	 * The warning includes information about the severity of the drift if applicable.
+	 * Evaluates and provides drift warnings based on the latest drift data.
 	 *
-	 * @return {Object} An object containing the drift warning status:
-	 * - `hasWarning` (boolean): Whether the drift exceeds the defined threshold.
-	 * - `drift` (number): The current drift value if applicable, undefined otherwise.
-	 * - `severity` (string): The severity of the drift ('high', 'medium') if there is a warning, undefined otherwise.
+	 * @return {Object} An object containing the drift warning status and associated details:
+	 * - hasWarning {boolean}: Indicates if the drift exceeds the warning threshold.
+	 * - drift {number}: The current drift value (if applicable).
+	 * - severity {string}: The severity level of the drift ('high' or 'medium') if a warning exists.
 	 */
 	getDriftWarning() {
 
@@ -117,12 +116,12 @@ class PerformanceMonitor {
 		}
 
 		const currentDrift = this._driftHistory[this._driftHistory.length - 1];
-		const threshold = 10; // ms
+		const threshold = Settings.performanceConstants.driftWarningThreshold;
 
 		return {
 			hasWarning: Math.abs(currentDrift) > threshold,
 			drift: currentDrift,
-			severity: Math.abs(currentDrift) > 20 ? 'high' : 'medium'
+			severity: Math.abs(currentDrift) > Settings.performanceConstants.highSeverityThreshold ? 'high' : 'medium'
 		};
 	}
 

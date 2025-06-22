@@ -28,7 +28,7 @@ class ClearCommand extends Command {
 	execute(args) {
 
 		console.clear();
-		this._core._initialize();
+		this._core.initialize();
 	}
 
 

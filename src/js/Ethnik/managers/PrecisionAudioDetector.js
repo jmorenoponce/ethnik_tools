@@ -1,3 +1,5 @@
+import Settings from "../core/Settings.js";
+
 /**
  * The PrecisionAudioDetector class provides mechanisms for audio signal analysis and sound event detection
  * using input from the user's microphone. It supports frequency analysis, visualization of audio levels,
@@ -230,23 +232,20 @@ class PrecisionAudioDetector {
 	 * @return {void} Does not return a value.
 	 */
 	detectSoundEvent(level) {
-
 		const currentTime = performance.now();
 
 		if (level > this.threshold && !this.isInAttack) {
-			// Inicio de ataque detectado
 			this.isInAttack = true;
 			this.attackStartTime = currentTime;
 
-			// Evitar detecciones múltiples muy cercanas (debounce de 50ms)
-			if (currentTime - this.lastDetectionTime > 50) {
+			// Evitar detecciones múltiples muy cercanas
+			if (currentTime - this.lastDetectionTime > Settings.performanceConstants.debounceTime) {
 				this.onSoundDetected(currentTime, level);
 				this.lastDetectionTime = currentTime;
 			}
 		}
 
 		if (level < this.threshold * 0.7 && this.isInAttack) {
-			// Fin de ataque
 			this.isInAttack = false;
 		}
 	}
