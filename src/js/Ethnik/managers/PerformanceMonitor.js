@@ -1,5 +1,5 @@
 import { performance } from 'perf_hooks';
-import Settings from './Settings.js';
+import Settings from '../core/Settings.js';
 
 
 /**

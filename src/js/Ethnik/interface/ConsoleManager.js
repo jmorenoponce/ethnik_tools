@@ -1,5 +1,20 @@
-import { PlayCommand, StopCommand, BpmCommand, DivisionCommand, AccentCommand, PatternCommand, VolumeCommand, PresetCommand, TapCommand, StatusCommand, TimelineCommand, HelpCommand, ClearCommand, ExitCommand } from './commands/index.js';
-import Settings from './Settings.js';
+import {
+	PlayCommand,
+	StopCommand,
+	BpmCommand,
+	DivisionCommand,
+	AccentCommand,
+	PatternCommand,
+	VolumeCommand,
+	PresetCommand,
+	TapCommand,
+	StatusCommand,
+	TimelineCommand,
+	HelpCommand,
+	ClearCommand,
+	ExitCommand
+} from '../commands/CommandsIndex.js';
+import Settings from '../core/Settings.js';
 
 
 /**

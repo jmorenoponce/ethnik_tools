@@ -1,11 +1,11 @@
 import Settings from "./Settings.js";
-import ConsoleManager from "./ConsoleManager.js";
-import { AudioEngine } from "./AudioEngine.js";
+import ConsoleManager from "../interface/ConsoleManager.js";
+import { AudioEngine } from "../audio/AudioEngine.js";
 import { performance } from 'perf_hooks';
-import TimelineManager from "./TimelineManager.js";
-import PerformanceMonitor from "./PerformanceMonitor.js";
-import TapTempoManager from "./TapTempoManager.js";
-
+import TimelineManager from "../timeline/TimelineManager.js";
+import PerformanceMonitor from "../managers/PerformanceMonitor.js";
+import TapTempoManager from "../managers/TapTempoManager.js";
+import PresetFactory from "../factories/PresetFactory.js";
 
 /**
  * The Core class represents the main functionality of an advanced metronome.
@@ -716,63 +716,5 @@ class Core {
 }
 
 
-/**
- * Factory class for creating metronome presets.
- * Implements Factory pattern for preset creation.
- */
-class PresetFactory {
-
-	/**
-	 * Creates a new PresetFactory instance.
-	 *
-	 * @return {void} No return value.
-	 */
-	constructor() {
-
-		this._presets = {
-			'classical': { bpm: 120, division: 1, accent: true },
-			'jazz': { bpm: 140, division: 4, accent: true },
-			'rock': { bpm: 120, division: 2, accent: true },
-			'latin': { bpm: 100, division: 4, accent: true }
-		};
-	}
-
-	/**
-	 * Creates a preset by name.
-	 *
-	 * @param {string} name - The name of the preset to create.
-	 * @return {Object|null} The preset object or null if not found.
-	 */
-	createPreset(name) {
-
-		return this._presets[name] || null;
-	}
-
-	/**
-	 * Gets available preset names.
-	 *
-	 * @return {Array<string>} Array of available preset names.
-	 */
-	getAvailablePresets() {
-
-		return Object.keys(this._presets);
-	}
-
-	/**
-	 * Adds a new preset.
-	 *
-	 * @param {string} name - The name of the new preset.
-	 * @param {Object} config - The preset configuration.
-	 * @return {void} No return value.
-	 */
-	addPreset(name, config) {
-
-		if (Settings.validatePreset(config)) {
-			this._presets[name] = config;
-		} else {
-			console.error("Invalid preset configuration");
-		}
-	}
-}
 
 export { Core };

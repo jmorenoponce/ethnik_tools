@@ -1,0 +1,81 @@
+
+/**
+ * Collection of training-specific patterns for skill development.
+ */
+class TrainingPatterns {
+
+	/**
+	 * Gets all training patterns.
+	 *
+	 * @return {Map} Map of pattern names to pattern objects.
+	 */
+	static getPatterns() {
+		return new Map([
+			['offbeat_only', {
+				beats: [0, 1, 0, 1],
+				accents: [0, 1, 0, 1],
+				description: 'Offbeat training - develops syncopation skills',
+				difficulty: 3,
+				category: 'training',
+				skills: ['syncopation', 'timing']
+			}],
+
+			['strong_beats', {
+				beats: [1, 0, 1, 0],
+				accents: [2, 0, 2, 0],
+				description: 'Strong beats only - builds internal timing',
+				difficulty: 2,
+				category: 'training',
+				skills: ['internal_clock', 'subdivision']
+			}],
+
+			['subdivision_16', {
+				beats: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+				accents: [2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1],
+				description: '16th note subdivisions for precision',
+				difficulty: 4,
+				category: 'training',
+				skills: ['precision', 'subdivision', 'endurance']
+			}],
+
+			['dotted_quarter', {
+				beats: [1, 0, 0, 1, 0, 0],
+				accents: [2, 0, 0, 1, 0, 0],
+				description: 'Dotted quarter note pattern',
+				difficulty: 3,
+				category: 'training',
+				skills: ['compound_time', 'grouping']
+			}],
+
+			['skip_beat', {
+				beats: [1, 0, 1, 1, 0, 1],
+				accents: [2, 0, 1, 1, 0, 1],
+				description: 'Skip beat pattern for irregularity training',
+				difficulty: 4,
+				category: 'training',
+				skills: ['irregular_grouping', 'concentration']
+			}]
+		]);
+	}
+
+	/**
+	 * Gets patterns that develop specific skills.
+	 *
+	 * @param {string} skill - Target skill to develop.
+	 * @return {Map} Patterns that develop the specified skill.
+	 */
+	static getPatternsBySkill(skill) {
+		const patterns = this.getPatterns();
+		const filtered = new Map();
+
+		for (const [name, pattern] of patterns) {
+			if (pattern.skills && pattern.skills.includes(skill)) {
+				filtered.set(name, pattern);
+			}
+		}
+
+		return filtered;
+	}
+}
+
+export default TrainingPatterns;
