@@ -24,6 +24,7 @@ class ClearCommand extends Command {
 	 * @return {void} No return value.
 	 */
 	execute(args) {
+
 		console.clear();
 		this._core._initialize();
 	}
@@ -35,6 +36,7 @@ class ClearCommand extends Command {
 	 * @return {string} Usage help text.
 	 */
 	getUsage() {
+
 		return 'Usage: clear';
 	}
 
@@ -45,6 +47,7 @@ class ClearCommand extends Command {
 	 * @return {string} Command description.
 	 */
 	getDescription() {
+
 		return 'Clears the console screen and reinitializes the display';
 	}
 }

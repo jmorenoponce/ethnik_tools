@@ -86,18 +86,42 @@ class Core {
 
 	/**
 	 * Cleanup method to be called when shutting down.
+	 * IMPORTANT: This method is now synchronous for compatibility with ExitCommand
+	 *
+	 * @return {void} No return value.
+	 */
+	destroy() {
+
+		try {
+			// Call async shutdown but don't await it in this sync method
+			this._coordinator.shutdown().then(() => {
+				// Clear singleton instance after successful shutdown
+				Core._instance = null;
+			}).catch((error) => {
+				console.error("Error during SystemCoordinator shutdown:", error);
+				// Clear singleton anyway to avoid stuck state
+				Core._instance = null;
+			});
+
+		} catch (error) {
+			console.error("Error during Core cleanup:", error);
+			Core._instance = null;
+		}
+	}
+
+	/**
+	 * Asynchronous version of destroy for when you can await.
 	 *
 	 * @return {Promise<void>} Resolves when cleanup is complete.
 	 */
-	async destroy() {
+	async destroyAsync() {
 
 		try {
 			await this._coordinator.shutdown();
-
-			// Clear singleton instance
 			Core._instance = null;
 		} catch (error) {
 			console.error("Error during Core cleanup:", error);
+			Core._instance = null;
 		}
 	}
 }

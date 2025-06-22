@@ -12,9 +12,11 @@ class ExitCommand extends Command {
 	 * @return {void} No return value.
 	 */
 	constructor(core) {
+
 		super();
 		this._core = core;
 	}
+
 
 	/**
 	 * Executes the exit command.
@@ -29,6 +31,7 @@ class ExitCommand extends Command {
 		// Handle graceful shutdown asynchronously
 		this._gracefulExit();
 	}
+
 
 	/**
 	 * Handles graceful application exit.
@@ -72,14 +75,17 @@ class ExitCommand extends Command {
 		}
 	}
 
+
 	/**
 	 * Gets usage help text for the exit command.
 	 *
 	 * @return {string} Usage help text.
 	 */
 	getUsage() {
+
 		return 'Usage: exit | quit';
 	}
+
 
 	/**
 	 * Gets a description of the exit command.
@@ -87,6 +93,7 @@ class ExitCommand extends Command {
 	 * @return {string} Command description.
 	 */
 	getDescription() {
+
 		return 'Exits the application gracefully with proper cleanup';
 	}
 }
