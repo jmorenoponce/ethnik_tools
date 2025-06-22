@@ -1,4 +1,7 @@
 import TimelineFactory from './TimelineFactory.js';
+import Settings from "../../core/Settings.js";
+
+
 
 /**
  * A factory class that extends TimelineFactory to create a basic training timeline.
@@ -8,7 +11,7 @@ import TimelineFactory from './TimelineFactory.js';
 class BasicTrainingFactory extends TimelineFactory {
 
 	/**
-	 * Creates a training timeline with predefined sections.
+	 * Creates a training timeline with predefined sections from Settings.
 	 * Each section includes specific attributes such as duration, bpm, pattern, accent, and description.
 	 * The generated timeline is intended for structured training sessions.
 	 *
@@ -16,45 +19,41 @@ class BasicTrainingFactory extends TimelineFactory {
 	 */
 	createTimeline() {
 
-		const sections = [
-			{
-				duration: 8,
-				bpm: 80,
-				pattern: 'straight',
-				accent: true,
-				description: 'Warm-up - slow straight rhythm'
-			},
-			{
-				duration: 4,
-				bpm: 100,
-				pattern: 'straight',
-				accent: true,
-				description: 'Building tempo'
-			},
-			{
-				duration: 4,
-				bpm: 120,
-				pattern: 'backbeat',
-				accent: true,
-				description: 'Backbeat introduction'
-			},
-			{
-				duration: 8,
-				bpm: 100,
-				pattern: 'offbeat_only',
-				accent: false,
-				description: 'Offbeat training'
-			},
-			{
-				duration: 4,
-				bpm: 80,
-				pattern: 'straight',
-				silent: true,
-				description: 'Silent practice - maintain tempo'
-			}
-		];
+		// ✅ REFACTORED: Usar configuración centralizada
+		const config = Settings.timelineConstants.basicTraining;
 
-		return this.createTrainingTimeline('Basic Training', sections);
+		// Aplicar defaults y crear secciones
+		const sections = config.sections.map(sectionConfig => {
+			return this._createSectionWithDefaults(sectionConfig);
+		});
+
+		return this.createTrainingTimeline(config.name, sections);
+	}
+
+
+	/**
+	 * Crea una sección aplicando valores por defecto de Settings.
+	 *
+	 * @param {Object} sectionConfig - Configuración de la sección
+	 * @return {Object} Sección completa con defaults aplicados
+	 */
+	_createSectionWithDefaults(sectionConfig) {
+
+		const defaults = Settings.timelineConstants.defaults;
+
+		return {
+			duration: sectionConfig.duration || defaults.sectionDuration,
+			bpm: sectionConfig.bpm || 120,
+			pattern: sectionConfig.pattern || 'straight',
+			division: sectionConfig.division || defaults.defaultDivision,
+			volume: sectionConfig.volume || defaults.defaultVolume,
+			accent: sectionConfig.accent !== undefined ? sectionConfig.accent : defaults.defaultAccent,
+			silent: sectionConfig.silent || false,
+			description: sectionConfig.description || '',
+			fadeIn: sectionConfig.fadeIn || 0,
+			fadeOut: sectionConfig.fadeOut || 0,
+			tracks: sectionConfig.tracks || ['main']
+		};
 	}
 }
 

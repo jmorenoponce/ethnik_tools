@@ -460,8 +460,8 @@ class MetronomeEngine {
 	_calculateInterval() {
 
 		// Use cached value if configuration hasn't changed
-		if (this._cachedInterval &&
-			(performance.now() - this._lastConfigChange) < 1000) {
+		const cacheThreshold = Settings.rhythmConstants.performance.configChangeThresholdMs;
+		if (this._cachedInterval && (performance.now() - this._lastConfigChange) < cacheThreshold) {
 			return this._cachedInterval;
 		}
 
@@ -469,11 +469,13 @@ class MetronomeEngine {
 		let interval = baseInterval / this._division;
 
 		if (this._currentPattern === 'swing') {
-			// Implement swing: Alternate between long and short intervals
+			// ✅ REFACTORED: Usar ratios centralizados para swing
+			const swingConfig = Settings.rhythmConstants.swingRatio;
 			const stats = this._performanceMonitor.getStats(this._bpm, this._division);
 			const tickCount = stats ? stats.tickCount : 0;
 			const isEvenTick = tickCount % 2 === 0;
-			interval *= isEvenTick ? 1.33 : 0.67; // 2:1 swing ratio
+
+			interval *= isEvenTick ? swingConfig.long : swingConfig.short;
 		}
 
 		this._cachedInterval = interval;
@@ -482,13 +484,12 @@ class MetronomeEngine {
 
 
 	/**
-	 * Renders a tick based on its position in the rhythm, determining the appropriate symbol and outputting it.
+	 * Renders a musical tick symbol depending on the given beat information and tick count. This method utilizes
+	 * configuration settings to determine the display format for the tick symbol, beat counters, and measure markers.
 	 *
-	 * @param {boolean} isDownbeat - Determines if the current tick is a downbeat.
-	 * @param {boolean} isStrongBeat - Indicates if the current tick is a strong beat.
-	 * @param {number} tickCount - The count of the current tick within the rhythm.
-	 * @return {void}
-	 */
+	 * @param {boolean} isDownbeat Indicates whether the current tick represents a downbeat.
+	 * @param {boolean} isStrongBeat Indicates whether the current tick represents a strong beat within a measure.
+	 * @param {number} tick*/
 	_renderTick(isDownbeat, isStrongBeat, tickCount) {
 
 		// Determine accent level for symbol
@@ -499,22 +500,30 @@ class MetronomeEngine {
 			accent = 1; // beat
 		}
 
-		if (isDownbeat) {
+		// ✅ REFACTORED: Usar configuración centralizada para layout
+		const displayConfig = Settings.rhythmConstants.display;
+		const layoutConfig = Settings.visualDisplayConstants.layout;
+
+		if (isDownbeat && layoutConfig.newlineOnDownbeat) {
 			process.stdout.write('\n');
 		}
 
 		const symbol = TickConfiguration.getSymbol(accent);
 		process.stdout.write(symbol + ' ');
 
-		// Display counter every 16 ticks
-		if (tickCount % 16 === 0) {
+		// ✅ REFACTORED: Usar intervalo centralizado para mostrar contador
+		if (layoutConfig.showTickCounters && tickCount % displayConfig.tickCounterInterval === 0) {
 			process.stdout.write(` [${tickCount}]`);
 		}
 
-		// New line every 4 measures for downbeats
-		const measureCount = Math.floor(tickCount / (4 * this._division));
-		if (measureCount > 0 && measureCount % 4 === 0 && isDownbeat) {
-			process.stdout.write(`\n--- Measure ${measureCount} ---`);
+		// ✅ REFACTORED: Usar configuración centralizada para marcadores de compás
+		if (layoutConfig.showMeasureMarkers) {
+			const measureCount = Math.floor(tickCount / (displayConfig.beatsPerMeasure * this._division));
+
+			if (measureCount > 0 && measureCount % displayConfig.measuresPerDisplayLine === 0 && isDownbeat) {
+				const markerText = layoutConfig.measureMarkerTemplate.replace('{count}', measureCount);
+				process.stdout.write(`\n${markerText}`);
+			}
 		}
 	}
 

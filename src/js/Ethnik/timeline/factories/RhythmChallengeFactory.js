@@ -1,4 +1,7 @@
 import TimelineFactory from './TimelineFactory.js';
+import Settings from "../../core/Settings.js";
+
+
 
 /**
  * Handles the creation of rhythm challenge timelines with varying BPMs,
@@ -17,49 +20,41 @@ class RhythmChallengeFactory extends TimelineFactory {
 	 */
 	createTimeline() {
 
-		const sections = [
-			{
-				duration: 4,
-				bpm: 90,
-				pattern: 'straight',
-				description: 'Baseline straight rhythm'
-			},
-			{
-				duration: 4,
-				bpm: 90,
-				pattern: 'syncopated',
-				description: 'Syncopation challenge'
-			},
-			{
-				duration: 4,
-				bpm: 110,
-				pattern: 'triplets',
-				division: 3,
-				description: 'Triplet patterns'
-			},
-			{
-				duration: 8,
-				bpm: 130,
-				pattern: 'subdivision_16',
-				division: 4,
-				description: '16th note subdivisions'
-			},
-			{
-				duration: 4,
-				bpm: 100,
-				pattern: 'latin_clave',
-				description: 'Latin clave pattern'
-			},
-			{
-				duration: 4,
-				bpm: 90,
-				pattern: 'straight',
-				silent: true,
-				description: 'Final silent challenge'
-			}
-		];
+		// ✅ REFACTORED: Usar configuración centralizada
+		const config = Settings.timelineConstants.rhythmChallenge;
 
-		return this.createTrainingTimeline('Rhythm Challenge', sections);
+		// Aplicar defaults y crear secciones
+		const sections = config.sections.map(sectionConfig => {
+			return this._createSectionWithDefaults(sectionConfig);
+		});
+
+		return this.createTrainingTimeline(config.name, sections);
+	}
+
+
+	/**
+	 * Crea una sección aplicando valores por defecto de Settings.
+	 *
+	 * @param {Object} sectionConfig - Configuración de la sección
+	 * @return {Object} Sección completa con defaults aplicados
+	 */
+	_createSectionWithDefaults(sectionConfig) {
+
+		const defaults = Settings.timelineConstants.defaults;
+
+		return {
+			duration: sectionConfig.duration || defaults.sectionDuration,
+			bpm: sectionConfig.bpm || 120,
+			pattern: sectionConfig.pattern || 'straight',
+			division: sectionConfig.division || defaults.defaultDivision,
+			volume: sectionConfig.volume || defaults.defaultVolume,
+			accent: sectionConfig.accent !== undefined ? sectionConfig.accent : defaults.defaultAccent,
+			silent: sectionConfig.silent || false,
+			description: sectionConfig.description || '',
+			fadeIn: sectionConfig.fadeIn || 0,
+			fadeOut: sectionConfig.fadeOut || 0,
+			tracks: sectionConfig.tracks || ['main']
+		};
 	}
 }
 

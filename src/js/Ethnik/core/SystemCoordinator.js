@@ -85,19 +85,29 @@ class SystemCoordinator {
 
 		try {
 			console.clear();
-			console.log("🎵 Ethnik Tools - Professional Metronome v2.0");
-			console.log("=".repeat(55));
 
-			// Wait for audio to initialize
-			await new Promise(resolve => setTimeout(resolve, 100));
+			// ✅ REFACTORED: Usar templates centralizados para display
+			const displayConfig = Settings.systemConstants.display;
+
+			console.log(displayConfig.templates.banner);
+			console.log(displayConfig.bannerChar.repeat(displayConfig.bannerWidth));
+
+			// ✅ REFACTORED: Usar delay centralizado para inicialización de audio
+			const initDelay = Settings.systemConstants.timing.initializationDelayMs;
+			await new Promise(resolve => setTimeout(resolve, initDelay));
 
 			// Log system information
 			this._logSystemInfo();
-			console.log("=".repeat(55));
+			console.log(displayConfig.bannerChar.repeat(displayConfig.bannerWidth));
 			console.log();
 
 			this._isInitialized = true;
 			this._eventBus.emit('system.initialized');
+
+			// ✅ REFACTORED: Usar template centralizado
+			if (Settings.systemConstants.logging.debugMode) {
+				console.log(displayConfig.templates.initialization);
+			}
 
 			return true;
 		} catch (error) {
@@ -127,10 +137,18 @@ class SystemCoordinator {
 		this._eventBus.emit('system.shuttingDown');
 
 		try {
+			// ✅ REFACTORED: Usar template centralizado para mensaje
+			const displayConfig = Settings.systemConstants.display;
+			console.log(displayConfig.templates.shutdown);
+
 			// Stop any active playback
 			if (this.isPlaying) {
 				await this.stop();
 			}
+
+			// ✅ REFACTORED: Usar delay centralizado para shutdown
+			const shutdownDelay = Settings.systemConstants.timing.shutdownDelayMs;
+			await new Promise(resolve => setTimeout(resolve, shutdownDelay));
 
 			// Cleanup all subsystems
 			this._metronomeEngine.destroy();
@@ -143,6 +161,7 @@ class SystemCoordinator {
 
 			this._isInitialized = false;
 			console.log('✅ System shutdown complete');
+
 		} catch (error) {
 			console.error("Error during system shutdown:", error);
 		}
@@ -654,7 +673,9 @@ class SystemCoordinator {
 		const result = callback();
 
 		if (wasPlaying) {
-			setTimeout(() => this.play(), 150);
+			// ✅ REFACTORED: Usar delay centralizado para reanudación
+			const resumeDelay = Settings.systemConstants.timing.playbackResumeDelayMs;
+			setTimeout(() => this.play(), resumeDelay);
 		}
 
 		return result;
@@ -693,6 +714,9 @@ class SystemCoordinator {
 
 		if (!engineStatus.stats) return;
 
+		// ✅ REFACTORED: Usar configuración centralizada para separadores
+		const displayConfig = Settings.systemConstants.display;
+
 		console.log(`\n⏹️ Metronome stopped`);
 		console.log(`📊 Performance:`);
 		console.log(`   ⏱️ Total time: ${engineStatus.stats.totalTime.toFixed(2)}s`);
@@ -701,6 +725,9 @@ class SystemCoordinator {
 		console.log(`   🎯 Accuracy: ${engineStatus.stats.accuracy.toFixed(2)}%`);
 		console.log(`   📈 Average drift: ${engineStatus.stats.avgDrift.toFixed(2)}ms`);
 		console.log(`   🔊 Audio method: ${audioInfo.method}`);
+
+		// Usar separador centralizado
+		console.log(displayConfig.separatorChar.repeat(displayConfig.separatorWidth));
 		console.log();
 	}
 }

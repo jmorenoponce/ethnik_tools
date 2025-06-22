@@ -575,8 +575,11 @@ class ConfigurationManager {
 
 		const now = Date.now();
 
+		// ✅ REFACTORED: Usar tiempo de cache centralizado
+		const cacheTime = Settings.rhythmConstants.performance.validationCacheTimeMs;
+
 		// Use cached validation if recent
-		if (this._lastValidation && (now - this._validationCacheTime) < 1000) {
+		if (this._lastValidation && (now - this._validationCacheTime) < cacheTime) {
 			return this._lastValidation;
 		}
 

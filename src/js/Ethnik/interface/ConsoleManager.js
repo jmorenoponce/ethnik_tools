@@ -34,7 +34,7 @@ class ConsoleManager {
 		this._core = core;
 		this._commandHistory = [];
 		this._historyIndex = -1;
-		this._maxHistorySize = 50; // Memory management for command history
+		this._maxHistorySize = Settings.defaultParams.maxHistorySize; // Memory management for command history
 		this._inputBuffer = '';
 
 		// Command registry using Command pattern

@@ -22,8 +22,10 @@ class PrecisionAudioDetector {
 		this.microphone = null;
 		this.dataArray = null;
 		this.isRecording = false;
-		this.threshold = 0.1;
-		this.sensitivity = 1.0;
+
+		// ✅ REFACTORED: Usar valores centralizados de Settings
+		this.threshold = Settings.audioDetectionConstants.defaultThreshold;
+		this.sensitivity = Settings.audioDetectionConstants.defaultSensitivity;
 
 		// Detección de eventos
 		this.lastDetectionTime = 0;
@@ -100,29 +102,34 @@ class PrecisionAudioDetector {
 	async startDetection() {
 
 		try {
-			// Solicitar acceso al micrófono
+			// ✅ REFACTORED: Usar configuración de audio centralizada
+			const audioConfig = Settings.audioDetectionConstants.audioCapture;
+
+			// Solicitar acceso al micrófono con configuración centralizada
 			this.mediaStream = await navigator.mediaDevices.getUserMedia({
 				audio: {
-					echoCancellation: false,
-					noiseSuppression: false,
-					autoGainControl: false,
-					sampleRate: 44100
+					echoCancellation: audioConfig.echoCancellation,
+					noiseSuppression: audioConfig.noiseSuppression,
+					autoGainControl: audioConfig.autoGainControl,
+					sampleRate: audioConfig.sampleRate
 				}
 			});
 
 			// Crear contexto de audio
 			this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-			// Crear analizador
+			// ✅ REFACTORED: Usar configuración FFT centralizada
 			this.analyser = this.audioContext.createAnalyser();
-			this.analyser.fftSize = 2048;
-			this.analyser.smoothingTimeConstant = 0.3;
+			this.analyser.fftSize = Settings.audioDetectionConstants.fft.size;
+			this.analyser.smoothingTimeConstant = Settings.audioDetectionConstants.fft.smoothingTimeConstant;
 
-			// Calcular bins de frecuencia
+			// ✅ REFACTORED: Calcular bins de frecuencia usando valores centralizados
 			const nyquist = this.audioContext.sampleRate / 2;
-			this.lowFreqBin = Math.floor(80 / nyquist * this.analyser.frequencyBinCount);
-			this.midFreqBin = Math.floor(1000 / nyquist * this.analyser.frequencyBinCount);
-			this.highFreqBin = Math.floor(8000 / nyquist * this.analyser.frequencyBinCount);
+			const freqs = Settings.audioDetectionConstants.analysisFrequencies;
+
+			this.lowFreqBin = Math.floor(freqs.lowCutoff / nyquist * this.analyser.frequencyBinCount);
+			this.midFreqBin = Math.floor(freqs.midCutoff / nyquist * this.analyser.frequencyBinCount);
+			this.highFreqBin = Math.floor(freqs.highCutoff / nyquist * this.analyser.frequencyBinCount);
 
 			// Conectar micrófono
 			this.microphone = this.audioContext.createMediaStreamSource(this.mediaStream);
@@ -189,9 +196,12 @@ class PrecisionAudioDetector {
 		const midLevel = this.getAverageLevel(this.lowFreqBin, this.midFreqBin);
 		const highLevel = this.getAverageLevel(this.midFreqBin, this.highFreqBin);
 
-		// Nivel general (ponderado hacia medios y agudos para palmas)
-		const overallLevel = (lowLevel * 0.3 + midLevel * 0.5 + highLevel * 0.2) / 255;
-		const adjustedLevel = Math.pow(overallLevel * this.sensitivity, 1.5);
+		// ✅ REFACTORED: Usar pesos centralizados para análisis de nivel
+		const weights = Settings.audioDetectionConstants.levelWeights;
+		const overallLevel = (lowLevel * weights.low + midLevel * weights.mid + highLevel * weights.high) / weights.normalize;
+
+		// ✅ REFACTORED: Usar exponente centralizado para ajuste de sensibilidad
+		const adjustedLevel = Math.pow(overallLevel * this.sensitivity, Settings.audioDetectionConstants.sensitivityExponent);
 
 		// Actualizar medidor visual
 		this.audioMeter.style.width = `${Math.min(adjustedLevel * 100, 100)}%`;
@@ -232,23 +242,27 @@ class PrecisionAudioDetector {
 	 * @return {void} Does not return a value.
 	 */
 	detectSoundEvent(level) {
+
 		const currentTime = performance.now();
 
 		if (level > this.threshold && !this.isInAttack) {
 			this.isInAttack = true;
 			this.attackStartTime = currentTime;
 
-			// Evitar detecciones múltiples muy cercanas
+			// Evitar detecciones múltiples muy cercanas usando debounce centralizado
 			if (currentTime - this.lastDetectionTime > Settings.performanceConstants.debounceTime) {
 				this.onSoundDetected(currentTime, level);
 				this.lastDetectionTime = currentTime;
 			}
 		}
 
-		if (level < this.threshold * 0.7 && this.isInAttack) {
+		// ✅ REFACTORED: Usar ratio centralizado para detectar fin de ataque
+		const releaseThreshold = this.threshold * Settings.audioDetectionConstants.attackReleaseRatio;
+		if (level < releaseThreshold && this.isInAttack) {
 			this.isInAttack = false;
 		}
 	}
+
 
 
 	/**
@@ -264,8 +278,9 @@ class PrecisionAudioDetector {
 		this.detectionCount++;
 		this.detectionTimes.push(timestamp);
 
-		// Mantener solo las últimas 10 detecciones para análisis
-		if (this.detectionTimes.length > 10) {
+		// ✅ REFACTORED: Usar límite centralizado para historial de detecciones
+		const maxHistory = Settings.audioDetectionConstants.maxDetectionHistory;
+		if (this.detectionTimes.length > maxHistory) {
 			this.detectionTimes.shift();
 		}
 
@@ -298,9 +313,11 @@ class PrecisionAudioDetector {
 			const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
 			this.avgInterval.textContent = `${Math.round(avgInterval)}ms`;
 
-			// Estimar BPM
+			// ✅ REFACTORED: Usar rango de validación centralizado para BPM
 			const bpm = Math.round(60000 / avgInterval);
-			this.bpmEstimate.textContent = bpm > 0 && bpm < 300 ? bpm : '--';
+			const bpmRange = Settings.audioDetectionConstants.bpmValidRange;
+
+			this.bpmEstimate.textContent = (bpm >= bpmRange.min && bpm <= bpmRange.max) ? bpm : '--';
 		}
 	}
 
@@ -334,8 +351,9 @@ class PrecisionAudioDetector {
 
 		this.logContainer.insertBefore(logEntry, this.logContainer.firstChild);
 
-		// Limitar el log a 20 entradas
-		while (this.logContainer.children.length > 20) {
+		// ✅ REFACTORED: Usar límite centralizado para entradas de log
+		const maxEntries = Settings.audioDetectionConstants.maxLogEntries;
+		while (this.logContainer.children.length > maxEntries) {
 			this.logContainer.removeChild(this.logContainer.lastChild);
 		}
 	}

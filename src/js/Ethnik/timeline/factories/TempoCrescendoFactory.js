@@ -1,4 +1,6 @@
 import TimelineFactory from './TimelineFactory.js';
+import Settings from "../../core/Settings.js";
+
 
 /**
  * This class is responsible for creating a tempo crescendo timeline.
@@ -20,52 +22,52 @@ class TempoCrescendoFactory extends TimelineFactory {
 	 */
 	createTimeline() {
 
-		const sections = [
-			{
-				duration: 8,
-				bpm: 60,
-				pattern: 'straight',
-				description: 'Very slow start'
-			},
-			{
-				duration: 8,
-				bpm: 80,
-				pattern: 'straight',
-				description: 'Gradual acceleration'
-			},
-			{
-				duration: 8,
-				bpm: 100,
-				pattern: 'straight',
-				description: 'Moderate tempo'
-			},
-			{
-				duration: 8,
-				bpm: 120,
-				pattern: 'straight',
-				description: 'Fast tempo'
-			},
-			{
-				duration: 8,
-				bpm: 140,
-				pattern: 'straight',
-				description: 'Peak tempo'
-			},
-			{
-				duration: 8,
-				bpm: 120,
-				pattern: 'straight',
-				description: 'Controlled descent'
-			},
-			{
-				duration: 8,
-				bpm: 100,
-				pattern: 'straight',
-				description: 'Cool down'
-			}
-		];
+		// ✅ REFACTORED: Usar configuración centralizada
+		const config = Settings.timelineConstants.tempoCrescendo;
 
-		return this.createTrainingTimeline('Tempo Crescendo', sections);
+		// Aplicar defaults y crear secciones
+		const sections = config.sections.map(sectionConfig => {
+			return this._createSectionWithDefaults(sectionConfig);
+		});
+
+		return this.createTrainingTimeline(config.name, sections);
+	}
+
+
+	/**
+	 * Creates a section configuration object by merging user-provided configuration with default values.
+	 *
+	 * @param {Object} sectionConfig - The user-defined section configuration.
+	 * @param {number} [sectionConfig.duration] - The duration of the section in seconds.
+	 * @param {number} [sectionConfig.bpm] - Beats per minute (tempo) for the section.
+	 * @param {string} [sectionConfig.pattern] - The rhythm pattern of the section (e.g., "straight").
+	 * @param {number} [sectionConfig.division] - The time division setting.
+	 * @param {number} [sectionConfig.volume] - The volume level for the section.
+	 * @param {boolean} [sectionConfig.accent] - Indicates if accenting is enabled.
+	 * @param {boolean} [sectionConfig.silent] - Specifies whether the section is silent.
+	 * @param {string} [sectionConfig.description] - A description for the section.
+	 * @param {number} [sectionConfig.fadeIn] - The fade-in duration for the section in seconds.
+	 * @param {number} [sectionConfig.fadeOut] - The fade-out duration for the section in seconds.
+	 * @param {Array<string>} [sectionConfig.tracks] - A list of tracks included in the section.
+	 * @return {Object} A section configuration object with filled default values where necessary.
+	 */
+	_createSectionWithDefaults(sectionConfig) {
+
+		const defaults = Settings.timelineConstants.defaults;
+
+		return {
+			duration: sectionConfig.duration || defaults.sectionDuration,
+			bpm: sectionConfig.bpm || 120,
+			pattern: sectionConfig.pattern || 'straight',
+			division: sectionConfig.division || defaults.defaultDivision,
+			volume: sectionConfig.volume || defaults.defaultVolume,
+			accent: sectionConfig.accent !== undefined ? sectionConfig.accent : defaults.defaultAccent,
+			silent: sectionConfig.silent || false,
+			description: sectionConfig.description || '',
+			fadeIn: sectionConfig.fadeIn || 0,
+			fadeOut: sectionConfig.fadeOut || 0,
+			tracks: sectionConfig.tracks || ['main']
+		};
 	}
 }
 
