@@ -29,8 +29,6 @@ class Settings {
 		division: 1,
 		volume: 70,
 
-		// Audio Settings
-		soundFile: './defaultAssets/sounds/rhythmHelper_classic_sound.ogg',
 		lookahead: 15.0,
 
 		// System Limits
@@ -58,6 +56,40 @@ class Settings {
 			beat: 100,
 			subdivision: 80
 		}
+	};
+
+	/**
+	 * 🆕 NEW: Audio file configuration - centralized file paths
+	 * This replaces the hardcoded paths in AudioEngine.js
+	 */
+	static audioFileConstants = {
+		// Primary sound files for different tick types
+		soundFiles: {
+			downbeat: './Ethnik/defaultAssets/sounds/metronome_sound.mp3',
+			beat: './Ethnik/defaultAssets/sounds/metronome_sound.mp3',
+			subdivision: './Ethnik/defaultAssets/sounds/metronome_sound.mp3'
+		},
+
+		// Volume adjustment for different tick types
+		volumes: {
+			downbeat: 1.0,    // Full volume for downbeat
+			beat: 0.8,        // Slightly quieter for beat
+			subdivision: 0.6  // Quieter for subdivisions
+		},
+
+		// Fallback sound file if specific types are not available
+		fallbackSound: './Ethnik/defaultAssets/sounds/metronome_sound.mp3',
+
+		// Supported audio formats (in order of preference)
+		supportedFormats: ['.mp3', '.wav', '.ogg', '.m4a'],
+
+		// Alternative sound locations to search
+		searchPaths: [
+			'./defaultAssets/sounds/',
+			'./assets/sounds/',
+			'./sounds/',
+			'./audio/'
+		]
 	};
 
 	/**
@@ -699,6 +731,68 @@ class Settings {
 		12: "Docesillos",
 		16: "Semicorcheas cuádruples"
 	};
+
+
+	// ============================================================================
+	// UTILITY METHODS FOR AUDIO FILE MANAGEMENT
+	// ============================================================================
+
+	/**
+	 * 🆕 NEW: Get the appropriate audio file for a tick type
+	 * @param {string} tickType - 'downbeat', 'beat', or 'subdivision'
+	 * @return {string} Path to the audio file
+	 */
+	static getAudioFile(tickType = 'beat') {
+		const soundFiles = Settings.audioFileConstants.soundFiles;
+		return soundFiles[tickType] || soundFiles.beat || Settings.audioFileConstants.fallbackSound;
+	}
+
+	/**
+	 * 🆕 NEW: Get volume for specific tick type
+	 * @param {string} tickType - 'downbeat', 'beat', or 'subdivision'
+	 * @return {number} Volume multiplier (0.0 to 1.0)
+	 */
+	static getAudioVolume(tickType = 'beat') {
+		const volumes = Settings.audioFileConstants.volumes;
+		return volumes[tickType] || volumes.beat || 0.8;
+	}
+
+	/**
+	 * 🆕 NEW: Check if audio file exists
+	 * @param {string} filePath - Path to audio file
+	 * @return {boolean} True if file exists
+	 */
+	static audioFileExists(filePath) {
+		try {
+			const fs = require('fs');
+			return fs.existsSync(filePath);
+		} catch (error) {
+			return false;
+		}
+	}
+
+	/**
+	 * 🆕 NEW: Find best available audio file from search paths
+	 * @param {string} fileName - Name of the audio file
+	 * @return {string|null} Full path to file or null if not found
+	 */
+	static findAudioFile(fileName) {
+		const searchPaths = Settings.audioFileConstants.searchPaths;
+		const supportedFormats = Settings.audioFileConstants.supportedFormats;
+
+		for (const basePath of searchPaths) {
+			for (const format of supportedFormats) {
+				const fileNameWithFormat = fileName.includes('.') ? fileName : fileName + format;
+				const fullPath = basePath + fileNameWithFormat;
+
+				if (Settings.audioFileExists(fullPath)) {
+					return fullPath;
+				}
+			}
+		}
+
+		return null;
+	}
 
 
 	// ============================================================================
