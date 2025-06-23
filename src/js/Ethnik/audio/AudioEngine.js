@@ -19,12 +19,9 @@ class AudioEngine {
 	 */
 	constructor() {
 
-		// TODO: Hardcoded file sounds
-		this._soundFiles = {
-			downbeat: './assets/sounds/downbeat.wav',
-			beat: './assets/sounds/beat.wav',
-			subdivision: './assets/sounds/subdivision.wav'
-		};
+		// ✅ FIXED: Use centralized configuration instead of hardcoded paths
+		this._soundFiles = { ...Settings.audioFileConstants.soundFiles };
+		this._volumeAdjustments = { ...Settings.audioFileConstants.volumes };
 
 		this._volume = Settings.defaultParams.volume;
 		this._latencyCompensation = 0;
@@ -50,8 +47,18 @@ class AudioEngine {
 	 */
 	async _initAudioSystem() {
 
+		// ✅ ENHANCED: Validate audio files before selecting strategy
+		await this._validateAudioFiles();
+
 		this._currentStrategy = await this._detectBestAudioStrategy();
-		console.log(`🔊 Audio method: ${this._getStrategyName(this._currentStrategy)}`);
+
+		const strategyName = this._getStrategyName(this._currentStrategy);
+		console.log(`🔊 Audio method: ${strategyName}`);
+
+		// ✅ ENHANCED: Show audio file status if using file strategy
+		if (this._currentStrategy instanceof FileAudioStrategy) {
+			this._logAudioFileStatus();
+		}
 
 		// Calibrate latency if using system strategy
 		if (this._currentStrategy instanceof SystemAudioStrategy) {
@@ -59,6 +66,91 @@ class AudioEngine {
 		}
 	}
 
+	/**
+	 * 🆕 NEW: Validates that audio files exist and are accessible
+	 * Provides helpful error messages if files are missing
+	 */
+	async _validateAudioFiles() {
+
+		console.log('🔍 Validating audio files...');
+
+		const missingFiles = [];
+		const validFiles = [];
+
+		for (const [tickType, filePath] of Object.entries(this._soundFiles)) {
+			if (fs.existsSync(filePath)) {
+				validFiles.push({ tickType, filePath });
+				console.log(`✅ ${tickType}: ${filePath}`);
+			} else {
+				missingFiles.push({ tickType, filePath });
+				console.log(`❌ ${tickType}: ${filePath} (NOT FOUND)`);
+			}
+		}
+
+		// Try to find alternative files if some are missing
+		if (missingFiles.length > 0) {
+			console.log('🔍 Searching for alternative audio files...');
+			await this._findAlternativeAudioFiles(missingFiles);
+		}
+
+		// If no files found, show helpful message
+		if (validFiles.length === 0) {
+			console.log('⚠️  No audio files found - will use system beeps or visual fallback');
+			console.log(`💡 Expected audio file: ${Settings.audioFileConstants.fallbackSound}`);
+		}
+	}
+
+	/**
+	 * 🆕 NEW: Attempts to find alternative audio files in different locations
+	 */
+	async _findAlternativeAudioFiles(missingFiles) {
+
+		const searchPaths = Settings.audioFileConstants.searchPaths;
+		const supportedFormats = Settings.audioFileConstants.supportedFormats;
+
+		for (const { tickType, filePath } of missingFiles) {
+			const fileName = filePath.split('/').pop().split('.')[0]; // Get filename without extension
+
+			for (const searchPath of searchPaths) {
+				for (const format of supportedFormats) {
+					const testPath = `${searchPath}${fileName}${format}`;
+
+					if (fs.existsSync(testPath)) {
+						console.log(`🔄 Found alternative: ${tickType} -> ${testPath}`);
+						this._soundFiles[tickType] = testPath;
+						break;
+					}
+				}
+				if (this._soundFiles[tickType] !== filePath) break; // Found alternative, stop searching
+			}
+		}
+	}
+
+	/**
+	 * 🆕 NEW: Logs the status of audio files for debugging
+	 */
+	_logAudioFileStatus() {
+
+		console.log('📋 Audio File Configuration:');
+
+		for (const [tickType, filePath] of Object.entries(this._soundFiles)) {
+			const exists = fs.existsSync(filePath);
+			const status = exists ? '✅' : '❌';
+			const volume = this._volumeAdjustments[tickType] || 1.0;
+
+			console.log(`   ${status} ${tickType}: ${filePath} (vol: ${(volume * 100).toFixed(0)}%)`);
+
+			if (exists) {
+				try {
+					const stats = fs.statSync(filePath);
+					const sizeKB = (stats.size / 1024).toFixed(1);
+					console.log(`      📏 Size: ${sizeKB} KB | Modified: ${stats.mtime.toLocaleDateString()}`);
+				} catch (error) {
+					console.log(`      ⚠️ Error reading file stats: ${error.message}`);
+				}
+			}
+		}
+	}
 
 	/**
 	 * Detects and determines the best available audio strategy based on predefined priorities.
@@ -72,14 +164,25 @@ class AudioEngine {
 
 		const priorities = Settings.commandConstants.audioStrategyPriorities;
 
+		console.log('🔍 Detecting best audio strategy...');
+
 		for (const strategyName of priorities) {
 			const strategy = this._strategies.get(strategyName);
-			if (await strategy.isAvailable()) {
+
+			console.log(`   Testing ${strategyName} strategy...`);
+
+			const isAvailable = await strategy.isAvailable();
+
+			if (isAvailable) {
+				console.log(`   ✅ ${strategyName} strategy is available`);
 				return strategy;
+			} else {
+				console.log(`   ❌ ${strategyName} strategy is not available`);
 			}
 		}
 
 		// Fallback to tone generator
+		console.log('   🔄 Falling back to tone generator strategy');
 		return this._strategies.get('tone');
 	}
 
@@ -132,15 +235,32 @@ class AudioEngine {
 	 */
 	async playTick(type = 'beat', frequency = 800, duration = 100) {
 
-		const compensatedDelay = Math.max(0, -this._latencyCompensation);
+		try {
+			const compensatedDelay = Math.max(0, -this._latencyCompensation);
 
-		if (compensatedDelay > 0) {
-			setTimeout(() => this._currentStrategy.playTick(type, frequency, duration), compensatedDelay);
-		} else {
-			this._currentStrategy.playTick(type, frequency, duration);
+			// ✅ ENHANCED: Apply volume adjustment for tick type
+			const volumeAdjustment = this._volumeAdjustments[type] || 1.0;
+			const adjustedVolume = this._volume * volumeAdjustment;
+
+			if (compensatedDelay > 0) {
+				setTimeout(() => {
+					this._currentStrategy.playTick(type, frequency, duration, adjustedVolume);
+				}, compensatedDelay);
+			} else {
+				await this._currentStrategy.playTick(type, frequency, duration, adjustedVolume);
+			}
+
+		} catch (error) {
+			console.error(`❌ Error playing tick: ${error.message}`);
+
+			// ✅ ENHANCED: Fallback to tone generator if file/system audio fails
+			if (!(this._currentStrategy instanceof ToneGeneratorStrategy)) {
+				console.log('🔄 Falling back to tone generator...');
+				const toneStrategy = this._strategies.get('tone');
+				await toneStrategy.playTick(type, frequency, duration);
+			}
 		}
 	}
-
 
 	/**
 	 * Sets the volume level for the instance.
@@ -152,6 +272,15 @@ class AudioEngine {
 
 		if (!isNaN(volume) && volume >= 0 && volume <= 100) {
 			this._volume = volume;
+
+			// ✅ ENHANCED: Propagate volume to current strategy if it supports it
+			if (this._currentStrategy && typeof this._currentStrategy.setVolume === 'function') {
+				this._currentStrategy.setVolume(volume);
+			}
+
+			console.log(`🔊 Volume set to: ${volume}%`);
+		} else {
+			console.warn(`⚠️ Invalid volume: ${volume}. Must be between 0-100.`);
 		}
 	}
 
@@ -166,16 +295,37 @@ class AudioEngine {
 	 * - hasAudioFiles: A boolean indicating whether any audio files exist in the specified paths.
 	 * - availableStrategies: A list of available audio strategies, defined by system settings.
 	 * - currentStrategy: The name of the currently selected audio strategy.
+	 * - audioFiles: Detailed information about audio files (if using file strategy).
 	 */
 	getAudioInfo() {
 
+		const strategyName = this._getStrategyName(this._currentStrategy);
+
+		// ✅ ENHANCED: Check actual file existence
+		const audioFileStatuses = {};
+		let hasAnyAudioFile = false;
+
+		for (const [tickType, filePath] of Object.entries(this._soundFiles)) {
+			const exists = fs.existsSync(filePath);
+			audioFileStatuses[tickType] = {
+				path: filePath,
+				exists: exists,
+				volume: this._volumeAdjustments[tickType] || 1.0
+			};
+			if (exists) hasAnyAudioFile = true;
+		}
+
 		return {
-			method: this._getStrategyName(this._currentStrategy),
+			method: strategyName,
 			latency: this._latencyCompensation,
 			volume: this._volume,
-			hasAudioFiles: Object.values(this._soundFiles).some(f => fs.existsSync(f)),
+			hasAudioFiles: hasAnyAudioFile,
 			availableStrategies: Settings.commandConstants.audioStrategyPriorities,
-			currentStrategy: this._getStrategyName(this._currentStrategy)
+			currentStrategy: strategyName,
+			audioFiles: audioFileStatuses,
+			fallbackSound: Settings.audioFileConstants.fallbackSound,
+			searchPaths: Settings.audioFileConstants.searchPaths,
+			supportedFormats: Settings.audioFileConstants.supportedFormats
 		};
 	}
 
@@ -201,17 +351,224 @@ class AudioEngine {
 	async switchStrategy(strategyName) {
 
 		if (!Settings.commandConstants.audioStrategyPriorities.includes(strategyName)) {
-			throw new Error(`Invalid strategy: ${strategyName}`);
+			throw new Error(`Invalid strategy: ${strategyName}. Valid strategies: ${Settings.commandConstants.audioStrategyPriorities.join(', ')}`);
 		}
 
 		const strategy = this._strategies.get(strategyName);
+
+		console.log(`🔄 Attempting to switch to ${strategyName} strategy...`);
+
 		if (await strategy.isAvailable()) {
+			const oldStrategy = this._getStrategyName(this._currentStrategy);
 			this._currentStrategy = strategy;
-			console.log(`🔄 Switched to audio strategy: ${strategyName}`);
+
+			console.log(`✅ Switched from ${oldStrategy} to ${strategyName} strategy`);
+
+			// Re-validate files if switching to file strategy
+			if (strategy instanceof FileAudioStrategy) {
+				await this._validateAudioFiles();
+			}
+
 			return true;
+		} else {
+			console.log(`❌ ${strategyName} strategy is not available`);
+			return false;
+		}
+	}
+
+	/**
+	 * 🆕 NEW: Force refresh of audio file paths from Settings
+	 * Useful when audio files are added/removed at runtime
+	 */
+	async refreshAudioFiles() {
+
+		console.log('🔄 Refreshing audio file configuration...');
+
+		// Update sound files from Settings
+		this._soundFiles = { ...Settings.audioFileConstants.soundFiles };
+		this._volumeAdjustments = { ...Settings.audioFileConstants.volumes };
+
+		// Update file strategy with new paths
+		const fileStrategy = this._strategies.get('file');
+		if (fileStrategy && typeof fileStrategy.updateSoundFiles === 'function') {
+			fileStrategy.updateSoundFiles(this._soundFiles);
 		}
 
-		return false;
+		// Re-validate files
+		await this._validateAudioFiles();
+
+		// Re-detect best strategy if current one is no longer available
+		if (!(await this._currentStrategy.isAvailable())) {
+			console.log('⚠️ Current strategy no longer available, re-detecting...');
+			this._currentStrategy = await this._detectBestAudioStrategy();
+		}
+
+		console.log('✅ Audio files refreshed');
+	}
+
+	/**
+	 * 🆕 NEW: Test audio playback with current configuration
+	 * Useful for debugging audio issues
+	 */
+	async testAudio() {
+
+		console.log('🧪 Testing audio playback...');
+
+		const testFrequencies = Settings.audioConstants.frequencies;
+		const testDurations = Settings.audioConstants.durations;
+
+		try {
+			console.log('   Testing downbeat...');
+			await this.playTick('downbeat', testFrequencies.downbeat, testDurations.downbeat);
+
+			await new Promise(resolve => setTimeout(resolve, 200));
+
+			console.log('   Testing beat...');
+			await this.playTick('beat', testFrequencies.beat, testDurations.beat);
+
+			await new Promise(resolve => setTimeout(resolve, 200));
+
+			console.log('   Testing subdivision...');
+			await this.playTick('subdivision', testFrequencies.subdivision, testDurations.subdivision);
+
+			console.log('✅ Audio test completed successfully');
+			return true;
+
+		} catch (error) {
+			console.error(`❌ Audio test failed: ${error.message}`);
+			return false;
+		}
+	}
+
+	/**
+	 * 🆕 NEW: Get detailed diagnostics about the audio system
+	 * Useful for troubleshooting audio issues
+	 */
+	getDiagnostics() {
+
+		const currentStrategy = this._getStrategyName(this._currentStrategy);
+
+		return {
+			timestamp: new Date().toISOString(),
+			platform: process.platform,
+			nodeVersion: process.version,
+			currentStrategy: currentStrategy,
+			latencyCompensation: this._latencyCompensation,
+			volume: this._volume,
+			strategies: {
+				file: {
+					available: this._strategies.get('file').isAvailable(),
+					soundFiles: this._soundFiles,
+					volumeAdjustments: this._volumeAdjustments
+				},
+				system: {
+					available: this._strategies.get('system').isAvailable()
+				},
+				tone: {
+					available: this._strategies.get('tone').isAvailable()
+				}
+			},
+			configuration: {
+				audioFileConstants: Settings.audioFileConstants,
+				audioConstants: Settings.audioConstants,
+				strategyPriorities: Settings.commandConstants.audioStrategyPriorities
+			}
+		};
+	}
+
+	/**
+	 * 🆕 NEW: Create a comprehensive audio system report
+	 * Useful for bug reports and system analysis
+	 */
+	async generateSystemReport() {
+
+		console.log('📋 Generating audio system report...');
+
+		const report = {
+			timestamp: new Date().toISOString(),
+			system: {
+				platform: process.platform,
+				nodeVersion: process.version,
+				architecture: process.arch
+			},
+			audioEngine: {
+				currentStrategy: this._getStrategyName(this._currentStrategy),
+				latency: this._latencyCompensation,
+				volume: this._volume
+			},
+			strategies: {},
+			audioFiles: {},
+			configuration: Settings.audioFileConstants
+		};
+
+		// Test each strategy
+		for (const [name, strategy] of this._strategies) {
+			try {
+				const available = await strategy.isAvailable();
+				report.strategies[name] = {
+					available: available,
+					className: strategy.constructor.name
+				};
+			} catch (error) {
+				report.strategies[name] = {
+					available: false,
+					error: error.message
+				};
+			}
+		}
+
+		// Check each audio file
+		for (const [tickType, filePath] of Object.entries(this._soundFiles)) {
+			const exists = fs.existsSync(filePath);
+			report.audioFiles[tickType] = {
+				path: filePath,
+				exists: exists
+			};
+
+			if (exists) {
+				try {
+					const stats = fs.statSync(filePath);
+					report.audioFiles[tickType].size = stats.size;
+					report.audioFiles[tickType].modified = stats.mtime;
+				} catch (error) {
+					report.audioFiles[tickType].error = error.message;
+				}
+			}
+		}
+
+		console.log('✅ Audio system report generated');
+		return report;
+	}
+
+	/**
+	 * 🆕 NEW: Cleanup and destroy the audio engine
+	 * Properly releases resources and cleans up strategies
+	 */
+	destroy() {
+
+		console.log('🧹 Destroying AudioEngine...');
+
+		// Clear latency compensation
+		this._latencyCompensation = 0;
+
+		// Cleanup strategies
+		for (const [name, strategy] of this._strategies) {
+			if (typeof strategy.destroy === 'function') {
+				try {
+					strategy.destroy();
+				} catch (error) {
+					console.warn(`⚠️ Error destroying ${name} strategy: ${error.message}`);
+				}
+			}
+		}
+
+		// Clear references
+		this._strategies.clear();
+		this._currentStrategy = null;
+		this._soundFiles = {};
+		this._volumeAdjustments = {};
+
+		console.log('✅ AudioEngine destroyed');
 	}
 }
 
